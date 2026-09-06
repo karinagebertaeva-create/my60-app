@@ -650,8 +650,266 @@
   window.quickFood=quickFood;
   document.addEventListener('click',function(e){if(!e.target.closest('.product-search-wrap'))hideProductSuggestions()});
 
+
+  const planExerciseInfo={
+    A:[
+      {name:'Приседания к стулу',dose:'3 × 10',focus:'Ноги · ягодицы',tip:'Стопы примерно на ширине плеч. Таз уводи назад к стулу, колени направляй по линии стоп. Поднимайся без рывка.'},
+      {name:'Ягодичный мост',dose:'3 × 12',focus:'Ягодицы',tip:'Ляг на спину, стопы ближе к тазу. Подними таз и мягко сожми ягодицы наверху. Не переразгибай поясницу.'},
+      {name:'Тяга к поясу',dose:'3 × 10',focus:'Спина · руки',tip:'Корпус устойчивый. Тяни вес локтями назад к поясу, плечи не поднимай к ушам. Возвращай медленно.'},
+      {name:'Отжимания от стены/стола',dose:'3 × 8–10',focus:'Грудь · руки',tip:'Тело держи одной линией. Сгибай локти под комфортным углом и приближай грудь к опоре, затем плавно выжимай себя назад.'},
+      {name:'Румынская тяга',dose:'3 × 10',focus:'Задняя поверхность бедра',tip:'Колени слегка мягкие. Таз отводи назад, спина нейтральная. Опускай вес вдоль ног только до комфортного натяжения.'},
+      {name:'Dead bug',dose:'2 × 8 / сторона',focus:'Кор',tip:'Поясница спокойно прижата к полу. Поочерёдно вытягивай противоположные руку и ногу, не спеша и без прогиба.'}
+    ],
+    B:[
+      {name:'Выпады назад / присед',dose:'3 × 8 / ногу',focus:'Ноги · ягодицы',tip:'Шагай назад достаточно далеко, чтобы передняя стопа оставалась устойчивой. Если выпады неудобны — замени на присед к стулу.'},
+      {name:'Ягодичный мост',dose:'3 × 15',focus:'Ягодицы',tip:'Поднимай таз за счёт ягодиц, задержись наверху на секунду и опускайся контролируемо.'},
+      {name:'Тяга к поясу',dose:'3 × 12',focus:'Спина · руки',tip:'Сохраняй длинную спину и тяни локти назад. Не дёргай вес и не округляй плечи.'},
+      {name:'Жим бутылок вверх',dose:'3 × 10',focus:'Плечи · руки',tip:'Держи корпус собранным. Выжимай бутылки вверх без резкого прогиба в пояснице, опускай до комфортного уровня.'},
+      {name:'Румынская тяга',dose:'3 × 10',focus:'Задняя поверхность бедра',tip:'Движение начинается тазом назад. Вес близко к ногам, шея продолжает линию спины.'},
+      {name:'Bird dog',dose:'2 × 8 / сторона',focus:'Кор · спина',tip:'На четвереньках вытягивай противоположные руку и ногу. Таз не разворачивай, движение делай медленно.'}
+    ]
+  };
+
+  function ensurePlanState(){
+    if(!window.S)return;
+    if(!S.planChecks||typeof S.planChecks!=='object')S.planChecks={};
+  }
+
+  function planWeekNumber(){
+    try{
+      const keys=Object.keys(S.weights||{}).sort();
+      if(!keys.length)return 1;
+      const first=new Date(keys[0]+'T00:00:00');
+      const days=Math.max(0,Math.floor((new Date()-first)/86400000));
+      return Math.max(1,Math.min(4,Math.floor(days/7)+1));
+    }catch(e){return 1}
+  }
+
+  function weekPlanSettings(w){
+    const data=[
+      {steps:7000,strength:2,note:'Входим в ритм спокойно'},
+      {steps:8000,strength:2,note:'Закрепляем привычки'},
+      {steps:8750,strength:2,note:'Добавляем немного движения'},
+      {steps:9500,strength:2,note:'Смотрим на восстановление'}
+    ];
+    return data[Math.max(0,Math.min(3,w-1))];
+  }
+
+  function dayPlanForDate(d){
+    const day=d.getDay();
+    if(day===1)return {type:'A',title:'Силовая A',sub:'Всё тело · база',duration:'30–35 мин'};
+    if(day===4)return {type:'B',title:'Силовая B',sub:'Всё тело · вариация',duration:'30–35 мин'};
+    if(day===2||day===5)return {type:'walk',title:'Активный день',sub:'Шаги + лёгкая прогулка',duration:'20–40 мин'};
+    if(day===3)return {type:'mobility',title:'Мягкое восстановление',sub:'Ходьба + 8–10 минут мобилизации',duration:'10–30 мин'};
+    if(day===6)return {type:'optional',title:'Свободный выбор',sub:'Прогулка или лёгкая активность',duration:'по самочувствию'};
+    return {type:'rest',title:'Восстановление',sub:'Спокойный день без обязательной тренировки',duration:'отдых'};
+  }
+
+  function planDashboardMarkup(){
+    return '<div class="plan-experience" id="planExperience">'+
+      '<div class="plan-hero">'+
+        '<div class="plan-copy"><div class="label">Твой маршрут</div><div class="plan-week-label">Неделя <span id="planWeekNo">1</span> из 4</div><h3 id="planHeroTitle">Держим ритм, не идеальность</h3><p id="planHeroSub">Сегодня покажу только то, что действительно нужно сделать.</p></div>'+
+        '<div class="plan-ring" id="planRing"><div><b id="planRingPct">0%</b><span>недели</span></div></div>'+
+      '</div>'+
+      '<div class="plan-targets">'+
+        '<div><span>Шаги</span><b id="planStepTarget">7 000</b><small>в день</small></div>'+
+        '<div><span>Силовые</span><b id="planStrengthTarget">2</b><small>за неделю</small></div>'+
+        '<div><span>Белок</span><b>100–110</b><small>г / день</small></div>'+
+      '</div>'+
+      '<div class="week-route" id="weekRoute"></div>'+
+      '<div class="today-plan-card" id="todayPlanCard"></div>'+
+      '<div class="workout-studio" id="workoutStudio">'+
+        '<div class="studio-head"><div><div class="label">Тренировки</div><h3>Моя силовая</h3><p>Отмечай упражнения по ходу — прогресс сохранится.</p></div><div class="studio-switch"><button id="planTabA" onclick="selectPlanWorkout(\'A\')">A</button><button id="planTabB" onclick="selectPlanWorkout(\'B\')">B</button></div></div>'+
+        '<div class="workout-progress"><div><span id="workoutProgressText">0 из 6</span><b id="workoutProgressPct">0%</b></div><div class="workout-progress-bar"><span id="workoutProgressBar"></span></div></div>'+
+        '<div id="interactiveWorkoutList"></div>'+
+        '<button class="btn workout-finish" id="workoutFinishBtn" onclick="completePremiumWorkout()">Завершить тренировку</button>'+
+      '</div>'+
+      '<div class="plan-insight" id="planInsight"></div>'+
+    '</div>';
+  }
+
+  let activePlanWorkout='A';
+
+  function weekDates(){
+    const now=new Date(),day=(now.getDay()+6)%7,monday=new Date(now);
+    monday.setHours(0,0,0,0);monday.setDate(now.getDate()-day);
+    return Array.from({length:7},function(_,i){const d=new Date(monday);d.setDate(monday.getDate()+i);return d});
+  }
+
+  function updateWeekRoute(){
+    const el=document.getElementById('weekRoute');if(!el)return;
+    const today=key();
+    const letters=['ПН','ВТ','СР','ЧТ','ПТ','СБ','ВС'];
+    el.innerHTML=weekDates().map(function(d,i){
+      const k=key(d),plan=dayPlanForDate(d),done=(S.workouts[k]||[]).length>0;
+      const tag=plan.type==='A'||plan.type==='B'?plan.type:(plan.type==='rest'?'—':'•');
+      return '<div class="route-day '+(k===today?'today':'')+' '+(done?'done':'')+'">'+
+        '<span>'+letters[i]+'</span><b>'+d.getDate()+'</b><i>'+tag+'</i>'+
+      '</div>';
+    }).join('');
+  }
+
+  function renderTodayPlan(){
+    const card=document.getElementById('todayPlanCard');if(!card)return;
+    const d=new Date(),plan=dayPlanForDate(d),settings=weekPlanSettings(planWeekNumber());
+    const steps=+(S.steps[key()]||0),workouts=S.workouts[key()]||[];
+    let action='',state='';
+    if(plan.type==='A'||plan.type==='B'){
+      const done=workouts.indexOf(plan.type)>=0;
+      state=done?'Готово на сегодня':'Сегодня по плану';
+      action=done
+        ? '<button class="plan-primary done" disabled>Тренировка выполнена ✓</button>'
+        : '<button class="plan-primary" onclick="startTodayWorkout(\''+plan.type+'\')">Открыть тренировку '+plan.type+'</button>';
+    }else if(plan.type==='walk'||plan.type==='mobility'||plan.type==='optional'){
+      state=steps>=settings.steps?'Цель движения выполнена':'День движения';
+      action='<button class="plan-primary '+(steps>=settings.steps?'done':'')+'" onclick="tab(\'today\',document.querySelector(\'.nav button\'))">'+(steps>=settings.steps?'Шаги выполнены ✓':'Перейти к шагам')+'</button>';
+    }else{
+      state='Восстановление';
+      action='<button class="plan-primary soft-plan" onclick="tab(\'today\',document.querySelector(\'.nav button\'))">Посмотреть мой день</button>';
+    }
+    card.innerHTML='<div class="today-plan-top"><div><span>'+state+'</span><h3>'+plan.title+'</h3><p>'+plan.sub+'</p></div><div class="plan-duration"><b>'+plan.duration+'</b><small>ориентир</small></div></div>'+
+      '<div class="today-plan-note">'+(plan.type==='A'||plan.type==='B'?'Не гонись за скоростью. Оставляй 1–3 повтора «в запасе» и прекращай упражнение, если появляется острая боль.':plan.type==='rest'?'Отдых — часть плана. Достаточно обычной повседневной активности и комфортного режима.':'Цель — набрать движение без ощущения наказания. Можно разбить прогулку на несколько коротких выходов.')+'</div>'+action;
+  }
+
+  function selectPlanWorkout(type){
+    activePlanWorkout=type==='B'?'B':'A';
+    const a=document.getElementById('planTabA'),b=document.getElementById('planTabB');
+    if(a)a.classList.toggle('active',activePlanWorkout==='A');
+    if(b)b.classList.toggle('active',activePlanWorkout==='B');
+    renderInteractiveWorkout();
+  }
+
+  function exerciseDone(type,i){
+    ensurePlanState();
+    const dk=key(),bucket=S.planChecks[dk]||{},arr=bucket[type]||[];
+    return !!arr[i];
+  }
+
+  function togglePlanExercise(type,i){
+    ensurePlanState();
+    const dk=key();
+    if(!S.planChecks[dk])S.planChecks[dk]={};
+    if(!Array.isArray(S.planChecks[dk][type]))S.planChecks[dk][type]=[];
+    S.planChecks[dk][type][i]=!S.planChecks[dk][type][i];
+    if(typeof save==='function')save();
+    renderInteractiveWorkout();
+  }
+
+  function showExerciseInfo(type,i){
+    const ex=(planExerciseInfo[type]||[])[i];if(!ex)return;
+    if(typeof sheet==='undefined'||typeof modal==='undefined')return;
+    sheet.innerHTML='<div class="exercise-sheet"><div class="exercise-sheet-icon">'+(i+1)+'</div><div class="label">'+escapeHtml(ex.focus)+'</div><h3>'+escapeHtml(ex.name)+'</h3><div class="exercise-dose">'+escapeHtml(ex.dose)+'</div><p>'+escapeHtml(ex.tip)+'</p><div class="exercise-safety">Движение должно быть контролируемым и комфортным. При острой боли остановись.</div><button class="btn" style="width:100%" onclick="closeM()">Понятно</button></div>';
+    modal.classList.add('open');
+  }
+
+  function renderInteractiveWorkout(){
+    const list=document.getElementById('interactiveWorkoutList');if(!list)return;
+    const type=activePlanWorkout,items=planExerciseInfo[type]||[];
+    const doneCount=items.filter(function(_,i){return exerciseDone(type,i)}).length;
+    list.innerHTML=items.map(function(ex,i){
+      const done=exerciseDone(type,i);
+      return '<div class="exercise-row '+(done?'done':'')+'">'+
+        '<button class="exercise-check" onclick="togglePlanExercise(\''+type+'\','+i+')"><span>'+(done?'✓':'')+'</span></button>'+
+        '<button class="exercise-main" onclick="showExerciseInfo(\''+type+'\','+i+')"><b>'+escapeHtml(ex.name)+'</b><small>'+escapeHtml(ex.focus)+' · '+escapeHtml(ex.dose)+'</small></button>'+
+        '<button class="exercise-info" onclick="showExerciseInfo(\''+type+'\','+i+')">i</button>'+
+      '</div>';
+    }).join('');
+    const text=document.getElementById('workoutProgressText'),pct=document.getElementById('workoutProgressPct'),bar=document.getElementById('workoutProgressBar');
+    const n=items.length?Math.round(doneCount/items.length*100):0;
+    if(text)text.textContent=doneCount+' из '+items.length;
+    if(pct)pct.textContent=n+'%';
+    if(bar)bar.style.width=n+'%';
+    const finish=document.getElementById('workoutFinishBtn');
+    const already=(S.workouts[key()]||[]).indexOf(type)>=0;
+    if(finish){
+      finish.textContent=already?'Тренировка '+type+' выполнена ✓':(doneCount===items.length?'Завершить тренировку '+type:'Отметь упражнения · '+doneCount+'/'+items.length);
+      finish.disabled=already||doneCount<items.length;
+      finish.classList.toggle('complete',already);
+    }
+  }
+
+  function startTodayWorkout(type){
+    selectPlanWorkout(type);
+    const studio=document.getElementById('workoutStudio');
+    if(studio)studio.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+
+  function completePremiumWorkout(){
+    const type=activePlanWorkout;
+    if((S.workouts[key()]||[]).indexOf(type)<0){
+      if(!S.workouts[key()])S.workouts[key()]=[];
+      S.workouts[key()].push(type);
+    }
+    if(typeof save==='function')save();
+    updatePlanExperience();
+  }
+
+  function updatePlanInsight(){
+    const el=document.getElementById('planInsight');if(!el)return;
+    const dates=weekDates(),settings=weekPlanSettings(planWeekNumber());
+    const completed=dates.reduce(function(n,d){return n+(S.workouts[key(d)]||[]).filter(function(x){return x==='A'||x==='B'}).length},0);
+    const stepVals=dates.map(function(d){return +(S.steps[key(d)]||0)}).filter(function(v){return v>0});
+    const avg=stepVals.length?Math.round(stepVals.reduce(function(a,b){return a+b},0)/stepVals.length):0;
+    let title,copy;
+    if(completed>=settings.strength){
+      title='Силовые недели уже закрыты';
+      copy='Отлично. Остальные дни можно оставить для шагов и восстановления — добавлять тренировку только ради галочки не нужно.';
+    }else if(completed===1){
+      title='Осталась одна силовая';
+      copy='Неделя уже движется. Вторую силовую удобнее поставить с перерывом хотя бы в один день от первой.';
+    }else{
+      title='Начни с одной понятной тренировки';
+      copy='Не нужно выполнять весь план сразу. Открой A, двигайся по упражнениям сверху вниз и отмечай выполненное.';
+    }
+    el.innerHTML='<div class="insight-mark">✦</div><div><span>Фокус недели</span><b>'+title+'</b><p>'+copy+'</p><div class="insight-stats"><i>'+completed+' / '+settings.strength+' силовых</i><i>'+(avg?avg.toLocaleString('ru-RU'):'—')+' ср. шагов</i></div></div>';
+  }
+
+  function updatePlanExperience(){
+    ensurePlanState();
+    const w=planWeekNumber(),settings=weekPlanSettings(w);
+    const no=document.getElementById('planWeekNo');if(no)no.textContent=w;
+    const st=document.getElementById('planStepTarget');if(st)st.textContent=settings.steps.toLocaleString('ru-RU');
+    const strength=document.getElementById('planStrengthTarget');if(strength)strength.textContent=settings.strength;
+    const sub=document.getElementById('planHeroSub');if(sub)sub.textContent=settings.note+' · ориентир '+settings.steps.toLocaleString('ru-RU')+' шагов в день';
+    const dates=weekDates();
+    const workoutsDone=dates.reduce(function(n,d){return n+(S.workouts[key(d)]||[]).filter(function(x){return x==='A'||x==='B'}).length},0);
+    const stepDays=dates.filter(function(d){return +(S.steps[key(d)]||0)>=settings.steps}).length;
+    const score=Math.min(100,Math.round((Math.min(workoutsDone/settings.strength,1)*55)+(stepDays/7*45)));
+    const ring=document.getElementById('planRing'),pct=document.getElementById('planRingPct');
+    if(ring)ring.style.setProperty('--plan-p',score+'%');
+    if(pct)pct.textContent=score+'%';
+    updateWeekRoute();renderTodayPlan();renderInteractiveWorkout();updatePlanInsight();
+  }
+
+  function decoratePlan(){
+    const sec=document.getElementById('plan');if(!sec)return;
+    const oldCards=Array.from(sec.children).filter(function(x){return x.classList&&x.classList.contains('card')});
+    oldCards.forEach(function(c,i){
+      if(i===0||c.classList.contains('work'))c.classList.add('plan-legacy-hidden');
+      if(c.querySelector&&c.querySelector('#menu'))c.classList.add('plan-menu-card');
+      if(c.classList.contains('shop'))c.classList.add('plan-shop-card');
+    });
+    let exp=document.getElementById('planExperience');
+    if(!exp){
+      const title=sec.querySelector('.premium-section-title');
+      if(title)title.insertAdjacentHTML('afterend',planDashboardMarkup());
+      else sec.insertAdjacentHTML('afterbegin',planDashboardMarkup());
+    }
+    const menuCard=sec.querySelector('.plan-menu-card');
+    if(menuCard){
+      const label=menuCard.querySelector('.label');if(label)label.textContent='Меню на неделю';
+    }
+    updatePlanExperience();
+  }
+
+  window.selectPlanWorkout=selectPlanWorkout;
+  window.togglePlanExercise=togglePlanExercise;
+  window.showExerciseInfo=showExerciseInfo;
+  window.startTodayWorkout=startTodayWorkout;
+  window.completePremiumWorkout=completePremiumWorkout;
+
   function decorate(){
-    decorateNav();sectionTitles();decorateToday();decorateFood();updateRing();
+    decorateNav();sectionTitles();decorateToday();decorateFood();decoratePlan();updateRing();
   }
   document.addEventListener('DOMContentLoaded',decorate);
   if(typeof window.render==='function'){
