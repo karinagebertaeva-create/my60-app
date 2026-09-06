@@ -3140,3 +3140,188 @@ canvas{margin-top:14px;height:220px;border:0;border-radius:20px;background:linea
     width:100%
   }
 }
+
+/* Gentle achievements v36 */
+.achievements-card{
+  margin-top:10px;
+  padding:17px;
+  border-radius:26px;
+  border:1px solid rgba(17,22,19,.055);
+  background:
+    radial-gradient(circle at 96% 0%,rgba(184,154,104,.08),transparent 13rem),
+    linear-gradient(145deg,#fff,#f8f7f3);
+  box-shadow:0 12px 32px rgba(22,29,25,.055)
+}
+.achievements-head{
+  display:flex;
+  justify-content:space-between;
+  gap:14px;
+  align-items:flex-start
+}
+.achievements-head>div:first-child{min-width:0}
+.achievements-head h3{
+  margin:4px 0 3px;
+  font-size:21px;
+  letter-spacing:-.04em
+}
+.achievements-head p{
+  margin:0;
+  max-width:330px;
+  font-size:9px;
+  line-height:1.45;
+  color:#8f9691
+}
+.achievement-count{
+  flex:0 0 auto;
+  min-width:54px;
+  min-height:36px;
+  padding:8px 10px;
+  border-radius:12px;
+  display:grid;
+  place-items:center;
+  background:#1a211d;
+  color:#fff;
+  font-size:9px;
+  font-weight:900
+}
+.achievement-next{
+  display:flex;
+  gap:11px;
+  align-items:flex-start;
+  margin-top:13px;
+  padding:12px;
+  border-radius:17px;
+  background:linear-gradient(145deg,#f3eee8,#eef3ee)
+}
+.achievement-next-mark{
+  width:34px;
+  height:34px;
+  border-radius:11px;
+  display:grid;
+  place-items:center;
+  flex:0 0 auto;
+  background:#1a211d;
+  color:#fff;
+  font-size:9px;
+  font-weight:900
+}
+.achievement-next>div:last-child{
+  flex:1;
+  min-width:0
+}
+.achievement-next span{
+  display:block;
+  font-size:7px;
+  text-transform:uppercase;
+  letter-spacing:.09em;
+  font-weight:850;
+  color:#9a7a7f
+}
+.achievement-next b{
+  display:block;
+  margin-top:4px;
+  font-size:11px
+}
+.achievement-next p{
+  margin:3px 0 0;
+  font-size:8px;
+  line-height:1.4;
+  color:#8d938f
+}
+.achievement-next-bar{
+  height:5px;
+  margin-top:8px;
+  border-radius:99px;
+  background:rgba(17,22,19,.08);
+  overflow:hidden
+}
+.achievement-next-bar i{
+  display:block;
+  height:100%;
+  border-radius:99px;
+  background:linear-gradient(90deg,#bd6e78,#78927e)
+}
+.achievement-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+  margin-top:10px
+}
+.achievement-item{
+  display:flex;
+  gap:9px;
+  align-items:flex-start;
+  min-width:0;
+  padding:11px;
+  border-radius:16px;
+  border:1px solid #e8eae6;
+  background:#fafaf8
+}
+.achievement-item.done{
+  background:linear-gradient(145deg,#eff4ef,#f8f5ee);
+  border-color:#dfe7e0
+}
+.achievement-icon{
+  width:31px;
+  height:31px;
+  border-radius:10px;
+  display:grid;
+  place-items:center;
+  flex:0 0 auto;
+  background:#e9ece8;
+  color:#7f8781;
+  font-size:8px;
+  font-weight:900
+}
+.achievement-item.done .achievement-icon{
+  background:#78927e;
+  color:#fff
+}
+.achievement-copy{
+  flex:1;
+  min-width:0
+}
+.achievement-copy b{
+  display:block;
+  font-size:9px;
+  line-height:1.25
+}
+.achievement-copy small{
+  display:block;
+  margin-top:3px;
+  font-size:7px;
+  line-height:1.35;
+  color:#969c98
+}
+.achievement-mini{
+  height:4px;
+  margin-top:7px;
+  border-radius:99px;
+  overflow:hidden;
+  background:#e6e9e4
+}
+.achievement-mini span{
+  display:block;
+  height:100%;
+  border-radius:99px;
+  background:#9aa59d
+}
+.achievement-item.done .achievement-mini span{
+  background:#78927e
+}
+.achievement-copy i{
+  display:block;
+  margin-top:4px;
+  font-style:normal;
+  font-size:7px;
+  color:#8d948f
+}
+@media(max-width:420px){
+  .achievements-card{
+    padding:15px;
+    border-radius:22px
+  }
+  .achievement-grid{
+    grid-template-columns:1fr
+  }
+}
