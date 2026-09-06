@@ -1440,3 +1440,85 @@ canvas{margin-top:14px;height:220px;border:0;border-radius:20px;background:linea
   .daily-route{gap:4px;padding:6px}
   .route-segment{padding:7px 5px}
 }
+
+/* Evening closeout v22 */
+.evening-card{
+  margin:0 0 12px;padding:16px;border-radius:24px;border:1px solid rgba(17,22,19,.055);
+  background:linear-gradient(145deg,#fff,#f8f7f3);box-shadow:0 10px 28px rgba(22,29,25,.05)
+}
+.evening-card[data-state="preview"]{
+  background:linear-gradient(145deg,#f8f7f3,#eef3ee)
+}
+.evening-card[data-state="closed"]{
+  background:linear-gradient(145deg,#f1f6f2,#e9f0ea);border-color:#dfe9e1
+}
+.evening-preview-head,.evening-head,.tomorrow-head{
+  display:flex;justify-content:space-between;gap:12px;align-items:flex-start
+}
+.evening-preview-head span,.evening-head span,.tomorrow-head span{
+  display:block;font-size:8px;text-transform:uppercase;letter-spacing:.1em;font-weight:850;color:#999f9b
+}
+.evening-preview-head h3,.evening-head h3{
+  margin:4px 0 3px;font-size:21px;letter-spacing:-.04em
+}
+.evening-preview-head p,.evening-head p{
+  margin:0;font-size:9px;line-height:1.45;color:#8d938f
+}
+.evening-preview-icon,.evening-moon{
+  width:40px;height:40px;border-radius:14px;display:grid;place-items:center;flex:0 0 auto;
+  background:#1a211d;color:white;font-size:14px
+}
+.evening-card[data-state="closed"] .evening-moon{background:#78927e}
+.tomorrow-focus-mini{
+  display:flex;gap:10px;align-items:flex-start;margin-top:12px;padding:11px 12px;border-radius:16px;
+  background:rgba(255,255,255,.7)
+}
+.tomorrow-focus-mini>i{
+  width:30px;height:30px;border-radius:10px;display:grid;place-items:center;flex:0 0 auto;
+  background:#eceeea;color:#606762;font-style:normal;font-size:10px;font-weight:900
+}
+.tomorrow-focus-mini b{display:block;font-size:10px}
+.tomorrow-focus-mini p{margin:3px 0 0;font-size:8px;line-height:1.45;color:#8e9490}
+.evening-checks{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-top:12px
+}
+.evening-checks>div{
+  min-width:0;padding:8px 5px;border-radius:13px;background:#f5f5f2;text-align:center
+}
+.evening-checks>div.done{background:#edf3ee}
+.evening-checks i{
+  display:grid;place-items:center;width:20px;height:20px;margin:0 auto 5px;border-radius:7px;
+  background:#e1e4df;color:#858c87;font-style:normal;font-size:8px;font-weight:900
+}
+.evening-checks>div.done i{background:#78927e;color:white}
+.evening-checks span{display:block;font-size:6px;text-transform:uppercase;letter-spacing:.08em;color:#9ba09c}
+.evening-checks b{display:block;margin-top:3px;font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tomorrow-card{
+  margin-top:11px;padding:13px;border-radius:18px;background:linear-gradient(145deg,#1a211d,#29332e);color:white
+}
+.tomorrow-head b{display:block;margin-top:4px;font-size:13px}
+.tomorrow-head small{display:block;margin-top:2px;font-size:7px;color:rgba(255,255,255,.45)}
+.tomorrow-focus-icon{
+  width:34px;height:34px;border-radius:11px;display:grid;place-items:center;flex:0 0 auto;
+  background:rgba(255,255,255,.1);font-size:10px;font-weight:900
+}
+.tomorrow-focus{margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)}
+.tomorrow-focus b{display:block;font-size:10px}
+.tomorrow-focus p{margin:3px 0 0;font-size:8px;line-height:1.45;color:rgba(255,255,255,.52)}
+.tomorrow-prep{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.tomorrow-prep>div{display:flex;gap:8px;align-items:center}
+.tomorrow-prep i{
+  width:20px;height:20px;border-radius:7px;display:grid;place-items:center;flex:0 0 auto;
+  background:rgba(255,255,255,.1);font-style:normal;font-size:7px
+}
+.tomorrow-prep span{font-size:8px;color:rgba(255,255,255,.68)}
+.evening-close{
+  width:100%;min-height:46px;margin-top:11px;border:0;border-radius:15px;
+  background:#1a211d;color:white;font-size:10px;font-weight:850
+}
+.evening-reopen{
+  width:100%;margin-top:10px;border:0;background:transparent;color:#738077;font-size:8px;font-weight:800;padding:7px
+}
+@media(max-width:390px){
+  .evening-checks{grid-template-columns:repeat(3,1fr)}
+}
