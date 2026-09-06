@@ -1359,3 +1359,84 @@ canvas{margin-top:14px;height:220px;border:0;border-radius:20px;background:linea
   .weekly-kpis{grid-template-columns:1fr 1fr}
   .next-week-targets{grid-template-columns:1fr 1fr}
 }
+
+/* Smart Today v21 */
+.today-legacy-wellness,.today-legacy-check{display:none!important}
+.daily-command{
+  margin:0 0 12px;padding:17px;border-radius:25px;border:1px solid rgba(17,22,19,.055);
+  background:
+    radial-gradient(circle at 96% 0%,rgba(120,146,126,.08),transparent 12rem),
+    linear-gradient(145deg,#fff,#f8f7f3);
+  box-shadow:0 10px 28px rgba(22,29,25,.05)
+}
+.daily-command-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
+.daily-command-head>div:first-child{min-width:0}
+.daily-command-head span{
+  font-size:8px;text-transform:uppercase;letter-spacing:.11em;font-weight:850;color:#9a7b7f
+}
+.daily-command-head h3{margin:4px 0 3px;font-size:22px;letter-spacing:-.04em}
+.daily-command-head p{margin:0;font-size:9px;line-height:1.45;color:#8c928e}
+.daily-score{
+  --daily-p:0%;position:relative;width:54px;height:54px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;
+  background:conic-gradient(#78927e var(--daily-p),#e7e9e5 0)
+}
+.daily-score:before{content:"";position:absolute;inset:5px;border-radius:50%;background:#fff}
+.daily-score b,.daily-score span{position:relative;z-index:1;text-align:center}
+.daily-score b{font-size:12px;letter-spacing:-.03em}
+.daily-score span{display:block;margin-top:-2px;font-size:6px!important;color:#9ba09c!important;text-transform:none!important;letter-spacing:0!important}
+.daily-priorities{display:flex;flex-direction:column;gap:7px;margin-top:13px}
+.daily-priority{
+  width:100%;display:grid;grid-template-columns:34px 1fr auto;gap:9px;align-items:center;
+  min-height:58px;padding:9px 10px;border:1px solid #e7e9e5;border-radius:16px;background:#fbfbf9;
+  text-align:left;color:var(--ink)
+}
+.daily-priority.done{background:#eff4ef;border-color:#e0e9e1}
+.daily-priority-num{
+  width:31px;height:31px;border-radius:10px;display:grid;place-items:center;
+  background:#1a211d;color:white;font-size:9px;font-weight:900
+}
+.daily-priority.done .daily-priority-num{background:#78927e}
+.daily-priority-copy{min-width:0}
+.daily-priority-copy b{display:block;font-size:10px}
+.daily-priority-copy small{display:block;margin-top:3px;font-size:8px;line-height:1.35;color:#959b97}
+.daily-priority>span{
+  font-size:7px!important;text-transform:none!important;letter-spacing:0!important;font-weight:800!important;
+  color:#7b827d!important;white-space:nowrap
+}
+.daily-route{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:11px;padding:8px;border-radius:18px;background:#f3f3ef
+}
+.route-segment{
+  min-width:0;padding:8px 7px;border-radius:13px;background:rgba(255,255,255,.64)
+}
+.route-segment i{
+  display:block;width:7px;height:7px;border-radius:50%;margin-bottom:7px;background:#d2d5d0
+}
+.route-segment.now{background:#fff;box-shadow:0 5px 14px rgba(20,27,23,.04)}
+.route-segment.now i{background:#bd6e78;box-shadow:0 0 0 4px rgba(189,110,120,.10)}
+.route-segment.done i{background:#78927e}
+.route-segment b{display:block;font-size:8px}
+.route-segment small{
+  display:block;margin-top:3px;font-size:6px;line-height:1.35;color:#9ba09c
+}
+.daily-left{
+  display:flex;gap:10px;align-items:flex-start;margin-top:10px;padding:11px 12px;border-radius:16px;
+  background:linear-gradient(145deg,#f4ecea,#eef3ee)
+}
+.daily-left-mark{
+  width:31px;height:31px;border-radius:10px;display:grid;place-items:center;flex:0 0 auto;
+  background:#1a211d;color:white;font-size:12px
+}
+.daily-left span{
+  display:block;font-size:7px!important;text-transform:uppercase!important;letter-spacing:.1em!important;
+  font-weight:850!important;color:#98777c!important
+}
+.daily-left b{display:block;margin-top:3px;font-size:10px}
+.daily-left p{margin:3px 0 0;font-size:8px;line-height:1.4;color:#858c87}
+@media(max-width:390px){
+  .daily-command{padding:15px}
+  .daily-priority{grid-template-columns:32px 1fr auto;gap:7px}
+  .daily-priority>span{max-width:70px;text-align:right}
+  .daily-route{gap:4px;padding:6px}
+  .route-segment{padding:7px 5px}
+}
