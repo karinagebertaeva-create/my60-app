@@ -719,8 +719,11 @@
       '<div class="week-route" id="weekRoute"></div>'+
       '<div class="today-plan-card" id="todayPlanCard"></div>'+
       '<div class="workout-studio" id="workoutStudio">'+
-        '<div class="studio-head"><div><div class="label">Тренировки</div><h3>Моя силовая</h3><p>Отмечай упражнения по ходу — прогресс сохранится.</p></div><div class="studio-switch"><button id="planTabA" onclick="selectPlanWorkout(\'A\')">A</button><button id="planTabB" onclick="selectPlanWorkout(\'B\')">B</button></div></div>'+
-        '<div class="workout-progress"><div><span id="workoutProgressText">0 из 6</span><b id="workoutProgressPct">0%</b></div><div class="workout-progress-bar"><span id="workoutProgressBar"></span></div></div>'+
+        '<div class="studio-head"><div><div class="label">Силовые тренировки</div><h3>Выбери тренировку</h3><p>MY 60 подскажет, какая следующая. Во время тренировки отмечай каждый подход отдельно.</p></div><div class="studio-week-badge" id="studioWeekBadge">0 / 2</div></div>'+
+        '<div class="workout-picker" id="workoutPicker"></div>'+
+        '<div class="active-workout-head"><div><span id="activeWorkoutBadge">Тренировка A</span><h4 id="activeWorkoutTitle">Всё тело · база</h4><small id="activeWorkoutMeta">6 упражнений · 30–35 мин</small></div><button class="workout-reset" onclick="resetCurrentWorkout()">Сбросить</button></div>'+
+        '<div class="workout-progress"><div><span id="workoutProgressText">0 подходов</span><b id="workoutProgressPct">0%</b></div><div class="workout-progress-bar"><span id="workoutProgressBar"></span></div></div>'+
+        '<div class="next-exercise" id="nextExercise"></div>'+
         '<div id="interactiveWorkoutList"></div>'+
         '<button class="btn workout-finish" id="workoutFinishBtn" onclick="completePremiumWorkout()">Завершить тренировку</button>'+
       '</div>'+
@@ -734,6 +737,18 @@
     const now=new Date(),day=(now.getDay()+6)%7,monday=new Date(now);
     monday.setHours(0,0,0,0);monday.setDate(now.getDate()-day);
     return Array.from({length:7},function(_,i){const d=new Date(monday);d.setDate(monday.getDate()+i);return d});
+  }
+
+  function weekWorkoutDone(type){
+    return weekDates().some(function(d){return (S.workouts[key(d)]||[]).indexOf(type)>=0});
+  }
+
+  function suggestedWorkout(){
+    const today=dayPlanForDate(new Date());
+    if((today.type==='A'||today.type==='B')&&!weekWorkoutDone(today.type))return today.type;
+    if(!weekWorkoutDone('A'))return 'A';
+    if(!weekWorkoutDone('B'))return 'B';
+    return today.type==='B'?'B':'A';
   }
 
   function updateWeekRoute(){
@@ -759,7 +774,7 @@
       state=done?'Готово на сегодня':'Сегодня по плану';
       action=done
         ? '<button class="plan-primary done" disabled>Тренировка выполнена ✓</button>'
-        : '<button class="plan-primary" onclick="startTodayWorkout(\''+plan.type+'\')">Открыть тренировку '+plan.type+'</button>';
+        : '<button class="plan-primary" onclick="startTodayWorkout(\''+plan.type+'\')">Начать тренировку '+plan.type+'</button>';
     }else if(plan.type==='walk'||plan.type==='mobility'||plan.type==='optional'){
       state=steps>=settings.steps?'Цель движения выполнена':'День движения';
       action='<button class="plan-primary '+(steps>=settings.steps?'done':'')+'" onclick="tab(\'today\',document.querySelector(\'.nav button\'))">'+(steps>=settings.steps?'Шаги выполнены ✓':'Перейти к шагам')+'</button>';
@@ -768,62 +783,153 @@
       action='<button class="plan-primary soft-plan" onclick="tab(\'today\',document.querySelector(\'.nav button\'))">Посмотреть мой день</button>';
     }
     card.innerHTML='<div class="today-plan-top"><div><span>'+state+'</span><h3>'+plan.title+'</h3><p>'+plan.sub+'</p></div><div class="plan-duration"><b>'+plan.duration+'</b><small>ориентир</small></div></div>'+
-      '<div class="today-plan-note">'+(plan.type==='A'||plan.type==='B'?'Не гонись за скоростью. Оставляй 1–3 повтора «в запасе» и прекращай упражнение, если появляется острая боль.':plan.type==='rest'?'Отдых — часть плана. Достаточно обычной повседневной активности и комфортного режима.':'Цель — набрать движение без ощущения наказания. Можно разбить прогулку на несколько коротких выходов.')+'</div>'+action;
+      '<div class="today-plan-note">'+(plan.type==='A'||plan.type==='B'?'Работай в спокойном темпе. Между подходами отдыхай примерно 45–90 секунд и останавливайся при острой боли.':plan.type==='rest'?'Отдых — часть плана. Достаточно обычной повседневной активности и комфортного режима.':'Цель — набрать движение без ощущения наказания. Можно разбить прогулку на несколько коротких выходов.')+'</div>'+action;
+  }
+
+  function renderWorkoutPicker(){
+    const picker=document.getElementById('workoutPicker');if(!picker)return;
+    const recommended=suggestedWorkout();
+    const data={
+      A:{title:'Силовая A',sub:'База всего тела',detail:'ноги · ягодицы · спина · кор'},
+      B:{title:'Силовая B',sub:'Вариация всего тела',detail:'ноги · плечи · спина · кор'}
+    };
+    picker.innerHTML=['A','B'].map(function(type){
+      const d=data[type],done=weekWorkoutDone(type),active=activePlanWorkout===type;
+      return '<button type="button" class="workout-choice '+(active?'active ':'')+(done?'done ':'')+'" onclick="selectPlanWorkout(\''+type+'\')">'+
+        '<div class="choice-top"><span class="choice-letter">'+type+'</span><span class="choice-state">'+(done?'Выполнена ✓':recommended===type?'Следующая':'На неделе')+'</span></div>'+
+        '<b>'+d.title+'</b><small>'+d.sub+'</small><i>'+d.detail+'</i>'+
+      '</button>';
+    }).join('');
+    const badge=document.getElementById('studioWeekBadge');
+    if(badge){
+      const count=(weekWorkoutDone('A')?1:0)+(weekWorkoutDone('B')?1:0);
+      badge.textContent=count+' / 2';
+      badge.classList.toggle('done',count>=2);
+    }
   }
 
   function selectPlanWorkout(type){
     activePlanWorkout=type==='B'?'B':'A';
-    const a=document.getElementById('planTabA'),b=document.getElementById('planTabB');
-    if(a)a.classList.toggle('active',activePlanWorkout==='A');
-    if(b)b.classList.toggle('active',activePlanWorkout==='B');
+    const studio=document.getElementById('workoutStudio');if(studio)studio.dataset.userPicked='1';
+    renderWorkoutPicker();
     renderInteractiveWorkout();
   }
 
-  function exerciseDone(type,i){
-    ensurePlanState();
-    const dk=key(),bucket=S.planChecks[dk]||{},arr=bucket[type]||[];
-    return !!arr[i];
+  function exerciseSetCount(ex){
+    const m=String(ex.dose||'').match(/^(\d+)/);
+    return m?Math.max(1,+m[1]):1;
   }
 
-  function togglePlanExercise(type,i){
+  function exerciseReps(ex){
+    const parts=String(ex.dose||'').split('×');
+    return parts.length>1?parts.slice(1).join('×').trim():ex.dose;
+  }
+
+  function getExerciseSetState(type,i){
+    ensurePlanState();
+    const bucket=S.planChecks[key()]||{},work=bucket[type]||[],old=work[i],sets=exerciseSetCount((planExerciseInfo[type]||[])[i]||{});
+    if(old===true)return Array.from({length:sets},function(){return true});
+    if(Array.isArray(old))return Array.from({length:sets},function(_,s){return !!old[s]});
+    return Array.from({length:sets},function(){return false});
+  }
+
+  function exerciseDone(type,i){
+    const state=getExerciseSetState(type,i);
+    return state.length>0&&state.every(Boolean);
+  }
+
+  function togglePlanSet(type,i,setIndex){
     ensurePlanState();
     const dk=key();
     if(!S.planChecks[dk])S.planChecks[dk]={};
     if(!Array.isArray(S.planChecks[dk][type]))S.planChecks[dk][type]=[];
-    S.planChecks[dk][type][i]=!S.planChecks[dk][type][i];
+    const state=getExerciseSetState(type,i);
+    state[setIndex]=!state[setIndex];
+    S.planChecks[dk][type][i]=state;
     if(typeof save==='function')save();
+    renderInteractiveWorkout();
+  }
+
+  function togglePlanExercise(type,i){
+    const current=getExerciseSetState(type,i),all=current.every(Boolean);
+    current.forEach(function(_,s){current[s]=!all});
+    ensurePlanState();
+    const dk=key();
+    if(!S.planChecks[dk])S.planChecks[dk]={};
+    if(!Array.isArray(S.planChecks[dk][type]))S.planChecks[dk][type]=[];
+    S.planChecks[dk][type][i]=current;
+    if(typeof save==='function')save();
+    renderInteractiveWorkout();
+  }
+
+  function resetCurrentWorkout(){
+    ensurePlanState();
+    if(S.planChecks[key()]&&S.planChecks[key()][activePlanWorkout]){
+      S.planChecks[key()][activePlanWorkout]=[];
+      if(typeof save==='function')save();
+    }
     renderInteractiveWorkout();
   }
 
   function showExerciseInfo(type,i){
     const ex=(planExerciseInfo[type]||[])[i];if(!ex)return;
     if(typeof sheet==='undefined'||typeof modal==='undefined')return;
-    sheet.innerHTML='<div class="exercise-sheet"><div class="exercise-sheet-icon">'+(i+1)+'</div><div class="label">'+escapeHtml(ex.focus)+'</div><h3>'+escapeHtml(ex.name)+'</h3><div class="exercise-dose">'+escapeHtml(ex.dose)+'</div><p>'+escapeHtml(ex.tip)+'</p><div class="exercise-safety">Движение должно быть контролируемым и комфортным. При острой боли остановись.</div><button class="btn" style="width:100%" onclick="closeM()">Понятно</button></div>';
+    sheet.innerHTML='<div class="exercise-sheet"><div class="exercise-sheet-icon">'+(i+1)+'</div><div class="label">'+escapeHtml(ex.focus)+'</div><h3>'+escapeHtml(ex.name)+'</h3><div class="exercise-dose">'+escapeHtml(ex.dose)+'</div><p>'+escapeHtml(ex.tip)+'</p><div class="exercise-safety">Отдых между подходами: примерно 45–90 секунд. Движение должно оставаться контролируемым и комфортным. При острой боли остановись.</div><button class="btn" style="width:100%" onclick="closeM()">Понятно</button></div>';
     modal.classList.add('open');
   }
 
   function renderInteractiveWorkout(){
     const list=document.getElementById('interactiveWorkoutList');if(!list)return;
     const type=activePlanWorkout,items=planExerciseInfo[type]||[];
-    const doneCount=items.filter(function(_,i){return exerciseDone(type,i)}).length;
+    const totalSets=items.reduce(function(n,ex){return n+exerciseSetCount(ex)},0);
+    let doneSets=0,nextIndex=-1;
+    items.forEach(function(ex,i){
+      const state=getExerciseSetState(type,i);
+      doneSets+=state.filter(Boolean).length;
+      if(nextIndex<0&&!state.every(Boolean))nextIndex=i;
+    });
     list.innerHTML=items.map(function(ex,i){
-      const done=exerciseDone(type,i);
-      return '<div class="exercise-row '+(done?'done':'')+'">'+
-        '<button class="exercise-check" onclick="togglePlanExercise(\''+type+'\','+i+')"><span>'+(done?'✓':'')+'</span></button>'+
-        '<button class="exercise-main" onclick="showExerciseInfo(\''+type+'\','+i+')"><b>'+escapeHtml(ex.name)+'</b><small>'+escapeHtml(ex.focus)+' · '+escapeHtml(ex.dose)+'</small></button>'+
-        '<button class="exercise-info" onclick="showExerciseInfo(\''+type+'\','+i+')">i</button>'+
+      const state=getExerciseSetState(type,i),done=state.every(Boolean),current=i===nextIndex;
+      const setButtons=state.map(function(v,s){
+        return '<button type="button" class="set-chip '+(v?'done':'')+'" onclick="togglePlanSet(\''+type+'\','+i+','+s+')"><span>'+(v?'✓':(s+1))+'</span><small>подход</small></button>';
+      }).join('');
+      return '<div class="exercise-card '+(done?'done ':'')+(current?'current':'')+'">'+
+        '<div class="exercise-card-top">'+
+          '<button class="exercise-number" onclick="togglePlanExercise(\''+type+'\','+i+')">'+(done?'✓':(i+1))+'</button>'+
+          '<button class="exercise-main" onclick="showExerciseInfo(\''+type+'\','+i+')"><b>'+escapeHtml(ex.name)+'</b><small>'+escapeHtml(ex.focus)+'</small></button>'+
+          '<div class="exercise-reps"><b>'+escapeHtml(exerciseReps(ex))+'</b><small>повторы</small></div>'+
+        '</div>'+
+        '<div class="set-row">'+setButtons+'<button class="how-btn" onclick="showExerciseInfo(\''+type+'\','+i+')">Как делать</button></div>'+
       '</div>';
     }).join('');
+
+    const n=totalSets?Math.round(doneSets/totalSets*100):0;
     const text=document.getElementById('workoutProgressText'),pct=document.getElementById('workoutProgressPct'),bar=document.getElementById('workoutProgressBar');
-    const n=items.length?Math.round(doneCount/items.length*100):0;
-    if(text)text.textContent=doneCount+' из '+items.length;
+    if(text)text.textContent=doneSets+' из '+totalSets+' подходов';
     if(pct)pct.textContent=n+'%';
     if(bar)bar.style.width=n+'%';
+
+    const meta={A:{title:'Всё тело · база'},B:{title:'Всё тело · вариация'}};
+    const badge=document.getElementById('activeWorkoutBadge'),title=document.getElementById('activeWorkoutTitle'),metaEl=document.getElementById('activeWorkoutMeta');
+    if(badge)badge.textContent='Тренировка '+type;
+    if(title)title.textContent=meta[type].title;
+    if(metaEl)metaEl.textContent=items.length+' упражнений · '+totalSets+' подходов · 30–35 мин';
+
+    const next=document.getElementById('nextExercise');
+    if(next){
+      if(nextIndex<0){
+        next.innerHTML='<span class="next-mark done">✓</span><div><small>Все подходы готовы</small><b>Можно завершать тренировку</b></div>';
+      }else{
+        const ex=items[nextIndex],state=getExerciseSetState(type,nextIndex),nextSet=state.findIndex(function(v){return !v});
+        next.innerHTML='<span class="next-mark">'+(nextIndex+1)+'</span><div><small>Сейчас</small><b>'+escapeHtml(ex.name)+' · подход '+(nextSet+1)+'</b></div>';
+      }
+    }
+
     const finish=document.getElementById('workoutFinishBtn');
     const already=(S.workouts[key()]||[]).indexOf(type)>=0;
     if(finish){
-      finish.textContent=already?'Тренировка '+type+' выполнена ✓':(doneCount===items.length?'Завершить тренировку '+type:'Отметь упражнения · '+doneCount+'/'+items.length);
-      finish.disabled=already||doneCount<items.length;
+      finish.textContent=already?'Тренировка '+type+' выполнена ✓':(doneSets===totalSets?'Завершить тренировку '+type:'Выполни все подходы · '+doneSets+'/'+totalSets);
+      finish.disabled=already||doneSets<totalSets;
       finish.classList.toggle('complete',already);
     }
   }
@@ -866,6 +972,7 @@
 
   function updatePlanExperience(){
     ensurePlanState();
+    if(!document.getElementById('workoutStudio')?.dataset.userPicked){activePlanWorkout=suggestedWorkout();}
     const w=planWeekNumber(),settings=weekPlanSettings(w);
     const no=document.getElementById('planWeekNo');if(no)no.textContent=w;
     const st=document.getElementById('planStepTarget');if(st)st.textContent=settings.steps.toLocaleString('ru-RU');
@@ -904,6 +1011,8 @@
 
   window.selectPlanWorkout=selectPlanWorkout;
   window.togglePlanExercise=togglePlanExercise;
+  window.togglePlanSet=togglePlanSet;
+  window.resetCurrentWorkout=resetCurrentWorkout;
   window.showExerciseInfo=showExerciseInfo;
   window.startTodayWorkout=startTodayWorkout;
   window.completePremiumWorkout=completePremiumWorkout;
