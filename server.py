@@ -5,7 +5,7 @@ import sqlite3
 from datetime import datetime, timedelta, timezone
 from functools import wraps
 
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, Response, jsonify, request, send_from_directory
 from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__, static_folder=".", static_url_path="")
@@ -111,7 +111,17 @@ def health():
 
 @app.get("/")
 def home():
-    return send_from_directory(".", "index.html")
+    with open("index.html", "r", encoding="utf-8") as source:
+        html = source.read()
+    html = html.replace(
+        "</head>",
+        '<link rel="stylesheet" href="premium.css?v=6"><meta name="theme-color" content="#101513"></head>',
+    )
+    html = html.replace(
+        "</body>",
+        '<script src="premium.js?v=6"></script></body>',
+    )
+    return Response(html, mimetype="text/html", headers={"Cache-Control": "no-cache"})
 
 
 if __name__ == "__main__":
