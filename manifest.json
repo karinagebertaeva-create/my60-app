@@ -1,0 +1,16 @@
+{
+  "name": "MY 60 — мой путь к 60 кг",
+  "short_name": "MY 60",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f7f2ee",
+  "theme_color": "#f5ece8",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
