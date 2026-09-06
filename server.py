@@ -111,17 +111,9 @@ def health():
 
 @app.get("/")
 def home():
-    with open("index.html", "r", encoding="utf-8") as source:
-        html = source.read()
-    html = html.replace(
-        "</head>",
-        '<link rel="stylesheet" href="premium.css?v=8"><meta name="theme-color" content="#101513"></head>',
-    )
-    html = html.replace(
-        "</body>",
-        '<script src="premium.js?v=8"></script></body>',
-    )
-    return Response(html, mimetype="text/html", headers={"Cache-Control": "no-cache"})
+    response = send_from_directory(".", "index.html")
+    response.headers["Cache-Control"] = "no-cache"
+    return response
 
 
 if __name__ == "__main__":
