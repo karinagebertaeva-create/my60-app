@@ -255,7 +255,7 @@
 
   function productLibraryMarkup(){
     return '<div class="product-library" id="productLibrary">'+
-      '<div class="library-top"><div><div class="label">Мои продукты</div><div class="library-title">Быстрый выбор</div></div><span class="library-count" id="libraryCount">0</span></div>'+
+      '<div class="library-top"><div><div class="label">Мои продукты</div><div class="library-title">Быстрый выбор</div><div class="library-base-note">В поиске также 118 продуктов и блюд MY 60</div></div><span class="library-count" id="libraryCount">0</span></div>'+
       '<div id="favoriteProducts"></div>'+
       '<div id="recentProducts"></div>'+
     '</div>';
@@ -266,7 +266,7 @@
       '<div class="calorie-head"><div><div class="label">Счётчик калорий</div><div class="big calorie-title">Рассчитать порцию</div><div class="muted">Один раз внеси продукт — дальше выбирай его из сохранённых и меняй только граммы.</div></div><div class="calorie-icon"><svg viewBox="0 0 24 24"><path d="M8 3h8l2 4v13H6V7l2-4Z"/><path d="M9 9h6"/><path d="M9 13h2M13 13h2M9 17h2M13 17h2"/></svg></div></div>'+
       productLibraryMarkup()+
       '<div class="calc-fields">'+
-        '<div class="calc-wide"><label>Продукт</label><input id="calcName" placeholder="Например, творог 5%"></div>'+
+        '<div class="calc-wide product-search-wrap"><label>Продукт</label><input id="calcName" autocomplete="off" placeholder="Начни вводить: творог, картошка, гуляш…" onfocus="productSearch(this.value)" oninput="productSearch(this.value)"><div class="product-suggestions" id="productSuggestions"></div></div>'+
         '<div><label>Приём пищи</label><select id="calcMeal"><option>Завтрак</option><option>Обед</option><option>Перекус</option><option>Ужин</option><option>Другое</option></select></div>'+
         '<div><label>Вес порции, г</label><input id="calcGrams" type="number" inputmode="decimal" min="0" step="1" placeholder="150" oninput="calorieCalc()"></div>'+
         '<div><label>Ккал / 100 г</label><input id="calcKcal100" type="number" inputmode="decimal" min="0" step="1" placeholder="120" oninput="calorieCalc()"></div>'+
@@ -316,14 +316,84 @@
     }
   }
 
-  function selectSavedProduct(id){
-    const p=ensureProductLibrary().find(function(x){return x.id===id});
+  function normalizeProductName(v){
+    return String(v||'').toLowerCase().replace(/ё/g,'е').replace(/[^a-zа-я0-9]+/gi,' ').trim();
+  }
+
+  function applyProductToCalculator(p){
     if(!p)return;
     const values={calcName:p.name,calcKcal100:p.kcal100,calcP100:p.p100,calcF100:p.f100,calcC100:p.c100};
-    Object.keys(values).forEach(function(k){const el=document.getElementById(k);if(el)el.value=values[k]==null?'':values[k]});
+    Object.keys(values).forEach(function(k){
+      const el=document.getElementById(k);
+      if(el)el.value=values[k]==null?'':values[k];
+    });
+    hideProductSuggestions();
     const grams=document.getElementById('calcGrams');
     if(grams){grams.value='';setTimeout(function(){grams.focus()},40)}
     calorieCalc();
+  }
+
+  function allSearchProducts(){
+    const saved=ensureProductLibrary().map(function(p){return Object.assign({source:'saved'},p)});
+    const seen={};
+    saved.forEach(function(p){seen[normalizeProductName(p.name)]=true});
+    const base=builtInProducts.filter(function(p){return !seen[normalizeProductName(p.name)]}).map(function(p){return Object.assign({source:'base'},p)});
+    return saved.concat(base);
+  }
+
+  function productSearch(query){
+    const box=document.getElementById('productSuggestions');
+    if(!box)return;
+    const q=normalizeProductName(query);
+    let items=allSearchProducts();
+    if(q){
+      items=items.filter(function(p){return normalizeProductName(p.name).includes(q)});
+      items.sort(function(a,b){
+        const an=normalizeProductName(a.name),bn=normalizeProductName(b.name);
+        const as=an.startsWith(q)?0:1,bs=bn.startsWith(q)?0:1;
+        if(as!==bs)return as-bs;
+        if(a.source!==b.source)return a.source==='saved'?-1:1;
+        return an.localeCompare(bn,'ru');
+      });
+    }else{
+      const popular=['Яйцо куриное, варёное','Творог 5%','Куриная грудка, варёная','Картофель варёный','Картошка жареная','Картофельное пюре с молоком и маслом','Гуляш из говядины','Гречка варёная'];
+      items=items.filter(function(p){return p.source==='saved'||popular.indexOf(p.name)>=0});
+      items.sort(function(a,b){
+        if(a.source!==b.source)return a.source==='saved'?-1:1;
+        return (b.lastUsed||0)-(a.lastUsed||0);
+      });
+    }
+    items=items.slice(0,8);
+    if(!items.length){
+      box.innerHTML='<div class="suggestion-empty">Не нашла в базе — введи КБЖУ вручную, после добавления продукт сохранится.</div>';
+      box.classList.add('show');
+      return;
+    }
+    box.innerHTML=items.map(function(p){
+      const tag=p.source==='saved'?'Мой':'База';
+      return '<button type="button" class="product-suggestion" onmousedown="event.preventDefault()" onclick="chooseProductSuggestion(\''+p.source+'\',\''+escapeHtml(p.id)+'\')">'+
+        '<span class="suggestion-main"><b>'+escapeHtml(p.name)+'</b><small>'+tag+' · '+Math.round(+p.kcal100||0)+' ккал / 100 г</small></span>'+
+        '<span class="suggestion-macros">Б '+round1(+p.p100||0)+' · Ж '+round1(+p.f100||0)+' · У '+round1(+p.c100||0)+'</span>'+
+      '</button>';
+    }).join('');
+    box.classList.add('show');
+  }
+
+  function hideProductSuggestions(){
+    const box=document.getElementById('productSuggestions');
+    if(box)box.classList.remove('show');
+  }
+
+  function chooseProductSuggestion(source,id){
+    const p=source==='saved'
+      ? ensureProductLibrary().find(function(x){return x.id===id})
+      : builtInProducts.find(function(x){return x.id===id});
+    applyProductToCalculator(p);
+  }
+
+  function selectSavedProduct(id){
+    const p=ensureProductLibrary().find(function(x){return x.id===id});
+    applyProductToCalculator(p);
   }
 
   function toggleFavoriteProduct(id){
@@ -449,6 +519,9 @@
   window.addCalculatedFood=addCalculatedFood;
   window.selectSavedProduct=selectSavedProduct;
   window.toggleFavoriteProduct=toggleFavoriteProduct;
+  window.productSearch=productSearch;
+  window.chooseProductSuggestion=chooseProductSuggestion;
+  document.addEventListener('click',function(e){if(!e.target.closest('.product-search-wrap'))hideProductSuggestions()});
 
   function decorate(){
     decorateNav();sectionTitles();decorateToday();decorateFood();updateRing();
