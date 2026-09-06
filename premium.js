@@ -854,6 +854,12 @@
       S.food[key()].push({
         meal:combo.meal,
         name:p.name+' · '+Math.round(it.grams)+' г',
+        baseName:p.name,
+        grams:+it.grams||0,
+        kcal100:+p.kcal100||0,
+        p100:+p.p100||0,
+        f100:+p.f100||0,
+        c100:+p.c100||0,
         cal:round1((+p.kcal100||0)*factor),
         p:round1((+p.p100||0)*factor),
         f:round1((+p.f100||0)*factor),
@@ -1192,6 +1198,111 @@
     if(typeof foodDel==='function')foodDel(index);
   }
 
+
+  function editableFoodEntry(index){
+    const list=(S.food&&S.food[key()])||[],x=list[index];
+    if(!x)return null;
+    let grams=+x.grams||0;
+    if(!grams){
+      const m=String(x.name||'').match(/·\s*([\d.,]+)\s*г\s*$/i);
+      if(m)grams=parseFloat(m[1].replace(',','.'))||0;
+    }
+    if(!(grams>0))grams=100;
+    const factor=grams/100;
+    const baseName=(x.baseName||String(x.name||'Еда').replace(/\s*·\s*[\d.,]+\s*г\s*$/i,'')).trim()||'Еда';
+    return {
+      index:index,
+      item:x,
+      meal:x.meal||'Другое',
+      baseName:baseName,
+      grams:grams,
+      kcal100:x.kcal100!=null?+x.kcal100:((+x.cal||0)/(factor||1)),
+      p100:x.p100!=null?+x.p100:((+x.p||0)/(factor||1)),
+      f100:x.f100!=null?+x.f100:((+x.f||0)/(factor||1)),
+      c100:x.c100!=null?+x.c100:((+x.c||0)/(factor||1))
+    };
+  }
+
+  function foodEditorTotals(){
+    const gramsEl=document.getElementById('foodEditGrams');
+    const grams=gramsEl?(+gramsEl.value||0):0;
+    const kcal100=+(gramsEl&&gramsEl.dataset.kcal100||0);
+    const p100=+(gramsEl&&gramsEl.dataset.p100||0);
+    const f100=+(gramsEl&&gramsEl.dataset.f100||0);
+    const c100=+(gramsEl&&gramsEl.dataset.c100||0);
+    const k=grams/100;
+    return {grams:grams,kcal:round1(kcal100*k),p:round1(p100*k),f:round1(f100*k),c:round1(c100*k)};
+  }
+
+  function updateFoodEditorPreview(){
+    const t=foodEditorTotals(),out=document.getElementById('foodEditPreview');
+    if(!out)return;
+    out.innerHTML='<div><span>Порция</span><b>'+Math.round(t.grams)+' г</b></div><div><span>Калории</span><b>'+Math.round(t.kcal)+' ккал</b></div><div><span>Белок</span><b>'+round1(t.p)+' г</b></div><div><span>Жиры / углеводы</span><b>'+round1(t.f)+' / '+round1(t.c)+' г</b></div>';
+  }
+
+  function openFoodEntryEditor(index){
+    const e=editableFoodEntry(index);if(!e)return;
+    const sheetEl=document.getElementById('sheet'),modalEl=document.getElementById('modal');
+    if(!sheetEl||!modalEl)return;
+    const meals=['Завтрак','Обед','Перекус','Ужин','Другое','Напиток'];
+    sheetEl.innerHTML=
+      '<div class="food-edit-sheet">'+
+        '<div class="food-edit-head"><div><div class="label">Дневник питания</div><h3>'+escapeHtml(e.baseName)+'</h3><p>Исправь порцию или перенеси запись в другой приём пищи.</p></div><div class="food-edit-mark">✎</div></div>'+
+        '<label class="food-edit-field"><span>Приём пищи</span><select id="foodEditMeal">'+meals.map(function(m){return '<option '+(m===e.meal?'selected':'')+'>'+m+'</option>'}).join('')+'</select></label>'+
+        '<label class="food-edit-field"><span>Порция</span><div class="food-edit-grams"><input id="foodEditGrams" type="number" inputmode="decimal" min="1" step="1" value="'+round1(e.grams)+'" data-kcal100="'+round1(e.kcal100)+'" data-p100="'+round1(e.p100)+'" data-f100="'+round1(e.f100)+'" data-c100="'+round1(e.c100)+'" oninput="updateFoodEditorPreview()"><i>г</i></div></label>'+
+        '<div class="food-edit-preview" id="foodEditPreview"></div>'+
+        '<div class="food-edit-actions"><button type="button" class="btn" onclick="saveFoodEntryEdit('+index+')">Сохранить</button><button type="button" class="btn soft" onclick="duplicateFoodEntry('+index+')">Добавить ещё такую же</button></div>'+
+        '<button type="button" class="food-edit-delete" onclick="deleteFoodEntryFromEditor('+index+')">Удалить запись</button>'+
+      '</div>';
+    modalEl.classList.add('open');
+    updateFoodEditorPreview();
+  }
+
+  function saveFoodEntryEdit(index){
+    const e=editableFoodEntry(index);if(!e)return;
+    const mealEl=document.getElementById('foodEditMeal'),gramsEl=document.getElementById('foodEditGrams');
+    const meal=mealEl?mealEl.value:e.meal,grams=gramsEl?(+gramsEl.value||0):0;
+    if(!(grams>0))return;
+    const t=foodEditorTotals(),x=e.item;
+    x.meal=meal;
+    x.baseName=e.baseName;
+    x.grams=grams;
+    x.kcal100=e.kcal100;x.p100=e.p100;x.f100=e.f100;x.c100=e.c100;
+    x.name=e.baseName+' · '+Math.round(grams)+' г';
+    x.cal=t.kcal;x.p=t.p;x.f=t.f;x.c=t.c;
+    if(typeof save==='function')save();
+    if(typeof closeM==='function')closeM();
+  }
+
+  function duplicateFoodEntry(index){
+    const e=editableFoodEntry(index);if(!e)return;
+    const mealEl=document.getElementById('foodEditMeal'),gramsEl=document.getElementById('foodEditGrams');
+    const meal=mealEl?mealEl.value:e.meal,grams=gramsEl?(+gramsEl.value||0):e.grams;
+    if(!(grams>0))return;
+    const t=foodEditorTotals();
+    if(!S.food[key()])S.food[key()]=[];
+    S.food[key()].push({
+      meal:meal,baseName:e.baseName,grams:grams,
+      kcal100:e.kcal100,p100:e.p100,f100:e.f100,c100:e.c100,
+      name:e.baseName+' · '+Math.round(grams)+' г',
+      cal:t.kcal,p:t.p,f:t.f,c:t.c,
+      copiedEntry:true
+    });
+    if(typeof save==='function')save();
+    if(typeof closeM==='function')closeM();
+  }
+
+  function deleteFoodEntryFromEditor(index){
+    if(typeof closeM==='function')closeM();
+    if(typeof foodDel==='function')foodDel(index);
+  }
+
+  window.openFoodEntryEditor=openFoodEntryEditor;
+  window.updateFoodEditorPreview=updateFoodEditorPreview;
+  window.saveFoodEntryEdit=saveFoodEntryEdit;
+  window.duplicateFoodEntry=duplicateFoodEntry;
+  window.deleteFoodEntryFromEditor=deleteFoodEntryFromEditor;
+
   function renderMealDiary(){
     const root=document.getElementById('mealDiaryList');if(!root||!window.S)return;
     const entries=((S.food&&S.food[key()])||[]).map(function(x,i){return {item:x,index:i}});
@@ -1215,7 +1326,7 @@
           ? '<button class="meal-empty-add" type="button" onclick="openMealAdd(\''+meal+'\')"><span>＋</span><div><b>Добавить '+meal.toLowerCase()+'</b><small>Найти продукт или блюдо</small></div></button>'
           : '<div class="meal-items">'+items.map(function(e){
               const x=e.item;
-              return '<div class="meal-item"><div class="meal-item-main"><b>'+escapeHtml(x.name||'Еда')+'</b><small>'+Math.round(+x.cal||0)+' ккал · Б '+round1(+x.p||0)+' · Ж '+round1(+x.f||0)+' · У '+round1(+x.c||0)+'</small></div><button type="button" aria-label="Удалить" onclick="deleteMealEntry('+e.index+')">×</button></div>';
+              return '<div class="meal-item"><button type="button" class="meal-item-edit" onclick="openFoodEntryEditor('+e.index+')"><div class="meal-item-main"><b>'+escapeHtml(x.name||'Еда')+'</b><small>'+Math.round(+x.cal||0)+' ккал · Б '+round1(+x.p||0)+' · Ж '+round1(+x.f||0)+' · У '+round1(+x.c||0)+'</small></div><span>Изм.</span></button><button type="button" class="meal-item-delete" aria-label="Удалить" onclick="deleteMealEntry('+e.index+')">×</button></div>';
             }).join('')+'</div><button class="meal-add-more" type="button" onclick="openMealAdd(\''+meal+'\')">+ Добавить ещё</button>')+
       '</div>';
     }).join('');
@@ -1325,6 +1436,12 @@
     S.food[key()].push({
       meal:meal,
       name:name+' · '+Math.round(t.grams)+' г',
+      baseName:name,
+      grams:t.grams,
+      kcal100:num('calcKcal100'),
+      p100:num('calcP100'),
+      f100:num('calcF100'),
+      c100:num('calcC100'),
       cal:t.kcal,
       p:t.p,
       f:t.f,
