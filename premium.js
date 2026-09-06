@@ -1508,17 +1508,91 @@
   function ensurePlanState(){
     if(!window.S)return;
     if(!S.planChecks||typeof S.planChecks!=='object')S.planChecks={};
+    if(!S.planStartedAt){
+      const candidates=[];
+      Object.keys(S.workouts||{}).forEach(function(k){
+        const arr=S.workouts[k]||[];
+        if(arr.indexOf('A')>=0||arr.indexOf('B')>=0)candidates.push(k);
+      });
+      Object.keys(S.planChecks||{}).forEach(function(k){
+        const bucket=S.planChecks[k]||{};
+        const has=['A','B'].some(function(type){
+          const work=bucket[type];
+          return Array.isArray(work)&&work.some(function(ex){
+            return ex===true||(Array.isArray(ex)&&ex.some(Boolean));
+          });
+        });
+        if(has)candidates.push(k);
+      });
+      S.planStartedAt=candidates.length?candidates.sort()[0]:key();
+      if(typeof persist==='function')persist();
+    }
+  }
+
+  function planStartDate(){
+    ensurePlanState();
+    const raw=S.planStartedAt||key();
+    const d=new Date(raw+'T00:00:00');
+    return isNaN(d.getTime())?new Date():d;
+  }
+
+  function planDayNumber(){
+    const start=planStartDate(),today=new Date();
+    start.setHours(0,0,0,0);today.setHours(0,0,0,0);
+    return Math.max(1,Math.floor((today-start)/86400000)+1);
   }
 
   function planWeekNumber(){
-    try{
-      const keys=Object.keys(S.weights||{}).sort();
-      if(!keys.length)return 1;
-      const first=new Date(keys[0]+'T00:00:00');
-      const days=Math.max(0,Math.floor((new Date()-first)/86400000));
-      return Math.max(1,Math.min(4,Math.floor(days/7)+1));
-    }catch(e){return 1}
+    const day=planDayNumber();
+    return Math.max(1,Math.min(4,Math.floor((day-1)/7)+1));
   }
+
+  function formatPlanStartDate(){
+    return planStartDate().toLocaleDateString('ru-RU',{day:'numeric',month:'long'});
+  }
+
+  function planStartMarkup(){
+    return '<div class="plan-start-card">'+
+      '<div class="plan-start-progress"><div><span>Программа 28 дней</span><b id="planDayNumber">День 1 из 28</b><small id="planStartDateLabel">Старт — сегодня</small></div><div class="plan-day-bar"><span id="planDayBar"></span></div></div>'+
+      '<button type="button" onclick="openPlanStartSettings()">Изменить старт</button>'+
+    '</div>';
+  }
+
+  function openPlanStartSettings(){
+    ensurePlanState();
+    const sheetEl=document.getElementById('sheet'),modalEl=document.getElementById('modal');
+    if(!sheetEl||!modalEl)return;
+    sheetEl.innerHTML=
+      '<div class="plan-start-sheet">'+
+        '<div class="plan-start-sheet-head"><div><div class="label">Мой план</div><h3>Дата старта программы</h3><p>От неё считаются неделя программы и день из 28. Старые записи веса не влияют на старт.</p></div><div class="plan-start-mark">28</div></div>'+
+        '<label class="plan-start-field"><span>Начало программы</span><input id="planStartInput" type="date" max="'+key()+'" value="'+escapeHtml(S.planStartedAt||key())+'"></label>'+
+        '<div class="plan-start-note">Изменение даты не удаляет вес, питание, тренировки или другие записи. Меняется только отсчёт программы.</div>'+
+        '<button class="btn plan-start-save" type="button" onclick="savePlanStartDate()">Сохранить дату старта</button>'+
+      '</div>';
+    modalEl.classList.add('open');
+  }
+
+  function savePlanStartDate(){
+    const el=document.getElementById('planStartInput');
+    if(!el||!/^\d{4}-\d{2}-\d{2}$/.test(el.value))return;
+    if(el.value>key())return;
+    S.planStartedAt=el.value;
+    if(typeof save==='function')save();
+    if(typeof closeM==='function')closeM();
+  }
+
+  function updatePlanStart(){
+    const day=planDayNumber(),displayDay=Math.min(28,day),pct=Math.min(100,displayDay/28*100);
+    const dayEl=document.getElementById('planDayNumber');
+    const dateEl=document.getElementById('planStartDateLabel');
+    const bar=document.getElementById('planDayBar');
+    if(dayEl)dayEl.textContent=day>28?'Первые 28 дней завершены':'День '+displayDay+' из 28';
+    if(dateEl)dateEl.textContent='Старт — '+formatPlanStartDate();
+    if(bar)bar.style.width=pct+'%';
+  }
+
+  window.openPlanStartSettings=openPlanStartSettings;
+  window.savePlanStartDate=savePlanStartDate;
 
   function weekPlanSettings(w){
     const data=[
@@ -1551,6 +1625,7 @@
         '<div><span>Силовые</span><b id="planStrengthTarget">2</b><small>за неделю</small></div>'+
         '<div><span>Белок</span><b id="planProteinTarget">105</b><small>г / день</small></div>'+
       '</div>'+
+      planStartMarkup()+
       '<div class="week-route" id="weekRoute"></div>'+
       '<div class="today-plan-card" id="todayPlanCard"></div>'+
       '<div class="workout-studio" id="workoutStudio">'+
@@ -1816,6 +1891,7 @@
     const strength=document.getElementById('planStrengthTarget');if(strength)strength.textContent=settings.strength;
     const proteinTarget=document.getElementById('planProteinTarget');if(proteinTarget)proteinTarget.textContent=Math.round(appGoals().protein);
     const sub=document.getElementById('planHeroSub');if(sub)sub.textContent=settings.note+' · ориентир '+settings.steps.toLocaleString('ru-RU')+' шагов в день';
+    updatePlanStart();
     const dates=weekDates();
     const workoutsDone=dates.reduce(function(n,d){return n+(S.workouts[key(d)]||[]).filter(function(x){return x==='A'||x==='B'}).length},0);
     const stepDays=dates.filter(function(d){return +(S.steps[key(d)]||0)>=settings.steps}).length;
