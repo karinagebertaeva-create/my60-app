@@ -1,10 +1,10 @@
 {
-  "name": "MY 60 — мой путь к 60 кг",
+  "name": "MY 60 — персональный wellness-трекер",
   "short_name": "MY 60",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#f7f2ee",
-  "theme_color": "#f5ece8",
+  "background_color": "#f4f5f1",
+  "theme_color": "#101513",
   "icons": [
     {
       "src": "icon.svg",
