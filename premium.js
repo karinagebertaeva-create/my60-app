@@ -330,6 +330,99 @@
 
   window.dailyAction=dailyAction;
 
+  function todayMenuCardMarkup(){
+    return '<div class="today-menu-card" id="todayMenuCard"></div>';
+  }
+
+  function currentMenuDay(){
+    if(typeof planDayNumber!=='function'||typeof ensureWeeklyMenu!=='function')return null;
+    const day=planDayNumber();
+    if(day<=0||day>28)return {dayNumber:day,day:null,index:null};
+    const index=(day-1)%7;
+    const menu=ensureWeeklyMenu();
+    return {dayNumber:day,day:menu[index],index:index};
+  }
+
+  function menuMealAddedToday(meal){
+    const list=(S.food&&S.food[key()])||[];
+    return list.some(function(x){return x.menuPlanId===meal.id});
+  }
+
+  function addTodayMenuMeal(type){
+    const info=currentMenuDay();if(!info||!info.day)return;
+    const meal=menuMealById(type,info.day[type]);if(!meal)return;
+    const mealMap={breakfast:'Завтрак',lunch:'Обед',snack:'Перекус',dinner:'Ужин'};
+    if(!S.food[key()])S.food[key()]=[];
+    if(!menuMealAddedToday(meal)){
+      S.food[key()].push({
+        meal:mealMap[type],
+        name:meal.title,
+        cal:meal.kcal,p:meal.p,f:meal.f,c:meal.c,
+        menuPlanId:meal.id
+      });
+      if(typeof save==='function')save();
+    }
+  }
+
+  function openWeeklyMenuFromToday(){
+    if(typeof tab!=='function')return;
+    tab('plan',navButtonFor('plan'));
+    setTimeout(function(){
+      const el=document.getElementById('weeklyMenu');
+      if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+    },220);
+  }
+
+  function updateTodayMenuCard(){
+    const card=document.getElementById('todayMenuCard');if(!card||!window.S)return;
+    const info=currentMenuDay();
+    if(!info)return;
+
+    if(info.dayNumber<=0){
+      const start=planStartDate();
+      card.dataset.state='waiting';
+      card.innerHTML=
+        '<div class="today-menu-head"><div><span>Меню дня</span><h3>Начнём '+start.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})+'</h3><p>Меню привязано к старту программы и появится здесь в первый день.</p></div><div class="today-menu-mark">○</div></div>'+
+        '<button class="today-menu-open" type="button" onclick="openWeeklyMenuFromToday()">Посмотреть меню заранее</button>';
+      return;
+    }
+
+    if(info.dayNumber>28||!info.day){
+      card.dataset.state='complete';
+      card.innerHTML=
+        '<div class="today-menu-head"><div><span>Меню дня</span><h3>Первый цикл завершён</h3><p>28-дневное меню пройдено. В «Плане» можно собрать следующий цикл.</p></div><div class="today-menu-mark">✓</div></div>'+
+        '<button class="today-menu-open" type="button" onclick="openWeeklyMenuFromToday()">Открыть меню недели</button>';
+      return;
+    }
+
+    const types=['breakfast','lunch','snack','dinner'];
+    const labels={breakfast:'Завтрак',lunch:'Обед',snack:'Перекус',dinner:'Ужин'};
+    const icons={breakfast:'☼',lunch:'◐',snack:'◇',dinner:'☾'};
+    const meals=types.map(function(type){
+      const meal=menuMealById(type,info.day[type]);
+      return {type:type,meal:meal,done:menuMealAddedToday(meal)};
+    });
+    const totals=weeklyMenuDayTotals(info.day);
+    const next=meals.find(function(x){return !x.done})||null;
+    const doneCount=meals.filter(function(x){return x.done}).length;
+
+    card.dataset.state=doneCount===4?'done':'active';
+    card.innerHTML=
+      '<div class="today-menu-head"><div><span>Меню дня · день '+info.dayNumber+'</span><h3>'+(next?'Что есть сегодня':'Меню на сегодня добавлено')+'</h3><p>'+Math.round(totals.kcal)+' ккал · Б '+Math.round(totals.p)+' г · можно менять в разделе «План».</p></div><div class="today-menu-mark">'+(doneCount===4?'✓':doneCount+'/4')+'</div></div>'+
+      (next?'<div class="today-menu-next"><span>Следующий приём пищи</span><b>'+labels[next.type]+' · '+next.meal.title+'</b><small>'+next.meal.kcal+' ккал · Б '+next.meal.p+' г</small><button type="button" onclick="addTodayMenuMeal(\''+next.type+'\')">Добавить '+labels[next.type].toLowerCase()+'</button></div>':'')+
+      '<div class="today-menu-list">'+meals.map(function(x){
+        return '<div class="today-menu-row '+(x.done?'done':'')+'">'+
+          '<i>'+icons[x.type]+'</i>'+
+          '<div><span>'+labels[x.type]+'</span><b>'+x.meal.title+'</b><small>'+x.meal.kcal+' ккал · Б '+x.meal.p+' г</small></div>'+
+          '<button type="button" '+(x.done?'disabled':'onclick="addTodayMenuMeal(\''+x.type+'\')"')+'>'+(x.done?'✓':'+')+'</button>'+
+        '</div>';
+      }).join('')+'</div>'+
+      '<button class="today-menu-open" type="button" onclick="openWeeklyMenuFromToday()">Изменить меню недели</button>';
+  }
+
+  window.addTodayMenuMeal=addTodayMenuMeal;
+  window.openWeeklyMenuFromToday=openWeeklyMenuFromToday;
+
   function decorateToday(){
     const sec=document.getElementById('today');
     if(!sec)return;
@@ -379,6 +472,12 @@
     const oldCheck=sec.querySelector('#score')&&sec.querySelector('#score').closest('.card');
     if(oldCheck)oldCheck.classList.add('today-legacy-check');
     updateDailyCommand();
+    let tm=document.getElementById('todayMenuCard');
+    if(!tm){
+      const anchor=document.getElementById('dailyCommand')||document.getElementById('todayWellnessCard')||sec.querySelector('.quick-strip')||hero;
+      if(anchor)anchor.insertAdjacentHTML('afterend',todayMenuCardMarkup());
+    }
+    updateTodayMenuCard();
     let ec=document.getElementById('eveningCard');
     if(!ec){
       const anchor=document.getElementById('dailyCommand')||document.getElementById('todayWellnessCard')||sec.querySelector('.quick-strip')||hero;
