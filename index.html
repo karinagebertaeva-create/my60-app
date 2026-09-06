@@ -205,7 +205,7 @@ summary{cursor:pointer;font-weight:820}
   .app{padding:24px 22px 132px}
 }
 </style>
-</head>
+<link rel="stylesheet" href="premium.css?v=6"><meta name="theme-color" content="#101513"></head>
 <body>
 <div id="authGate" class="authGate"><div class="authCard"><div class="brand">MY 60</div><h1 id="authTitle">Твой личный трекер</h1><p id="authLead" class="muted">Создай облачный профиль: записи и фото будут шифроваться PIN-кодом и автоматически синхронизироваться.</p><div id="accountFields" class="stack"><input id="accountEmail" type="email" autocomplete="email" placeholder="E-mail для входа"><input id="accountPassword" type="password" autocomplete="new-password" placeholder="Пароль (минимум 8 символов)"></div><div id="setupFields" class="stack" style="margin-top:9px"><input id="profileName" placeholder="Как тебя называть"><div class="row"><input id="profileStart" type="number" step=".01" placeholder="Стартовый вес, кг"><input id="profileGoal" type="number" step=".01" placeholder="Цель, кг"></div><div class="row"><input id="profileCalories" type="number" placeholder="Ккал в день"><input id="profileSteps" type="number" placeholder="Шаги в день"></div></div><input id="pin" inputmode="numeric" type="password" maxlength="12" placeholder="PIN-код (минимум 4 цифры)" style="margin-top:9px"><button class="btn" style="width:100%;margin-top:10px" onclick="unlockApp()" id="authButton">Создать профиль и включить синхронизацию</button><button class="btn out" style="width:100%;margin-top:8px" onclick="toggleAuthMode()" id="authSwitch">У меня уже есть аккаунт</button><p class="muted" style="margin-bottom:0">Сервер хранит только зашифрованную копию. PIN не отправляется в облако.</p></div></div>
 <div class="app" id="appShell" hidden>
@@ -336,5 +336,5 @@ function draw(){var cv=document.getElementById("chart"),ctx=cv.getContext("2d"),
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js?v=5").catch(function(){});
 boot();
 </script>
-</body>
+<script src="premium.js?v=6"></script></body>
 </html>
