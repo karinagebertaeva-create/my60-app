@@ -1809,3 +1809,162 @@ canvas{margin-top:14px;height:220px;border:0;border-radius:20px;background:linea
 @media(max-width:390px){
   .food-edit-actions{grid-template-columns:1fr}
 }
+
+/* Wide smart meal suggestions v28 */
+.smart-meal-section{
+  margin:0 0 12px;
+}
+.smart-meal-section .smart-tip{
+  margin:0;
+  padding:18px;
+  border-radius:26px;
+  background:
+    radial-gradient(circle at 100% 0%,rgba(189,110,120,.10),transparent 13rem),
+    radial-gradient(circle at 0% 100%,rgba(120,146,126,.10),transparent 14rem),
+    linear-gradient(145deg,#fff,#f7f4ef);
+  border:1px solid rgba(17,22,19,.055);
+  box-shadow:0 12px 32px rgba(22,29,25,.055)
+}
+.smart-meal-section .smart-meal-head{
+  display:flex;justify-content:space-between;gap:16px;align-items:flex-start
+}
+.smart-meal-section .smart-meal-head span{
+  display:block;
+  font-size:9px;
+  text-transform:uppercase;
+  letter-spacing:.11em;
+  font-weight:850;
+  color:#9a7a7e
+}
+.smart-meal-section .smart-meal-head b{
+  display:block;
+  margin-top:6px;
+  font-size:22px;
+  line-height:1.08;
+  letter-spacing:-.04em
+}
+.smart-meal-section .smart-meal-head p{
+  margin:7px 0 0;
+  max-width:430px;
+  font-size:11px;
+  line-height:1.5;
+  color:#7f8782
+}
+.smart-meal-section .smart-meal-mark{
+  width:46px;height:46px;border-radius:15px;
+  display:grid;place-items:center;flex:0 0 auto;
+  background:#1a211d;color:#fff;font-size:15px
+}
+.smart-meal-section .smart-meal-options{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:10px;
+  margin-top:15px
+}
+.smart-meal-section .smart-meal-option{
+  width:100%;
+  padding:15px;
+  border:1px solid #e2e6e1;
+  border-radius:20px;
+  background:#fff;
+  text-align:left;
+  color:var(--ink);
+  box-shadow:0 7px 22px rgba(22,29,25,.035)
+}
+.smart-meal-section .smart-meal-option:active{transform:scale(.995)}
+.smart-meal-section .smart-meal-option-top{
+  display:flex;justify-content:space-between;gap:12px;align-items:center
+}
+.smart-meal-section .smart-meal-option-top span{
+  padding:6px 8px;
+  border-radius:999px;
+  background:#eef2ee;
+  font-size:8px;
+  text-transform:uppercase;
+  letter-spacing:.09em;
+  font-weight:850;
+  color:#6f7a73
+}
+.smart-meal-section .smart-meal-option-top b{
+  font-size:11px;
+  color:#545b56
+}
+.smart-meal-section .smart-meal-option h4{
+  margin:9px 0 0;
+  font-size:17px;
+  line-height:1.15;
+  letter-spacing:-.03em
+}
+.smart-meal-section .smart-meal-option p{
+  margin:5px 0 0;
+  font-size:10px;
+  line-height:1.45;
+  color:#858c87
+}
+.smart-meal-section .smart-meal-items{
+  margin-top:10px;
+  padding:10px 11px;
+  border-radius:14px;
+  background:#f5f5f2;
+  font-size:9px;
+  line-height:1.45;
+  color:#6f7772
+}
+.smart-meal-section .smart-meal-macros{
+  display:flex;
+  gap:7px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin-top:10px
+}
+.smart-meal-section .smart-meal-macros span{
+  padding:6px 8px;
+  border-radius:999px;
+  background:#edf1ed;
+  color:#626d66;
+  font-size:8px;
+  font-weight:850
+}
+.smart-meal-section .smart-meal-add{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-top:11px;
+  min-height:44px;
+  padding:9px 11px 9px 13px;
+  border-radius:14px;
+  background:#1a211d;
+  color:#fff
+}
+.smart-meal-section .smart-meal-add span{
+  font-size:10px;
+  font-weight:850;
+  color:#fff;
+  text-transform:none;
+  letter-spacing:0
+}
+.smart-meal-section .smart-meal-add i{
+  width:28px;height:28px;border-radius:9px;
+  display:grid;place-items:center;
+  background:rgba(255,255,255,.12);
+  font-style:normal;
+  font-size:14px
+}
+.smart-meal-section .smart-meal-foot{
+  margin-top:10px;
+  font-size:8px;
+  line-height:1.45;
+  color:#989e9a
+}
+@media(min-width:560px){
+  .smart-meal-section .smart-meal-options{grid-template-columns:repeat(3,1fr)}
+  .smart-meal-section .smart-meal-option{display:flex;flex-direction:column}
+  .smart-meal-section .smart-meal-add{margin-top:auto;padding-top:9px}
+}
+@media(max-width:390px){
+  .smart-meal-section .smart-tip{padding:16px}
+  .smart-meal-section .smart-meal-head b{font-size:20px}
+  .smart-meal-section .smart-meal-head p{font-size:10px}
+  .smart-meal-section .smart-meal-option{padding:14px}
+}
