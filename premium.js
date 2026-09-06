@@ -1070,6 +1070,64 @@
   window.useRecipe=useRecipe;
   window.deleteRecipe=deleteRecipe;
 
+  function mealDiaryMarkup(){
+    return '<div class="meal-diary" id="mealDiary">'+
+      '<div class="meal-diary-head"><div><div class="label">Сегодня</div><h3>Дневник питания</h3><p>Каждый приём пищи отдельно — сразу видно калории и белок.</p></div><button type="button" onclick="openMealAdd(\'Завтрак\')">+ Добавить</button></div>'+
+      '<div class="meal-diary-list" id="mealDiaryList"></div>'+
+    '</div>';
+  }
+
+  function mealIcon(meal){
+    return meal==='Завтрак'?'☼':meal==='Обед'?'◐':meal==='Перекус'?'◇':meal==='Ужин'?'☾':'•';
+  }
+
+  function openMealAdd(meal){
+    const select=document.getElementById('calcMeal');
+    if(select)select.value=meal;
+    const calc=document.getElementById('calorieCalculator');
+    if(calc)calc.scrollIntoView({behavior:'smooth',block:'start'});
+    setTimeout(function(){
+      const input=document.getElementById('calcName');
+      if(input){input.focus();if(typeof searchProducts==='function')searchProducts(input.value)}
+    },260);
+  }
+
+  function deleteMealEntry(index){
+    if(typeof foodDel==='function')foodDel(index);
+  }
+
+  function renderMealDiary(){
+    const root=document.getElementById('mealDiaryList');if(!root||!window.S)return;
+    const entries=((S.food&&S.food[key()])||[]).map(function(x,i){return {item:x,index:i}});
+    const meals=['Завтрак','Обед','Перекус','Ужин','Другое','Напиток'];
+    const visible=meals.filter(function(meal){
+      return ['Завтрак','Обед','Перекус','Ужин'].indexOf(meal)>=0||entries.some(function(e){return e.item.meal===meal});
+    });
+
+    root.innerHTML=visible.map(function(meal){
+      const items=entries.filter(function(e){return e.item.meal===meal});
+      const sum=items.reduce(function(a,e){
+        a.cal+=+e.item.cal||0;a.p+=+e.item.p||0;return a;
+      },{cal:0,p:0});
+      const empty=!items.length;
+      return '<div class="meal-diary-card '+(empty?'empty':'')+'">'+
+        '<div class="meal-card-head">'+
+          '<div class="meal-name"><i>'+mealIcon(meal)+'</i><div><b>'+meal+'</b><small>'+(empty?'Пока ничего не добавлено':items.length+' '+(items.length===1?'позиция':'позиций'))+'</small></div></div>'+
+          '<div class="meal-total"><b>'+Math.round(sum.cal)+' ккал</b><small>'+(sum.p?('Б '+Math.round(sum.p)+' г'):'—')+'</small></div>'+
+        '</div>'+
+        (empty
+          ? '<button class="meal-empty-add" type="button" onclick="openMealAdd(\''+meal+'\')"><span>＋</span><div><b>Добавить '+meal.toLowerCase()+'</b><small>Найти продукт или блюдо</small></div></button>'
+          : '<div class="meal-items">'+items.map(function(e){
+              const x=e.item;
+              return '<div class="meal-item"><div class="meal-item-main"><b>'+escapeHtml(x.name||'Еда')+'</b><small>'+Math.round(+x.cal||0)+' ккал · Б '+round1(+x.p||0)+' · Ж '+round1(+x.f||0)+' · У '+round1(+x.c||0)+'</small></div><button type="button" aria-label="Удалить" onclick="deleteMealEntry('+e.index+')">×</button></div>';
+            }).join('')+'</div><button class="meal-add-more" type="button" onclick="openMealAdd(\''+meal+'\')">+ Добавить ещё</button>')+
+      '</div>';
+    }).join('');
+  }
+
+  window.openMealAdd=openMealAdd;
+  window.deleteMealEntry=deleteMealEntry;
+
   function decorateFood(){
     const sec=document.getElementById('food');
     if(!sec)return;
@@ -1081,11 +1139,18 @@
       if(title)title.insertAdjacentHTML('afterend',nutritionDashboardMarkup());
       else sec.insertAdjacentHTML('afterbegin',nutritionDashboardMarkup());
     }
+    const legacyDiary=document.getElementById('foodList');
+    const legacyDiaryCard=legacyDiary&&legacyDiary.closest('.card');
+    if(legacyDiaryCard)legacyDiaryCard.classList.add('food-diary-legacy-hidden');
+    let premiumDiary=document.getElementById('mealDiary');
+    if(!premiumDiary){
+      if(legacyDiaryCard)legacyDiaryCard.insertAdjacentHTML('beforebegin',mealDiaryMarkup());
+      else sec.insertAdjacentHTML('beforeend',mealDiaryMarkup());
+      premiumDiary=document.getElementById('mealDiary');
+    }
     let tools=document.getElementById('foodToolsCard');
     if(!tools){
-      const diary=document.getElementById('foodList');
-      const diaryCard=diary&&diary.closest('.card');
-      if(diaryCard)diaryCard.insertAdjacentHTML('beforebegin',foodToolsMarkup());
+      if(premiumDiary)premiumDiary.insertAdjacentHTML('afterend',foodToolsMarkup());
       else sec.insertAdjacentHTML('beforeend',foodToolsMarkup());
       tools=document.getElementById('foodToolsCard');
     }
@@ -1105,6 +1170,7 @@
     const caffeine=document.getElementById('caf');
     const caffeineCard=caffeine&&caffeine.closest('.card');
     if(caffeineCard)caffeineCard.classList.add('caffeine-card');
+    renderMealDiary();
     renderFoodTools();
     renderProductLibrary();
     updateCalorieDaily();
