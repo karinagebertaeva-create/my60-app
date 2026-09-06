@@ -1968,3 +1968,49 @@ canvas{margin-top:14px;height:220px;border:0;border-radius:20px;background:linea
   .smart-meal-section .smart-meal-head p{font-size:10px}
   .smart-meal-section .smart-meal-option{padding:14px}
 }
+
+/* Backdated entry flow v29 */
+.entry-date-banner{
+  margin-bottom:12px;padding:12px 13px;border-radius:16px;
+  background:linear-gradient(145deg,#f4ecea,#eef3ee);
+  border:1px solid rgba(17,22,19,.055)
+}
+.entry-date-banner span{
+  display:block;font-size:7px;text-transform:uppercase;letter-spacing:.1em;font-weight:850;color:#9a7a7e
+}
+.entry-date-banner b{
+  display:block;margin-top:4px;font-size:12px;color:#515853
+}
+.entry-date-banner small{
+  display:block;margin-top:3px;font-size:8px;line-height:1.4;color:#8f9691
+}
+.history-edit-block{
+  margin-top:12px;padding-top:12px;border-top:1px solid #eceeea
+}
+.history-edit-title{
+  display:flex;justify-content:space-between;gap:10px;align-items:flex-start
+}
+.history-edit-title span{
+  font-size:8px;text-transform:uppercase;letter-spacing:.1em;font-weight:850;color:#999f9b
+}
+.history-edit-title b{
+  font-size:7px;color:#8f9691;text-align:right
+}
+.history-edit-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:9px
+}
+.history-edit-grid button{
+  min-height:58px;border:1px solid #e6e9e4;border-radius:14px;background:#f9f9f6;
+  color:#59615b;padding:8px 5px
+}
+.history-edit-grid i{
+  width:25px;height:25px;margin:0 auto 5px;border-radius:8px;
+  display:grid;place-items:center;background:#eceeea;
+  font-style:normal;font-size:9px;color:#626b65
+}
+.history-edit-grid span{
+  display:block;font-size:7px;font-weight:850
+}
+@media(max-width:390px){
+  .history-edit-grid{grid-template-columns:repeat(3,1fr)}
+}
