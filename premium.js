@@ -1900,6 +1900,135 @@
       '<div class="next-week-focus">'+plan.focuses.map(function(x,i){return '<div><span>0'+(i+1)+'</span><b>'+x+'</b></div>'}).join('')+'</div>';
   }
 
+  let historyMonthOffset=0;
+
+  function historyCardMarkup(){
+    return '<div class="history-card" id="historyCard">'+
+      '<div class="history-head"><div><div class="label">История</div><h3>Календарь дней</h3><p>Нажми на дату, чтобы увидеть всё, что было записано.</p></div><div class="history-nav"><button type="button" onclick="changeHistoryMonth(-1)">‹</button><b id="historyMonthLabel">—</b><button type="button" id="historyNextBtn" onclick="changeHistoryMonth(1)">›</button></div></div>'+
+      '<div class="history-weekdays"><span>ПН</span><span>ВТ</span><span>СР</span><span>ЧТ</span><span>ПТ</span><span>СБ</span><span>ВС</span></div>'+
+      '<div class="history-grid" id="historyGrid"></div>'+
+      '<div class="history-legend"><span><i class="dot weight"></i>вес</span><span><i class="dot food"></i>еда</span><span><i class="dot workout"></i>тренировка</span><span><i class="dot well"></i>чек-ин</span></div>'+
+    '</div>';
+  }
+
+  function historyMonthDate(){
+    const d=new Date();
+    d.setDate(1);
+    d.setMonth(d.getMonth()+historyMonthOffset);
+    d.setHours(0,0,0,0);
+    return d;
+  }
+
+  function dayHasAnyData(k){
+    return Boolean(
+      (S.weights&&S.weights[k])||
+      (S.food&&S.food[k]&&S.food[k].length)||
+      (S.steps&&S.steps[k])||
+      (S.water&&S.water[k])||
+      (S.well&&S.well[k])||
+      (S.workouts&&S.workouts[k]&&S.workouts[k].length)||
+      (S.measures&&S.measures[k])||
+      (S.caf&&S.caf[k])||
+      (S.notes&&S.notes.some(function(n){return n.date===k}))
+    );
+  }
+
+  function changeHistoryMonth(delta){
+    const next=historyMonthOffset+delta;
+    if(next>0)return;
+    historyMonthOffset=Math.max(-24,next);
+    renderHistoryCalendar();
+  }
+
+  function renderHistoryCalendar(){
+    const grid=document.getElementById('historyGrid');
+    if(!grid||!window.S)return;
+    const month=historyMonthDate(),year=month.getFullYear(),m=month.getMonth();
+    const label=document.getElementById('historyMonthLabel');
+    if(label)label.textContent=month.toLocaleDateString('ru-RU',{month:'long',year:'numeric'});
+    const next=document.getElementById('historyNextBtn');
+    if(next)next.disabled=historyMonthOffset>=0;
+    const firstWeekday=(month.getDay()+6)%7;
+    const daysInMonth=new Date(year,m+1,0).getDate();
+    const todayKey=key();
+    let html='';
+    for(let i=0;i<firstWeekday;i++)html+='<div class="history-day empty"></div>';
+    for(let d=1;d<=daysInMonth;d++){
+      const dt=new Date(year,m,d),k=key(dt),future=k>todayKey,has=dayHasAnyData(k);
+      const marks=[];
+      if(S.weights&&S.weights[k])marks.push('<i class="weight"></i>');
+      if(S.food&&S.food[k]&&S.food[k].length)marks.push('<i class="food"></i>');
+      if(S.workouts&&S.workouts[k]&&S.workouts[k].length)marks.push('<i class="workout"></i>');
+      if(S.well&&S.well[k])marks.push('<i class="well"></i>');
+      html+='<button type="button" class="history-day '+(k===todayKey?'today ':'')+(has?'has-data ':'')+(future?'future':'')+'" data-date="'+k+'" '+(future?'disabled':'onclick="openHistoryDay(this.dataset.date)"')+'>'+
+        '<b>'+d+'</b><div class="history-day-marks">'+marks.join('')+'</div>'+
+      '</button>';
+    }
+    grid.innerHTML=html;
+  }
+
+  function dayFoodTotals(k){
+    const list=(S.food&&S.food[k])||[];
+    return list.reduce(function(a,x){
+      a.cal+=+x.cal||0;a.p+=+x.p||0;a.f+=+x.f||0;a.c+=+x.c||0;return a;
+    },{cal:0,p:0,f:0,c:0});
+  }
+
+  function historyDayTitle(k){
+    return new Date(k+'T00:00').toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});
+  }
+
+  function openHistoryDay(k){
+    if(typeof sheet==='undefined'||typeof modal==='undefined')return;
+    const food=(S.food&&S.food[k])||[],tot=dayFoodTotals(k),well=S.well&&S.well[k],work=(S.workouts&&S.workouts[k])||[];
+    const meals=['Завтрак','Обед','Перекус','Ужин','Другое','Напиток'];
+    const foodHtml=food.length?meals.map(function(m){
+      const items=food.filter(function(x){return x.meal===m});
+      if(!items.length)return '';
+      const kc=Math.round(items.reduce(function(a,x){return a+(+x.cal||0)},0));
+      return '<div class="history-meal"><div class="history-meal-head"><b>'+m+'</b><span>'+kc+' ккал</span></div>'+
+        items.map(function(x){return '<div><span>'+escapeHtml(x.name||'Еда')+'</span><small>'+Math.round(+x.cal||0)+' ккал</small></div>'}).join('')+
+      '</div>';
+    }).join(''):'<div class="history-empty-block">Питание в этот день не записано.</div>';
+
+    const weight=(S.weights&&S.weights[k])?round1(+S.weights[k])+' кг':'—';
+    const steps=(S.steps&&S.steps[k])?Math.round(+S.steps[k]).toLocaleString('ru-RU'):'—';
+    const water=(S.water&&S.water[k])?Math.round(+S.water[k])+' мл':'—';
+    const caffeine=(S.caf&&S.caf[k])?Math.round(+S.caf[k])+' мг':'—';
+
+    const wellHtml=well
+      ? '<div class="history-well-grid"><div><span>Сон</span><b>'+(well.sleep?round1(+well.sleep)+' ч':'—')+'</b></div><div><span>Голод</span><b>'+(+well.hunger||5)+'/10</b></div><div><span>Энергия</span><b>'+(+well.energy||5)+'/10</b></div><div><span>Стресс</span><b>'+(+well.stress||5)+'/10</b></div></div>'+(well.note?'<div class="history-note">'+escapeHtml(well.note)+'</div>':'')
+      : '<div class="history-empty-block">Чек-ин не заполнен.</div>';
+
+    const repeatBtn=food.length&&k!==key()
+      ? '<button class="btn history-repeat-btn" type="button" data-date="'+k+'" onclick="repeatHistoryFood(this.dataset.date)">Повторить питание сегодня</button>'
+      : '';
+
+    sheet.innerHTML=
+      '<div class="history-sheet">'+
+        '<div class="history-sheet-head"><div><div class="label">История дня</div><h3>'+historyDayTitle(k)+'</h3></div><div class="history-date-badge">'+new Date(k+'T00:00').getDate()+'</div></div>'+
+        '<div class="history-summary-grid"><div><span>Вес</span><b>'+weight+'</b></div><div><span>Шаги</span><b>'+steps+'</b></div><div><span>Вода</span><b>'+water+'</b></div><div><span>Кофеин</span><b>'+caffeine+'</b></div></div>'+
+        '<div class="history-section"><div class="history-section-head"><span>Питание</span><b>'+Math.round(tot.cal)+' ккал · Б '+round1(tot.p)+' · Ж '+round1(tot.f)+' · У '+round1(tot.c)+'</b></div>'+foodHtml+'</div>'+
+        '<div class="history-section"><div class="history-section-head"><span>Самочувствие</span><b>'+(well?'заполнено':'нет записи')+'</b></div>'+wellHtml+'</div>'+
+        '<div class="history-section"><div class="history-section-head"><span>Тренировки</span><b>'+work.length+'</b></div>'+(work.length?'<div class="history-workouts">'+work.map(function(x){return '<span>Силовая '+escapeHtml(x)+'</span>'}).join('')+'</div>':'<div class="history-empty-block">Тренировок не записано.</div>')+'</div>'+
+        repeatBtn+
+      '</div>';
+    modal.classList.add('open');
+  }
+
+  function repeatHistoryFood(k){
+    const src=(S.food&&S.food[k])||[];
+    if(!src.length)return;
+    if(!S.food[key()])S.food[key()]=[];
+    src.forEach(function(x){S.food[key()].push(Object.assign({},x,{copiedFrom:k}))});
+    if(typeof save==='function')save();
+    if(typeof closeM==='function')closeM();
+  }
+
+  window.changeHistoryMonth=changeHistoryMonth;
+  window.openHistoryDay=openHistoryDay;
+  window.repeatHistoryFood=repeatHistoryFood;
+
   function decorateMore(){
     const sec=document.getElementById('more');if(!sec)return;
     const oldSummary=sec.querySelector('#summary')&&sec.querySelector('#summary').closest('.card');
@@ -1911,6 +2040,13 @@
       else sec.insertAdjacentHTML('afterbegin',weeklyDashboardMarkup());
     }
     updateWeeklyExperience();
+    let history=document.getElementById('historyCard');
+    if(!history){
+      const anchor=document.getElementById('weeklyExperience');
+      if(anchor)anchor.insertAdjacentHTML('afterend',historyCardMarkup());
+      else sec.insertAdjacentHTML('afterbegin',historyCardMarkup());
+    }
+    renderHistoryCalendar();
   }
 
   function decoratePlan(){
