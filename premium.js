@@ -2540,13 +2540,182 @@
     updateGoalsCard();
   }
 
+  function weeklyMenuLibrary(){
+    return {
+      breakfast:[
+        {id:'b1',title:'Омлет, сыр и овощи',kcal:360,p:26,f:18,c:24,ingredients:[['Яйца',2,'шт'],['Сыр',30,'г'],['Овощи',180,'г'],['Хлеб',40,'г']]},
+        {id:'b2',title:'Творог с бананом',kcal:350,p:30,f:10,c:37,ingredients:[['Творог 5%',180,'г'],['Бананы',100,'г'],['Мёд',8,'г']]},
+        {id:'b3',title:'Овсянка + яйца',kcal:390,p:23,f:14,c:43,ingredients:[['Овсянка',50,'г'],['Яйца',2,'шт'],['Яблоки',100,'г']]},
+        {id:'b4',title:'Йогурт, ягоды и овсянка',kcal:330,p:24,f:7,c:41,ingredients:[['Греческий йогурт',220,'г'],['Ягоды',120,'г'],['Овсянка',35,'г']]}
+      ],
+      lunch:[
+        {id:'l1',title:'Курица, гречка и салат',kcal:455,p:48,f:11,c:42,ingredients:[['Куриное филе',150,'г'],['Гречка сухая',55,'г'],['Овощи',200,'г']]},
+        {id:'l2',title:'Гуляш с пюре и овощами',kcal:480,p:35,f:17,c:48,ingredients:[['Говядина',140,'г'],['Картофель',230,'г'],['Овощи',180,'г']]},
+        {id:'l3',title:'Курица с рисом и салатом',kcal:465,p:46,f:10,c:47,ingredients:[['Куриное филе',150,'г'],['Рис сухой',55,'г'],['Овощи',200,'г']]},
+        {id:'l4',title:'Говядина с макаронами',kcal:490,p:37,f:16,c:50,ingredients:[['Говядина',130,'г'],['Макароны сухие',65,'г'],['Томатный соус',60,'г'],['Овощи',150,'г']]}
+      ],
+      snack:[
+        {id:'s1',title:'Творог + яблоко',kcal:225,p:23,f:8,c:18,ingredients:[['Творог 5%',150,'г'],['Яблоки',130,'г']]},
+        {id:'s2',title:'Йогурт + ягоды',kcal:190,p:19,f:5,c:18,ingredients:[['Греческий йогурт',200,'г'],['Ягоды',120,'г']]},
+        {id:'s3',title:'Творог + банан',kcal:235,p:23,f:8,c:24,ingredients:[['Творог 5%',150,'г'],['Бананы',90,'г']]},
+        {id:'s4',title:'Йогурт + яблоко',kcal:205,p:18,f:5,c:23,ingredients:[['Греческий йогурт',180,'г'],['Яблоки',130,'г']]}
+      ],
+      dinner:[
+        {id:'d1',title:'Курица, картофель и салат',kcal:410,p:43,f:10,c:38,ingredients:[['Куриное филе',140,'г'],['Картофель',200,'г'],['Овощи',180,'г']]},
+        {id:'d2',title:'Рыба, картофель и овощи',kcal:415,p:35,f:14,c:37,ingredients:[['Рыба',160,'г'],['Картофель',200,'г'],['Овощи',180,'г']]},
+        {id:'d3',title:'Курица, гречка и овощи',kcal:420,p:44,f:10,c:39,ingredients:[['Куриное филе',140,'г'],['Гречка сухая',50,'г'],['Овощи',200,'г']]},
+        {id:'d4',title:'Омлет, сыр и овощи',kcal:385,p:29,f:21,c:20,ingredients:[['Яйца',3,'шт'],['Сыр',30,'г'],['Овощи',220,'г'],['Хлеб',30,'г']]}
+      ]
+    };
+  }
+
+  function defaultWeeklyMenu(){
+    return [
+      {breakfast:'b1',lunch:'l1',snack:'s1',dinner:'d3'},
+      {breakfast:'b3',lunch:'l3',snack:'s2',dinner:'d2'},
+      {breakfast:'b2',lunch:'l4',snack:'s4',dinner:'d1'},
+      {breakfast:'b4',lunch:'l2',snack:'s3',dinner:'d4'},
+      {breakfast:'b3',lunch:'l1',snack:'s1',dinner:'d2'},
+      {breakfast:'b1',lunch:'l3',snack:'s2',dinner:'d3'},
+      {breakfast:'b2',lunch:'l2',snack:'s4',dinner:'d1'}
+    ];
+  }
+
+  function ensureWeeklyMenu(){
+    if(!Array.isArray(S.weeklyMenu)||S.weeklyMenu.length!==7){
+      S.weeklyMenu=defaultWeeklyMenu();
+    }
+    return S.weeklyMenu;
+  }
+
+  function menuMealById(type,id){
+    const list=weeklyMenuLibrary()[type]||[];
+    return list.find(function(x){return x.id===id})||list[0];
+  }
+
+  function menuWeekStartDate(){
+    const start=planStartDate();
+    const day=planDayNumber();
+    const week=day<=0?1:planWeekNumber();
+    const d=new Date(start);
+    d.setDate(start.getDate()+(week-1)*7);
+    d.setHours(0,0,0,0);
+    return d;
+  }
+
+  function menuDateForDay(index){
+    const d=menuWeekStartDate();
+    d.setDate(d.getDate()+index);
+    return d;
+  }
+
+  function weeklyMenuDayTotals(day){
+    const types=['breakfast','lunch','snack','dinner'];
+    return types.reduce(function(a,type){
+      const m=menuMealById(type,day[type]);
+      a.kcal+=m.kcal;a.p+=m.p;a.f+=m.f;a.c+=m.c;return a;
+    },{kcal:0,p:0,f:0,c:0});
+  }
+
+  function weeklyMenuMarkup(){
+    return '<div class="weekly-menu" id="weeklyMenu">'+
+      '<div class="weekly-menu-head"><div><div class="label">Питание на 7 дней</div><h3>Меню недели</h3><p>Примерно под твои цели. Любой приём пищи можно заменить одним нажатием.</p></div><button type="button" onclick="resetWeeklyMenu()">Сбросить меню</button></div>'+
+      '<div class="weekly-menu-days" id="weeklyMenuDays"></div>'+
+      '<div class="weekly-shop" id="weeklyShop"></div>'+
+    '</div>';
+  }
+
+  function swapWeeklyMeal(dayIndex,type){
+    const menu=ensureWeeklyMenu(),list=weeklyMenuLibrary()[type]||[],current=menuMealById(type,menu[dayIndex][type]);
+    const i=list.findIndex(function(x){return x.id===current.id});
+    menu[dayIndex][type]=list[(i+1)%list.length].id;
+    S.shop={};
+    if(typeof save==='function')save();
+    renderWeeklyMenu();
+  }
+
+  function resetWeeklyMenu(){
+    S.weeklyMenu=defaultWeeklyMenu();
+    S.shop={};
+    if(typeof save==='function')save();
+    renderWeeklyMenu();
+  }
+
+  function addWeeklyMenuDay(dayIndex){
+    const menu=ensureWeeklyMenu(),day=menu[dayIndex];
+    const date=menuDateForDay(dayIndex),dateKey=key(date);
+    const mealMap={breakfast:'Завтрак',lunch:'Обед',snack:'Перекус',dinner:'Ужин'};
+    if(!S.food[dateKey])S.food[dateKey]=[];
+    ['breakfast','lunch','snack','dinner'].forEach(function(type){
+      const m=menuMealById(type,day[type]);
+      const exists=S.food[dateKey].some(function(x){return x.menuPlanId===m.id});
+      if(!exists)S.food[dateKey].push({
+        meal:mealMap[type],name:m.title,cal:m.kcal,p:m.p,f:m.f,c:m.c,menuPlanId:m.id
+      });
+    });
+    if(typeof save==='function')save();
+    renderWeeklyMenu();
+  }
+
+  function weeklyShoppingList(){
+    const menu=ensureWeeklyMenu(),map={};
+    menu.forEach(function(day){
+      ['breakfast','lunch','snack','dinner'].forEach(function(type){
+        const meal=menuMealById(type,day[type]);
+        meal.ingredients.forEach(function(it){
+          const keyName=it[0]+'|'+it[2];
+          if(!map[keyName])map[keyName]={name:it[0],qty:0,unit:it[2]};
+          map[keyName].qty+=+it[1]||0;
+        });
+      });
+    });
+    return Object.keys(map).map(function(k){return map[k]}).sort(function(a,b){return a.name.localeCompare(b.name,'ru')});
+  }
+
+  function formatShopQty(x){
+    if(x.unit==='г'&&x.qty>=1000)return round1(x.qty/1000)+' кг';
+    return Math.round(x.qty)+' '+x.unit;
+  }
+
+  function renderWeeklyMenu(){
+    const root=document.getElementById('weeklyMenuDays');
+    if(!root||!window.S)return;
+    const menu=ensureWeeklyMenu(),today=key();
+    const labels={breakfast:'Завтрак',lunch:'Обед',snack:'Перекус',dinner:'Ужин'};
+    root.innerHTML=menu.map(function(day,i){
+      const date=menuDateForDay(i),dk=key(date),tot=weeklyMenuDayTotals(day);
+      return '<div class="weekly-menu-day '+(dk===today?'today':'')+'">'+
+        '<div class="weekly-menu-day-head"><div><span>День '+(i+1)+'</span><h4>'+date.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'short'})+'</h4></div><div class="weekly-menu-day-total"><b>'+Math.round(tot.kcal)+' ккал</b><small>Б '+Math.round(tot.p)+' г</small></div></div>'+
+        '<div class="weekly-menu-meals">'+['breakfast','lunch','snack','dinner'].map(function(type){
+          const m=menuMealById(type,day[type]);
+          return '<div class="weekly-menu-meal"><div><span>'+labels[type]+'</span><b>'+m.title+'</b><small>'+m.kcal+' ккал · Б '+m.p+' г</small></div><button type="button" onclick="swapWeeklyMeal('+i+',\''+type+'\')">Заменить</button></div>';
+        }).join('')+'</div>'+
+        '<button class="weekly-menu-add" type="button" onclick="addWeeklyMenuDay('+i+')">'+((S.food[dk]||[]).some(function(x){return x.menuPlanId})?'Добавлено в дневник ✓':'Добавить этот день в дневник')+'</button>'+
+      '</div>';
+    }).join('');
+
+    const shop=document.getElementById('weeklyShop');
+    if(shop){
+      const items=weeklyShoppingList();
+      shop.innerHTML='<div class="weekly-shop-head"><div><span>Автосписок</span><h4>Покупки на эту неделю</h4><p>Пересчитывается после каждой замены блюда.</p></div><button type="button" onclick="resetShop();renderWeeklyMenu()">Сбросить ✓</button></div>'+
+        '<div class="weekly-shop-list">'+items.map(function(x,i){
+          return '<label><input type="checkbox" '+(S.shop[i]?'checked':'')+' onchange="sh('+i+');renderWeeklyMenu()"><span>'+escapeHtml(x.name)+'</span><b>'+formatShopQty(x)+'</b></label>';
+        }).join('')+'</div>';
+    }
+  }
+
+  window.swapWeeklyMeal=swapWeeklyMeal;
+  window.resetWeeklyMenu=resetWeeklyMenu;
+  window.addWeeklyMenuDay=addWeeklyMenuDay;
+  window.renderWeeklyMenu=renderWeeklyMenu;
+
   function decoratePlan(){
     const sec=document.getElementById('plan');if(!sec)return;
     const oldCards=Array.from(sec.children).filter(function(x){return x.classList&&x.classList.contains('card')});
     oldCards.forEach(function(c,i){
       if(i===0||c.classList.contains('work'))c.classList.add('plan-legacy-hidden');
-      if(c.querySelector&&c.querySelector('#menu'))c.classList.add('plan-menu-card');
-      if(c.classList.contains('shop'))c.classList.add('plan-shop-card');
+      if(c.querySelector&&c.querySelector('#menu'))c.classList.add('plan-menu-card','plan-legacy-hidden');
+      if(c.classList.contains('shop'))c.classList.add('plan-shop-card','plan-legacy-hidden');
     });
     let exp=document.getElementById('planExperience');
     if(!exp){
@@ -2558,7 +2727,14 @@
     if(menuCard){
       const label=menuCard.querySelector('.label');if(label)label.textContent='Меню на неделю';
     }
+    let weekly=document.getElementById('weeklyMenu');
+    if(!weekly){
+      const studio=document.getElementById('workoutStudio');
+      if(studio)studio.insertAdjacentHTML('afterend',weeklyMenuMarkup());
+      else if(exp)exp.insertAdjacentHTML('beforeend',weeklyMenuMarkup());
+    }
     updatePlanExperience();
+    renderWeeklyMenu();
   }
 
   window.selectPlanWorkout=selectPlanWorkout;
