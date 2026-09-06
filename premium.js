@@ -1539,11 +1539,12 @@
   function planDayNumber(){
     const start=planStartDate(),today=new Date();
     start.setHours(0,0,0,0);today.setHours(0,0,0,0);
-    return Math.max(1,Math.floor((today-start)/86400000)+1);
+    return Math.floor((today-start)/86400000)+1;
   }
 
   function planWeekNumber(){
     const day=planDayNumber();
+    if(day<=0)return 1;
     return Math.max(1,Math.min(4,Math.floor((day-1)/7)+1));
   }
 
@@ -1565,7 +1566,7 @@
     sheetEl.innerHTML=
       '<div class="plan-start-sheet">'+
         '<div class="plan-start-sheet-head"><div><div class="label">Мой план</div><h3>Дата старта программы</h3><p>От неё считаются неделя программы и день из 28. Старые записи веса не влияют на старт.</p></div><div class="plan-start-mark">28</div></div>'+
-        '<label class="plan-start-field"><span>Начало программы</span><input id="planStartInput" type="date" max="'+key()+'" value="'+escapeHtml(S.planStartedAt||key())+'"></label>'+
+        '<label class="plan-start-field"><span>Начало программы</span><input id="planStartInput" type="date" value="'+escapeHtml(S.planStartedAt||key())+'"></label>'+
         '<div class="plan-start-note">Изменение даты не удаляет вес, питание, тренировки или другие записи. Меняется только отсчёт программы.</div>'+
         '<button class="btn plan-start-save" type="button" onclick="savePlanStartDate()">Сохранить дату старта</button>'+
       '</div>';
@@ -1575,18 +1576,24 @@
   function savePlanStartDate(){
     const el=document.getElementById('planStartInput');
     if(!el||!/^\d{4}-\d{2}-\d{2}$/.test(el.value))return;
-    if(el.value>key())return;
     S.planStartedAt=el.value;
     if(typeof save==='function')save();
     if(typeof closeM==='function')closeM();
   }
 
   function updatePlanStart(){
-    const day=planDayNumber(),displayDay=Math.min(28,day),pct=Math.min(100,displayDay/28*100);
+    const day=planDayNumber(),displayDay=Math.max(0,Math.min(28,day)),pct=day<=0?0:Math.min(100,displayDay/28*100);
     const dayEl=document.getElementById('planDayNumber');
     const dateEl=document.getElementById('planStartDateLabel');
     const bar=document.getElementById('planDayBar');
-    if(dayEl)dayEl.textContent=day>28?'Первые 28 дней завершены':'День '+displayDay+' из 28';
+    if(dayEl){
+      if(day<=0){
+        const daysLeft=Math.abs(day)+1;
+        dayEl.textContent=daysLeft===1?'Старт завтра':'До старта '+daysLeft+' дн.';
+      }else{
+        dayEl.textContent=day>28?'Первые 28 дней завершены':'День '+displayDay+' из 28';
+      }
+    }
     if(dateEl)dateEl.textContent='Старт — '+formatPlanStartDate();
     if(bar)bar.style.width=pct+'%';
   }
@@ -1676,6 +1683,12 @@
 
   function renderTodayPlan(){
     const card=document.getElementById('todayPlanCard');if(!card)return;
+    const planDay=planDayNumber();
+    if(planDay<=0){
+      const start=planStartDate(),label=start.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});
+      card.innerHTML='<div class="today-plan-top"><div><span>До старта программы</span><h3>Начинаем '+label+'</h3><p>Сегодня ничего догонять не нужно. Программа начнётся с выбранной даты.</p></div><div class="plan-duration"><b>28 дней</b><small>программа</small></div></div><div class="today-plan-note">Можно просто подготовиться: выбрать удобное время для первой тренировки и оставить обычный режим питания и активности.</div>';
+      return;
+    }
     const d=new Date(),plan=dayPlanForDate(d),settings=weekPlanSettings(planWeekNumber());
     const steps=+(S.steps[key()]||0),workouts=S.workouts[key()]||[];
     let action='',state='';
@@ -1895,7 +1908,7 @@
     const dates=weekDates();
     const workoutsDone=dates.reduce(function(n,d){return n+(S.workouts[key(d)]||[]).filter(function(x){return x==='A'||x==='B'}).length},0);
     const stepDays=dates.filter(function(d){return +(S.steps[key(d)]||0)>=settings.steps}).length;
-    const score=Math.min(100,Math.round((Math.min(workoutsDone/settings.strength,1)*55)+(stepDays/7*45)));
+    const score=planDayNumber()<=0?0:Math.min(100,Math.round((Math.min(workoutsDone/settings.strength,1)*55)+(stepDays/7*45)));
     const ring=document.getElementById('planRing'),pct=document.getElementById('planRingPct');
     if(ring)ring.style.setProperty('--plan-p',score+'%');
     if(pct)pct.textContent=score+'%';
