@@ -284,3 +284,69 @@ canvas{margin-top:14px;height:220px;border:0;border-radius:20px;background:linea
   .nav{bottom:20px}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* Calorie calculator */
+.calorie-card{
+  margin-top:11px!important;
+  min-height:auto!important;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 95% 5%,rgba(189,110,120,.10),transparent 13rem),
+    linear-gradient(160deg,#fff,#faf8f5)!important;
+}
+.calorie-card:after{display:none!important}
+.calorie-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+.calorie-title{font-size:22px!important;margin:5px 0 5px}
+.calorie-icon{
+  width:46px;height:46px;border-radius:16px;display:grid;place-items:center;flex:0 0 auto;
+  background:#181e1b;color:white;box-shadow:0 11px 24px rgba(18,25,21,.15)
+}
+.calorie-icon svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.calc-fields{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:17px}
+.calc-fields .calc-wide{grid-column:1/-1}
+.calc-fields label,.calc-macros label{
+  display:block;font-size:10px;font-weight:800;color:#747b76;letter-spacing:.01em
+}
+.calc-fields input,.calc-fields select{margin-top:6px}
+.calc-macros-title{
+  display:flex;justify-content:space-between;align-items:center;margin:15px 1px 8px;
+  font-size:10px;font-weight:850;color:#747b76;text-transform:uppercase;letter-spacing:.09em
+}
+.calc-macros-title .muted{text-transform:none;letter-spacing:0;font-weight:600}
+.calc-macros{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.calc-macros label{
+  padding:9px 10px 10px;border:1px solid #e8eae6;border-radius:16px;background:rgba(255,255,255,.72)
+}
+.calc-macros label span{display:block;margin-bottom:5px}
+.calc-macros input{
+  min-height:38px;padding:8px 9px;border-radius:11px;background:#f8f8f5;
+  font-size:14px;font-weight:800
+}
+.calc-result{
+  display:flex;justify-content:space-between;align-items:center;gap:16px;
+  margin-top:12px;padding:15px 16px;border-radius:20px;
+  background:linear-gradient(145deg,#171e1a,#252e29);color:white;
+  box-shadow:0 13px 30px rgba(18,25,21,.14)
+}
+.calc-kcal{display:flex;align-items:baseline;gap:5px}
+.calc-kcal span{
+  display:block;position:absolute;transform:translateY(-20px);
+  font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.48)
+}
+.calc-kcal strong{font-size:32px;line-height:1;letter-spacing:-.055em}
+.calc-kcal small{font-size:10px;color:rgba(255,255,255,.55)}
+.calc-result-macros{display:flex;gap:10px;font-size:10px;color:rgba(255,255,255,.62)}
+.calc-result-macros b{color:white;font-size:11px}
+.calc-add{width:100%;margin-top:10px;min-height:48px}
+.calc-add:disabled{opacity:.34;box-shadow:none;cursor:not-allowed}
+.calc-daily{
+  display:flex;justify-content:space-between;gap:12px;margin:11px 2px 0;
+  color:#8b918d;font-size:10px
+}
+.calc-daily b{color:#4b524e}
+@media(max-width:390px){
+  .calc-fields{grid-template-columns:1fr}
+  .calc-fields .calc-wide{grid-column:auto}
+  .calc-result{align-items:flex-end}
+  .calc-result-macros{gap:7px;flex-direction:column}
+}
