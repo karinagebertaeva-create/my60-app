@@ -114,8 +114,119 @@
     const last=pts[pts.length-1];ctx.beginPath();ctx.arc(last.x,last.y,4.5,0,Math.PI*2);ctx.fillStyle='#ff7f8f';ctx.fill();
     ctx.beginPath();ctx.arc(last.x,last.y,8,0,Math.PI*2);ctx.strokeStyle='rgba(255,127,143,.22)';ctx.lineWidth=4;ctx.stroke();
   }
+
+  function calculatorMarkup(){
+    return '<div class="card calorie-card" id="calorieCalculator">'+
+      '<div class="calorie-head"><div><div class="label">Счётчик калорий</div><div class="big calorie-title">Рассчитать порцию</div><div class="muted">Введи данные с упаковки на 100 г — MY 60 посчитает твою порцию.</div></div><div class="calorie-icon"><svg viewBox="0 0 24 24"><path d="M8 3h8l2 4v13H6V7l2-4Z"/><path d="M9 9h6"/><path d="M9 13h2M13 13h2M9 17h2M13 17h2"/></svg></div></div>'+
+      '<div class="calc-fields">'+
+        '<div class="calc-wide"><label>Продукт</label><input id="calcName" placeholder="Например, творог 5%"></div>'+
+        '<div><label>Приём пищи</label><select id="calcMeal"><option>Завтрак</option><option>Обед</option><option>Перекус</option><option>Ужин</option><option>Другое</option></select></div>'+
+        '<div><label>Вес порции, г</label><input id="calcGrams" type="number" inputmode="decimal" min="0" step="1" placeholder="150" oninput="calorieCalc()"></div>'+
+        '<div><label>Ккал / 100 г</label><input id="calcKcal100" type="number" inputmode="decimal" min="0" step="1" placeholder="120" oninput="calorieCalc()"></div>'+
+      '</div>'+
+      '<div class="calc-macros-title"><span>КБЖУ на 100 г</span><span class="muted">необязательно</span></div>'+
+      '<div class="calc-macros">'+
+        '<label><span>Белки</span><input id="calcP100" type="number" inputmode="decimal" min="0" step=".1" placeholder="0" oninput="calorieCalc()"></label>'+
+        '<label><span>Жиры</span><input id="calcF100" type="number" inputmode="decimal" min="0" step=".1" placeholder="0" oninput="calorieCalc()"></label>'+
+        '<label><span>Углеводы</span><input id="calcC100" type="number" inputmode="decimal" min="0" step=".1" placeholder="0" oninput="calorieCalc()"></label>'+
+      '</div>'+
+      '<div class="calc-result">'+
+        '<div class="calc-kcal"><span>Порция</span><strong id="calcKcalResult">0</strong><small>ккал</small></div>'+
+        '<div class="calc-result-macros"><span>Б <b id="calcPResult">0</b> г</span><span>Ж <b id="calcFResult">0</b> г</span><span>У <b id="calcCResult">0</b> г</span></div>'+
+      '</div>'+
+      '<button class="btn calc-add" id="calcAddButton" onclick="addCalculatedFood()" disabled>Добавить в дневник</button>'+
+      '<div class="calc-daily"><span>Сегодня съедено <b id="calcDailyUsed">0</b> ккал</span><span>Осталось <b id="calcDailyLeft">—</b> ккал</span></div>'+
+    '</div>';
+  }
+
+  function decorateFood(){
+    const sec=document.getElementById('food');
+    if(!sec)return;
+    let calc=document.getElementById('calorieCalculator');
+    if(!calc){
+      const first=sec.querySelector('.card');
+      if(!first)return;
+      first.insertAdjacentHTML('afterend',calculatorMarkup());
+      calc=document.getElementById('calorieCalculator');
+    }
+    updateCalorieDaily();
+    calorieCalc();
+  }
+
+  function num(id){
+    const el=document.getElementById(id);
+    return el ? (parseFloat(String(el.value||'').replace(',','.'))||0) : 0;
+  }
+
+  function round1(v){ return Math.round((v||0)*10)/10; }
+
+  function calorieCalc(){
+    const grams=num('calcGrams');
+    const factor=grams/100;
+    const kcal=Math.round(num('calcKcal100')*factor);
+    const p=round1(num('calcP100')*factor);
+    const f=round1(num('calcF100')*factor);
+    const c=round1(num('calcC100')*factor);
+    const kr=document.getElementById('calcKcalResult');
+    const pr=document.getElementById('calcPResult');
+    const fr=document.getElementById('calcFResult');
+    const cr=document.getElementById('calcCResult');
+    const add=document.getElementById('calcAddButton');
+    if(kr)kr.textContent=kcal;
+    if(pr)pr.textContent=p;
+    if(fr)fr.textContent=f;
+    if(cr)cr.textContent=c;
+    if(add)add.disabled=!(grams>0 && num('calcKcal100')>0);
+    return {grams:grams,kcal:kcal,p:p,f:f,c:c};
+  }
+
+  function updateCalorieDaily(){
+    if(!window.S || typeof key!=='function')return;
+    const list=(S.food&&S.food[key()])||[];
+    const used=Math.round(list.reduce(function(sum,x){return sum+(+x.cal||0)},0));
+    const goal=(S.profile&&+S.profile.calories)||1500;
+    const usedEl=document.getElementById('calcDailyUsed');
+    const leftEl=document.getElementById('calcDailyLeft');
+    if(usedEl)usedEl.textContent=used;
+    if(leftEl)leftEl.textContent=Math.max(0,goal-used);
+  }
+
+  function addCalculatedFood(){
+    if(!window.S || typeof key!=='function')return;
+    const t=calorieCalc();
+    if(!(t.grams>0 && t.kcal>0))return;
+    const nameEl=document.getElementById('calcName');
+    const mealEl=document.getElementById('calcMeal');
+    const name=(nameEl&&nameEl.value.trim())||'Продукт';
+    const meal=(mealEl&&mealEl.value)||'Другое';
+    if(!S.food[key()])S.food[key()]=[];
+    S.food[key()].push({
+      meal:meal,
+      name:name+' · '+Math.round(t.grams)+' г',
+      cal:t.kcal,
+      p:t.p,
+      f:t.f,
+      c:t.c
+    });
+    if(typeof save==='function')save();
+    ['calcName','calcGrams','calcKcal100','calcP100','calcF100','calcC100'].forEach(function(id){
+      const el=document.getElementById(id); if(el)el.value='';
+    });
+    calorieCalc();
+    updateCalorieDaily();
+    const btn=document.getElementById('calcAddButton');
+    if(btn){
+      const old=btn.textContent;
+      btn.textContent='Добавлено ✓';
+      setTimeout(function(){if(btn)btn.textContent=old},900);
+    }
+  }
+
+  window.calorieCalc=calorieCalc;
+  window.addCalculatedFood=addCalculatedFood;
+
   function decorate(){
-    decorateNav();sectionTitles();decorateToday();updateRing();
+    decorateNav();sectionTitles();decorateToday();decorateFood();updateRing();
   }
   document.addEventListener('DOMContentLoaded',decorate);
   if(typeof window.render==='function'){
