@@ -971,3 +971,56 @@ canvas{margin-top:14px;height:220px;border:0;border-radius:20px;background:linea
   .pin-input-row input{height:56px;min-height:56px!important}
   .authGate.returning .authCard{padding:25px}
 }
+
+/* Actionable wellness summary v17 */
+.today-wellness-card{
+  margin:0 0 12px;padding:17px;border-radius:24px;border:1px solid rgba(17,22,19,.055);
+  background:linear-gradient(145deg,#fff,#f8f7f3);box-shadow:0 10px 28px rgba(22,29,25,.05)
+}
+.today-wellness-card[data-mode="gentle"]{
+  background:linear-gradient(145deg,#fff7f4,#f7f1ee);border-color:rgba(189,110,120,.12)
+}
+.today-wellness-card[data-mode="good"]{
+  background:linear-gradient(145deg,#f8fbf8,#eef4ef);border-color:rgba(120,146,126,.13)
+}
+.wellness-summary-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
+.wellness-summary-head>div:first-child{min-width:0}
+.wellness-summary-head span{
+  font-size:8px;text-transform:uppercase;letter-spacing:.11em;font-weight:850;color:#9b7a7f
+}
+.wellness-summary-head h3{margin:4px 0 3px;font-size:21px;letter-spacing:-.04em}
+.wellness-summary-head p{margin:0;font-size:9px;line-height:1.45;color:#8c928e}
+.wellness-summary-icon{
+  width:42px;height:42px;border-radius:14px;display:grid;place-items:center;flex:0 0 auto;
+  background:#1a211d;color:white;font-size:17px
+}
+.wellness-edit{
+  border:0;background:#f0efeb;color:#646b66;border-radius:11px;padding:8px 10px;font-size:8px;font-weight:800
+}
+.wellness-open{
+  width:100%;margin-top:12px;min-height:44px;border:0;border-radius:14px;
+  background:linear-gradient(145deg,#1d2420,#101513);color:white;font-size:10px;font-weight:850
+}
+.wellness-metrics{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:13px
+}
+.wellness-metrics>div{
+  min-width:0;padding:8px 5px;border-radius:13px;background:rgba(255,255,255,.72);
+  border:1px solid rgba(17,22,19,.045);text-align:center
+}
+.wellness-metrics span{display:block;font-size:6px;text-transform:uppercase;letter-spacing:.08em;color:#9ba09c}
+.wellness-metrics b{display:block;margin-top:4px;font-size:10px}
+.wellness-advice{margin-top:11px;display:flex;flex-direction:column;gap:7px}
+.wellness-advice-item{
+  display:flex;gap:9px;align-items:flex-start;padding:10px 11px;border-radius:15px;background:rgba(255,255,255,.72)
+}
+.wellness-advice-item i{
+  width:28px;height:28px;border-radius:10px;display:grid;place-items:center;flex:0 0 auto;
+  background:#eceeea;font-style:normal;font-size:11px;color:#616863
+}
+.wellness-advice-item b{display:block;font-size:10px}
+.wellness-advice-item p{margin:3px 0 0;font-size:8px;line-height:1.45;color:#8d938f}
+@media(max-width:390px){
+  .wellness-metrics{grid-template-columns:repeat(3,1fr)}
+  .wellness-metrics>div:nth-child(4),.wellness-metrics>div:nth-child(5){grid-column:span 1}
+}
