@@ -2304,10 +2304,26 @@
         '<div class="history-section"><div class="history-section-head"><span>Питание</span><b>'+Math.round(tot.cal)+' ккал · Б '+round1(tot.p)+' · Ж '+round1(tot.f)+' · У '+round1(tot.c)+'</b></div>'+foodHtml+'</div>'+
         '<div class="history-section"><div class="history-section-head"><span>Самочувствие</span><b>'+(well?'заполнено':'нет записи')+'</b></div>'+wellHtml+'</div>'+
         '<div class="history-section"><div class="history-section-head"><span>Тренировки</span><b>'+work.length+'</b></div>'+(work.length?'<div class="history-workouts">'+work.map(function(x){return '<span>Силовая '+escapeHtml(x)+'</span>'}).join('')+'</div>':'<div class="history-empty-block">Тренировок не записано.</div>')+'</div>'+
+        '<div class="history-edit-block"><div class="history-edit-title"><span>Добавить или исправить</span><b>Запись сохранится за эту дату</b></div><div class="history-edit-grid">'+
+          '<button type="button" onclick="openHistoryEntry(\'weight\',\''+k+'\')"><i>⚖</i><span>Вес</span></button>'+
+          '<button type="button" onclick="openHistoryEntry(\'steps\',\''+k+'\')"><i>↗</i><span>Шаги</span></button>'+
+          '<button type="button" onclick="openHistoryEntry(\'food\',\''+k+'\')"><i>○</i><span>Еда</span></button>'+
+          '<button type="button" onclick="openHistoryEntry(\'water\',\''+k+'\')"><i>◌</i><span>Вода</span></button>'+
+          '<button type="button" onclick="openHistoryEntry(\'wellness\',\''+k+'\')"><i>♡</i><span>Чек-ин</span></button>'+
+          '<button type="button" onclick="openHistoryEntry(\'measure\',\''+k+'\')"><i>↔</i><span>Замеры</span></button>'+
+          '<button type="button" onclick="openHistoryEntry(\'photo\',\''+k+'\')"><i>▣</i><span>Фото</span></button>'+
+        '</div></div>'+
         repeatBtn+
       '</div>';
     modal.classList.add('open');
   }
+
+  function openHistoryEntry(type,k){
+    if(typeof openEntryForm!=='function')return;
+    openEntryForm(type,k);
+  }
+
+  window.openHistoryEntry=openHistoryEntry;
 
   function repeatHistoryFood(k){
     const src=(S.food&&S.food[k])||[];
