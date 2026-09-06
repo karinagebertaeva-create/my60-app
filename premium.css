@@ -858,3 +858,73 @@ canvas{margin-top:14px;height:220px;border:0;border-radius:20px;background:linea
   .set-chip{min-width:44px;height:34px}
   .how-btn{height:34px;padding:0 8px}
 }
+
+/* Wellness check-in v15 */
+.wellness-form{padding:2px 0 4px}
+.wellness-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:15px}
+.wellness-head .label{margin-bottom:5px}
+.wellness-head h3{margin:0!important;font-size:25px!important;letter-spacing:-.045em}
+.wellness-head p{margin:6px 0 0;font-size:10px;line-height:1.45;color:#8d938f}
+.wellness-orb{
+  width:46px;height:46px;border-radius:16px;display:grid;place-items:center;flex:0 0 auto;
+  background:linear-gradient(145deg,#f3e5e5,#eef2ed);color:#a6656d;font-size:19px;
+  box-shadow:0 8px 20px rgba(32,40,35,.05)
+}
+.sleep-field{
+  padding:13px 14px;border-radius:18px;background:#f7f7f4;border:1px solid #e9ebe7;margin-bottom:9px
+}
+.sleep-field>label{display:block;font-size:10px;font-weight:850;color:#5e6661;margin-bottom:7px}
+.sleep-field>div{display:flex;align-items:center;gap:8px}
+.sleep-field input{
+  min-height:44px!important;height:44px;padding:8px 11px!important;border-radius:13px!important;
+  font-size:18px;font-weight:900;letter-spacing:-.03em
+}
+.sleep-field span{font-size:9px;color:#949a96;white-space:nowrap}
+.wellness-control{
+  padding:14px;border:1px solid #e8eae6;border-radius:18px;background:#fff;margin-top:8px;
+  box-shadow:0 5px 16px rgba(20,27,23,.025)
+}
+.wellness-control-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.wellness-control-top b{display:block;font-size:12px;letter-spacing:-.02em}
+.wellness-control-top span{display:block;margin-top:3px;font-size:9px;color:#959b97}
+.wellness-control output{
+  width:34px;height:34px;border-radius:11px;display:grid;place-items:center;flex:0 0 auto;
+  background:#1a211d;color:white;font-size:12px;font-weight:900
+}
+.wellness-range-row{display:grid;grid-template-columns:34px 1fr 34px;gap:8px;align-items:center;margin-top:12px}
+.wellness-range-row button{
+  width:34px;height:34px;border:1px solid #e3e6e1;border-radius:11px;background:#f6f6f3;
+  color:#535a55;font-size:16px;font-weight:800;line-height:1
+}
+.wellness-range-row input[type=range]{
+  --well-p:44%;display:block!important;width:100%!important;height:28px!important;min-height:28px!important;
+  margin:0!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;
+  appearance:none;-webkit-appearance:none;touch-action:pan-y;cursor:pointer;pointer-events:auto!important
+}
+.wellness-range-row input[type=range]::-webkit-slider-runnable-track{
+  height:6px;border-radius:99px;
+  background:linear-gradient(90deg,#bd6e78 0%,#bd6e78 var(--well-p),#e7e9e5 var(--well-p),#e7e9e5 100%)
+}
+.wellness-range-row input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;width:24px;height:24px;border-radius:50%;
+  background:#fff;border:6px solid #1a211d;margin-top:-9px;box-shadow:0 3px 10px rgba(17,23,20,.18)
+}
+.wellness-range-row input[type=range]::-moz-range-track{height:6px;border-radius:99px;background:#e7e9e5}
+.wellness-range-row input[type=range]::-moz-range-progress{height:6px;border-radius:99px;background:#bd6e78}
+.wellness-range-row input[type=range]::-moz-range-thumb{
+  width:14px;height:14px;border-radius:50%;background:#fff;border:6px solid #1a211d;
+  box-shadow:0 3px 10px rgba(17,23,20,.18)
+}
+.wellness-scale{display:flex;justify-content:space-between;gap:12px;margin:3px 42px 0}
+.wellness-scale span{font-size:7px;color:#a0a5a1}
+.wellness-note{margin-top:10px}
+.wellness-note label{display:flex;justify-content:space-between;gap:8px;margin:0 2px 6px;font-size:10px;font-weight:850}
+.wellness-note label span{font-size:8px;font-weight:650;color:#a0a5a1}
+.wellness-note textarea{min-height:82px!important}
+.wellness-save{width:100%;min-height:50px!important;margin-top:10px;border-radius:16px!important;font-size:12px!important}
+@media(max-width:390px){
+  .wellness-control{padding:12px}
+  .wellness-range-row{grid-template-columns:32px 1fr 32px;gap:7px}
+  .wellness-range-row button{width:32px;height:32px}
+  .wellness-scale{margin-left:39px;margin-right:39px}
+}
