@@ -985,7 +985,7 @@
     const ring=document.getElementById('planRing'),pct=document.getElementById('planRingPct');
     if(ring)ring.style.setProperty('--plan-p',score+'%');
     if(pct)pct.textContent=score+'%';
-    updateWeekRoute();renderTodayPlan();renderInteractiveWorkout();updatePlanInsight();
+    updateWeekRoute();renderTodayPlan();renderWorkoutPicker();renderInteractiveWorkout();updatePlanInsight();
   }
 
   function decoratePlan(){
