@@ -1765,3 +1765,47 @@ canvas{margin-top:14px;height:220px;border:0;border-radius:20px;background:linea
 .smart-meal-foot{
   margin-top:8px;font-size:7px;line-height:1.4;color:#9aa09c
 }
+
+/* Editable food entries v27 */
+.meal-item{padding:0!important;overflow:hidden}
+.meal-item-edit{
+  flex:1;min-width:0;display:flex;justify-content:space-between;gap:10px;align-items:center;
+  border:0;background:transparent;padding:9px 10px;text-align:left;color:var(--ink)
+}
+.meal-item-edit>span{
+  flex:0 0 auto;font-size:7px;font-weight:850;color:#9b7a7f
+}
+.meal-item-delete{
+  width:34px!important;height:auto!important;align-self:stretch;border-radius:0!important;
+  border-left:1px solid #f0e6e6!important;background:#fbf2f2!important
+}
+.food-edit-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
+.food-edit-head h3{margin:4px 0 3px!important;font-size:23px!important;letter-spacing:-.04em}
+.food-edit-head p{margin:0;max-width:320px;font-size:9px;line-height:1.45;color:#8e9490}
+.food-edit-mark{
+  width:42px;height:42px;border-radius:14px;display:grid;place-items:center;flex:0 0 auto;
+  background:#1a211d;color:white;font-size:13px
+}
+.food-edit-field{display:block;margin-top:13px}
+.food-edit-field>span{
+  display:block;margin:0 2px 6px;font-size:8px;text-transform:uppercase;letter-spacing:.09em;font-weight:850;color:#8f9691
+}
+.food-edit-field select,.food-edit-field input{width:100%}
+.food-edit-grams{display:flex;align-items:center;gap:8px}
+.food-edit-grams i{font-style:normal;font-size:9px;color:#969c98}
+.food-edit-preview{
+  display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:12px;padding:9px;
+  border-radius:17px;background:linear-gradient(145deg,#f7f7f4,#eef2ee)
+}
+.food-edit-preview>div{padding:9px;border-radius:12px;background:rgba(255,255,255,.72)}
+.food-edit-preview span{display:block;font-size:6px;text-transform:uppercase;letter-spacing:.08em;color:#999f9b}
+.food-edit-preview b{display:block;margin-top:4px;font-size:10px}
+.food-edit-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:12px}
+.food-edit-actions .btn{min-height:46px!important;border-radius:14px!important}
+.food-edit-delete{
+  width:100%;margin-top:8px;padding:8px;border:0;background:transparent;
+  color:#a2676f;font-size:8px;font-weight:850
+}
+@media(max-width:390px){
+  .food-edit-actions{grid-template-columns:1fr}
+}
