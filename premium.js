@@ -42,6 +42,67 @@
       sec.insertBefore(t,sec.firstChild);
     });
   }
+  function todayWellness(){
+    if(!window.S||typeof key!=='function')return null;
+    const w=S.well&&S.well[key()];
+    if(!w)return null;
+    return {
+      sleep:+w.sleep||0,
+      hunger:+w.hunger||5,
+      energy:+w.energy||5,
+      stress:+w.stress||5,
+      sweet:+w.sweet||5,
+      note:w.note||''
+    };
+  }
+
+  function wellnessMode(w){
+    if(!w)return {id:'empty',title:'Добавь чек-ин',sub:'MY 60 подстроит рекомендации по еде и тренировке под твой сегодняшний ресурс.'};
+    if((w.sleep&&w.sleep<6.5)||w.energy<=4||w.stress>=8)return {id:'gentle',title:'Бережный режим',sub:'Сегодня лучше снизить нагрузку и не требовать от себя идеального дня.'};
+    if((!w.sleep||w.sleep>=7)&&w.energy>=7&&w.stress<=5)return {id:'good',title:'Хороший ресурс',sub:'Энергии достаточно — можно спокойно держаться обычного плана.'};
+    return {id:'normal',title:'Обычный режим',sub:'Нормальный день: ориентируйся на голод, энергию и план без перегибов.'};
+  }
+
+  function wellnessRecommendations(w){
+    if(!w)return [];
+    const r=[];
+    if(w.sleep&&w.sleep<6.5)r.push({icon:'☾',title:'Сон ниже привычного',text:'Не компенсируй усталость жёсткой тренировкой. Лучше обычная активность или облегчённая силовая.'});
+    if(w.energy<=4)r.push({icon:'↘',title:'Энергии мало',text:'Если силовая стоит по плану, можно сократить подходы или перенести её на день, когда будет больше сил.'});
+    if(w.stress>=7)r.push({icon:'≈',title:'Стресс высокий',text:'Сделай день проще: обычная еда, комфортные шаги и без попыток «отработать» калории.'});
+    if(w.hunger>=7)r.push({icon:'○',title:'Голод высокий',text:'Не затягивай с приёмом пищи. Белок + гарнир + овощи обычно насыщают лучше, чем перекусы на ходу.'});
+    if(w.sweet>=7)r.push({icon:'◇',title:'Сильно хочется сладкого',text:'Сначала нормальный приём пищи. Если сладкого всё ещё хочется — лучше запланировать порцию, а не запрещать себе.'});
+    if(!r.length)r.push({icon:'✓',title:'Можно идти по обычному плану',text:'По чек-ину нет сигнала, что сегодня нужно специально облегчать день.'});
+    return r.slice(0,3);
+  }
+
+  function wellnessInsightMarkup(){
+    return '<div class="today-wellness-card" id="todayWellnessCard"></div>';
+  }
+
+  function updateTodayWellness(){
+    const card=document.getElementById('todayWellnessCard');
+    if(!card)return;
+    const w=todayWellness(),mode=wellnessMode(w);
+    if(!w){
+      card.innerHTML='<div class="wellness-summary-head"><div><span>Как ты сегодня?</span><h3>'+mode.title+'</h3><p>'+mode.sub+'</p></div><div class="wellness-summary-icon">♡</div></div><button class="wellness-open" onclick="openEntryForm(\'wellness\')">Заполнить чек-ин</button>';
+      card.dataset.mode='empty';
+      return;
+    }
+    const metrics=[
+      ['Сон',w.sleep?round1(w.sleep)+' ч':'—'],
+      ['Голод',w.hunger+'/10'],
+      ['Энергия',w.energy+'/10'],
+      ['Стресс',w.stress+'/10'],
+      ['Сладкое',w.sweet+'/10']
+    ];
+    const recs=wellnessRecommendations(w);
+    card.dataset.mode=mode.id;
+    card.innerHTML=
+      '<div class="wellness-summary-head"><div><span>Как ты сегодня?</span><h3>'+mode.title+'</h3><p>'+mode.sub+'</p></div><button class="wellness-edit" onclick="openEntryForm(\'wellness\')">Изменить</button></div>'+
+      '<div class="wellness-metrics">'+metrics.map(function(x){return '<div><span>'+x[0]+'</span><b>'+x[1]+'</b></div>'}).join('')+'</div>'+
+      '<div class="wellness-advice">'+recs.map(function(x){return '<div class="wellness-advice-item"><i>'+x.icon+'</i><div><b>'+x.title+'</b><p>'+x.text+'</p></div></div>'}).join('')+'</div>';
+  }
+
   function decorateToday(){
     const sec=document.getElementById('today');
     if(!sec)return;
@@ -75,6 +136,12 @@
         '<button onclick="openEntryForm(\'steps\')"><span class="qi"><svg viewBox="0 0 24 24"><path d="M9 4c1.7 2.6 1.8 5.1.7 7.6L8 15"/><path d="M8 15c-1.1 1.6-.7 3.5.9 4.4 1.6.9 3.5.3 4.4-1.3l1.4-2.4"/><path d="M15 5c1.2 1.9 1.4 3.8.7 5.7"/></svg></span>Шаги</button>';
       hero.insertAdjacentElement('afterend',qs);
     }
+    let wc=document.getElementById('todayWellnessCard');
+    if(!wc){
+      const anchor=sec.querySelector('.quick-strip')||hero;
+      if(anchor)anchor.insertAdjacentHTML('afterend',wellnessInsightMarkup());
+    }
+    updateTodayWellness();
   }
   function updateRing(){
     const bar=document.getElementById('goalBar'),ring=document.querySelector('.premium-ring'),pct=document.getElementById('premiumPct');
@@ -771,10 +838,11 @@
     let action='',state='';
     if(plan.type==='A'||plan.type==='B'){
       const done=workouts.indexOf(plan.type)>=0;
-      state=done?'Готово на сегодня':'Сегодня по плану';
+      const w=todayWellness(),gentle=w&&((w.sleep&&w.sleep<6.5)||w.energy<=4||w.stress>=8);
+      state=done?'Готово на сегодня':(gentle?'Сегодня лучше бережно':'Сегодня по плану');
       action=done
         ? '<button class="plan-primary done" disabled>Тренировка выполнена ✓</button>'
-        : '<button class="plan-primary" onclick="startTodayWorkout(\''+plan.type+'\')">Начать тренировку '+plan.type+'</button>';
+        : '<button class="plan-primary '+(gentle?'soft-plan':'')+'" onclick="startTodayWorkout(\''+plan.type+'\')">'+(gentle?'Открыть облегчённую тренировку ':'Начать тренировку ')+plan.type+'</button>';
     }else if(plan.type==='walk'||plan.type==='mobility'||plan.type==='optional'){
       state=steps>=settings.steps?'Цель движения выполнена':'День движения';
       action='<button class="plan-primary '+(steps>=settings.steps?'done':'')+'" onclick="tab(\'today\',document.querySelector(\'.nav button\'))">'+(steps>=settings.steps?'Шаги выполнены ✓':'Перейти к шагам')+'</button>';
@@ -782,8 +850,9 @@
       state='Восстановление';
       action='<button class="plan-primary soft-plan" onclick="tab(\'today\',document.querySelector(\'.nav button\'))">Посмотреть мой день</button>';
     }
+    const wellness=todayWellness(),gentleDay=wellness&&((wellness.sleep&&wellness.sleep<6.5)||wellness.energy<=4||wellness.stress>=8);
     card.innerHTML='<div class="today-plan-top"><div><span>'+state+'</span><h3>'+plan.title+'</h3><p>'+plan.sub+'</p></div><div class="plan-duration"><b>'+plan.duration+'</b><small>ориентир</small></div></div>'+
-      '<div class="today-plan-note">'+(plan.type==='A'||plan.type==='B'?'Работай в спокойном темпе. Между подходами отдыхай примерно 45–90 секунд и останавливайся при острой боли.':plan.type==='rest'?'Отдых — часть плана. Достаточно обычной повседневной активности и комфортного режима.':'Цель — набрать движение без ощущения наказания. Можно разбить прогулку на несколько коротких выходов.')+'</div>'+action;
+      '<div class="today-plan-note">'+(plan.type==='A'||plan.type==='B'?(gentleDay?'По чек-ину ресурс сегодня ниже обычного. Можно сделать меньше подходов или перенести силовую — это не считается срывом плана.':'Работай в спокойном темпе. Между подходами отдыхай примерно 45–90 секунд и останавливайся при острой боли.'):plan.type==='rest'?'Отдых — часть плана. Достаточно обычной повседневной активности и комфортного режима.':'Цель — набрать движение без ощущения наказания. Можно разбить прогулку на несколько коротких выходов.')+'</div>'+action;
   }
 
   function renderWorkoutPicker(){
