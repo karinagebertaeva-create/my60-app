@@ -2010,6 +2010,113 @@
     }
   }
 
+  let bodyMetric='waist';
+
+  function bodyMetricDefinitions(){
+    return {
+      waist:{label:'Талия',unit:'см'},
+      belly:{label:'Живот',unit:'см'},
+      hips:{label:'Бёдра',unit:'см'},
+      chest:{label:'Грудь',unit:'см'},
+      thigh:{label:'Бедро',unit:'см'}
+    };
+  }
+
+  function bodyMeasurementEntries(metric){
+    return Object.entries(S.measures||{})
+      .filter(function(x){return x[1]&&(+x[1][metric]>0)})
+      .map(function(x){return [x[0],+x[1][metric]]})
+      .sort();
+  }
+
+  function bodyProgressMarkup(){
+    return '<div class="body-progress-card" id="bodyProgressCard">'+
+      '<div class="body-progress-head"><div><div class="label">Объёмы тела</div><h3>Изменения в сантиметрах</h3><p>Смотри не только на вес. Выбери параметр — MY 60 покажет динамику.</p></div><button type="button" onclick="openEntryForm(\'measure\')">+ Замеры</button></div>'+
+      '<div class="body-metric-tabs" id="bodyMetricTabs"></div>'+
+      '<div class="body-change-hero" id="bodyChangeHero"></div>'+
+      '<canvas id="bodyProgressChart"></canvas>'+
+      '<div class="body-measure-grid" id="bodyMeasureGrid"></div>'+
+    '</div>';
+  }
+
+  function setBodyMetric(metric){
+    const defs=bodyMetricDefinitions();
+    if(!defs[metric])metric='waist';
+    bodyMetric=metric;
+    updateBodyProgress();
+    setTimeout(drawBodyProgressChart,20);
+  }
+
+  function bodyMetricSummary(metric){
+    const data=bodyMeasurementEntries(metric);
+    if(!data.length)return {count:0,first:null,last:null,delta:null};
+    const first=data[0],last=data[data.length-1];
+    return {count:data.length,first:first,last:last,delta:last[1]-first[1]};
+  }
+
+  function updateBodyProgress(){
+    const root=document.getElementById('bodyProgressCard');
+    if(!root||!window.S)return;
+    const defs=bodyMetricDefinitions();
+
+    const tabs=document.getElementById('bodyMetricTabs');
+    if(tabs)tabs.innerHTML=Object.keys(defs).map(function(k){
+      return '<button type="button" class="'+(k===bodyMetric?'active':'')+'" onclick="setBodyMetric(\''+k+'\')">'+defs[k].label+'</button>';
+    }).join('');
+
+    const summary=bodyMetricSummary(bodyMetric),hero=document.getElementById('bodyChangeHero');
+    if(hero){
+      if(summary.count){
+        const d=summary.delta||0;
+        const sign=d<0?'−':d>0?'+':'';
+        hero.innerHTML='<div><span>'+defs[bodyMetric].label+'</span><b>'+round1(summary.last[1])+' '+defs[bodyMetric].unit+'</b><small>сейчас</small></div>'+
+          '<div><span>Первый замер</span><b>'+round1(summary.first[1])+' '+defs[bodyMetric].unit+'</b><small>'+new Date(summary.first[0]+'T00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short'})+'</small></div>'+
+          '<div class="'+(d<0?'down':d>0?'up':'flat')+'"><span>Изменение</span><b>'+sign+round1(Math.abs(d))+' '+defs[bodyMetric].unit+'</b><small>'+summary.count+' замер'+(summary.count===1?'':'а')+'</small></div>';
+      }else{
+        hero.innerHTML='<div class="body-empty"><span>'+defs[bodyMetric].label+'</span><b>Пока нет данных</b><small>Добавь первый замер — дальше динамика появится автоматически.</small></div>';
+      }
+    }
+
+    const grid=document.getElementById('bodyMeasureGrid');
+    if(grid){
+      grid.innerHTML=Object.keys(defs).map(function(k){
+        const s=bodyMetricSummary(k),d=s.delta||0;
+        return '<button type="button" class="'+(k===bodyMetric?'active ':'')+(s.count?'has-data':'empty')+'" onclick="setBodyMetric(\''+k+'\')">'+
+          '<span>'+defs[k].label+'</span><b>'+(s.count?round1(s.last[1])+' см':'—')+'</b>'+
+          '<small>'+(s.count>1?((d<0?'−':d>0?'+':'')+round1(Math.abs(d))+' см от первого'):(s.count===1?'нужен ещё замер':'нет данных'))+'</small>'+
+        '</button>';
+      }).join('');
+    }
+  }
+
+  function drawBodyProgressChart(){
+    const cv=document.getElementById('bodyProgressChart');
+    if(!cv||!window.S)return;
+    const data=bodyMeasurementEntries(bodyMetric);
+    const rect=cv.getBoundingClientRect(),W=Math.max(280,Math.floor(rect.width||280)),H=170,dpr=Math.min(window.devicePixelRatio||1,2);
+    cv.width=W*dpr;cv.height=H*dpr;
+    const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);
+    if(data.length<2){
+      ctx.fillStyle='#929894';ctx.font='600 11px -apple-system,BlinkMacSystemFont,sans-serif';
+      ctx.fillText(data.length?'Добавь ещё один замер для графика':'Добавь первый замер',15,32);
+      return;
+    }
+    const vals=data.map(function(x){return x[1]}),mn=Math.min.apply(null,vals)-1,mx=Math.max.apply(null,vals)+1;
+    const px=15,py=16,usableW=W-px*2,usableH=H-py*2;
+    ctx.strokeStyle='#e7e9e5';ctx.lineWidth=1;
+    for(let i=0;i<4;i++){const y=py+usableH*i/3;ctx.beginPath();ctx.moveTo(px,y);ctx.lineTo(W-px,y);ctx.stroke()}
+    const pts=data.map(function(x,i){
+      return {x:px+usableW*i/(data.length-1),y:py+usableH*(mx-x[1])/(mx-mn)};
+    });
+    const fill=ctx.createLinearGradient(0,py,0,H-py);
+    fill.addColorStop(0,'rgba(189,110,120,.18)');fill.addColorStop(1,'rgba(189,110,120,0)');
+    ctx.beginPath();ctx.moveTo(pts[0].x,H-py);pts.forEach(function(p){ctx.lineTo(p.x,p.y)});ctx.lineTo(pts[pts.length-1].x,H-py);ctx.closePath();ctx.fillStyle=fill;ctx.fill();
+    ctx.beginPath();pts.forEach(function(p,i){i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)});ctx.strokeStyle='#bd6e78';ctx.lineWidth=3;ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke();
+    pts.forEach(function(p,i){if(i===0||i===pts.length-1){ctx.beginPath();ctx.arc(p.x,p.y,4,0,Math.PI*2);ctx.fillStyle=i===pts.length-1?'#78927e':'#bd6e78';ctx.fill()}});
+  }
+
+  window.setBodyMetric=setBodyMetric;
+
   function progressExperienceMarkup(){
     return '<div class="progress-experience" id="progressExperience">'+
       '<div class="progress-hero">'+
@@ -2025,6 +2132,7 @@
         '<div><span>Силовые</span><b id="progressWorkoutCount">0</b><small id="progressWorkoutNote">за период</small></div>'+
       '</div>'+
       '<div class="progress-insight" id="progressInsight"></div>'+
+      bodyProgressMarkup()+
       achievementsMarkup()+
       '<div class="photo-compare-card" id="photoCompareCard"></div>'+
     '</div>';
@@ -2169,6 +2277,7 @@
       insight.innerHTML='<div class="progress-insight-mark">'+mark+'</div><div><span>Вывод MY 60</span><b>'+head+'</b><p>'+copy+'</p></div>';
     }
 
+    updateBodyProgress();
     updateAchievements();
     const photo=document.getElementById('photoCompareCard'),pair=progressPhotoPair();
     if(photo){
@@ -2216,11 +2325,11 @@
     const measure=sec.querySelector('#measureList')&&sec.querySelector('#measureList').closest('.card');
     const gallery=sec.querySelector('#gallery')&&sec.querySelector('#gallery').closest('.card');
     const milestones=sec.querySelector('#milestones')&&sec.querySelector('#milestones').closest('.card');
-    if(measure)measure.classList.add('progress-detail-card');
+    if(measure)measure.classList.add('progress-detail-card','progress-measure-legacy');
     if(gallery)gallery.classList.add('progress-detail-card','progress-gallery-legacy');
     if(milestones)milestones.classList.add('progress-detail-card');
     updateProgressExperience();
-    if(sec.classList.contains('active'))setTimeout(drawProgressChart,30);
+    if(sec.classList.contains('active'))setTimeout(function(){drawProgressChart();drawBodyProgressChart()},30);
   }
 
   window.setProgressPeriod=setProgressPeriod;
@@ -2850,7 +2959,7 @@
   if(typeof window.draw==='function')window.draw=premiumDraw;
   if(typeof window.tab==='function'){
     const oldTab=window.tab;
-    window.tab=function(id,b){oldTab(id,b);requestAnimationFrame(()=>{decorate();if(id==='progress')setTimeout(()=>{premiumDraw();drawProgressChart();},60);});}
+    window.tab=function(id,b){oldTab(id,b);requestAnimationFrame(()=>{decorate();if(id==='progress')setTimeout(()=>{premiumDraw();drawProgressChart();drawBodyProgressChart();},60);});}
   }
-  window.addEventListener('resize',()=>{if((function(){var p=document.getElementById('progress');return p&&p.classList.contains('active')})())premiumDraw();});
+  window.addEventListener('resize',()=>{if((function(){var p=document.getElementById('progress');return p&&p.classList.contains('active')})()){premiumDraw();drawProgressChart();drawBodyProgressChart();}});
 })();
