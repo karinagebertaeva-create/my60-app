@@ -1918,6 +1918,98 @@
 
   let progressPeriod=30;
 
+  function achievementStats(){
+    const foodDays=Object.keys(S.food||{}).filter(function(k){return (S.food[k]||[]).length>0}).length;
+    const wellDays=Object.keys(S.well||{}).filter(function(k){return !!S.well[k]}).length;
+    const weightEntries=Object.entries(S.weights||{}).sort();
+    const weights=weightEntries.map(function(x){return +x[1]}).filter(Boolean);
+    const lowest=weights.length?Math.min.apply(null,weights):(+START||0);
+
+    const measures=Object.entries(S.measures||{}).filter(function(x){return x[1]&&+x[1].waist}).sort();
+    const firstWaist=measures.length?+measures[0][1].waist:0;
+    const minWaist=measures.length?Math.min.apply(null,measures.map(function(x){return +x[1].waist})):0;
+    const waistLost=firstWaist&&minWaist?Math.max(0,firstWaist-minWaist):0;
+
+    const workoutDays=Object.keys(S.workouts||{}).filter(function(k){
+      return (S.workouts[k]||[]).some(function(x){return x==='A'||x==='B'});
+    });
+    const totalStrength=workoutDays.reduce(function(n,k){
+      return n+(S.workouts[k]||[]).filter(function(x){return x==='A'||x==='B'}).length;
+    },0);
+
+    const weekBuckets={};
+    workoutDays.forEach(function(k){
+      const d=new Date(k+'T00:00:00'),day=(d.getDay()+6)%7,monday=new Date(d);
+      monday.setDate(d.getDate()-day);
+      const wk=key(monday);
+      weekBuckets[wk]=(weekBuckets[wk]||0)+(S.workouts[k]||[]).filter(function(x){return x==='A'||x==='B'}).length;
+    });
+    const bestStrengthWeek=Object.keys(weekBuckets).length?Math.max.apply(null,Object.values(weekBuckets)):0;
+
+    const bestSteps=Object.keys(S.steps||{}).reduce(function(m,k){return Math.max(m,+S.steps[k]||0)},0);
+    const planDay=typeof planDayNumber==='function'?planDayNumber():0;
+    const pair=progressPhotoPair();
+
+    return {
+      foodDays:foodDays,wellDays:wellDays,lowest:lowest,
+      weightLost:(+START||0)&&lowest?Math.max(0,(+START)-lowest):0,
+      waistLost:waistLost,totalStrength:totalStrength,bestStrengthWeek:bestStrengthWeek,
+      bestSteps:bestSteps,planDay:planDay,photoPair:!!pair
+    };
+  }
+
+  function achievementDefinitions(){
+    const s=achievementStats();
+    const defs=[
+      {id:'first-workout',icon:'A',title:'Первая силовая',sub:'Начать тренировочный путь',done:s.totalStrength>=1,progress:Math.min(1,s.totalStrength/1),value:s.totalStrength+' / 1'},
+      {id:'two-strength',icon:'2',title:'Две силовые за неделю',sub:'Рабочий ритм без перегруза',done:s.bestStrengthWeek>=2,progress:Math.min(1,s.bestStrengthWeek/2),value:Math.min(s.bestStrengthWeek,2)+' / 2'},
+      {id:'food-seven',icon:'○',title:'7 дней с питанием',sub:'Собрать данные без обязательной серии подряд',done:s.foodDays>=7,progress:Math.min(1,s.foodDays/7),value:Math.min(s.foodDays,7)+' / 7'},
+      {id:'well-seven',icon:'♡',title:'7 чек-инов',sub:'Замечать сон, энергию и голод',done:s.wellDays>=7,progress:Math.min(1,s.wellDays/7),value:Math.min(s.wellDays,7)+' / 7'},
+      {id:'minus-one',icon:'−1',title:'Минус 1 кг',sub:'Первая заметная отметка пути',done:s.weightLost>=1,progress:Math.min(1,s.weightLost/1),value:round1(Math.min(s.weightLost,1))+' кг'},
+      {id:'waist-two',icon:'↔',title:'Талия −2 см',sub:'Изменение тела, не только весов',done:s.waistLost>=2,progress:Math.min(1,s.waistLost/2),value:round1(Math.min(s.waistLost,2))+' см'},
+      {id:'steps-ten',icon:'↗',title:'10 000 шагов',sub:'Один активный день',done:s.bestSteps>=10000,progress:Math.min(1,s.bestSteps/10000),value:Math.round(Math.min(s.bestSteps,10000)).toLocaleString('ru-RU')},
+      {id:'photo-pair',icon:'▣',title:'Фото-сравнение',sub:'Два фото одного ракурса',done:s.photoPair,progress:s.photoPair?1:0,value:s.photoPair?'Готово':'0 / 1'},
+      {id:'day-fourteen',icon:'14',title:'14 дней программы',sub:'Половина первого цикла',done:s.planDay>=14,progress:Math.max(0,Math.min(1,s.planDay/14)),value:Math.max(0,Math.min(s.planDay,14))+' / 14'},
+      {id:'day-twenty-eight',icon:'28',title:'28 дней программы',sub:'Первый цикл MY 60 завершён',done:s.planDay>=28,progress:Math.max(0,Math.min(1,s.planDay/28)),value:Math.max(0,Math.min(s.planDay,28))+' / 28'}
+    ];
+    return defs;
+  }
+
+  function achievementsMarkup(){
+    return '<div class="achievements-card" id="achievementsCard">'+
+      '<div class="achievements-head"><div><div class="label">Мои победы</div><h3>Прогресс, который уже есть</h3><p>Без стриков и обнулений. Открытое достижение остаётся твоим.</p></div><div class="achievement-count" id="achievementCount">0 / 10</div></div>'+
+      '<div class="achievement-next" id="achievementNext"></div>'+
+      '<div class="achievement-grid" id="achievementGrid"></div>'+
+    '</div>';
+  }
+
+  function updateAchievements(){
+    const grid=document.getElementById('achievementGrid');
+    if(!grid||!window.S)return;
+    const defs=achievementDefinitions(),done=defs.filter(function(x){return x.done});
+    const count=document.getElementById('achievementCount');
+    if(count)count.textContent=done.length+' / '+defs.length;
+
+    grid.innerHTML=defs.map(function(a){
+      const pct=Math.round(a.progress*100);
+      return '<div class="achievement-item '+(a.done?'done':'locked')+'">'+
+        '<div class="achievement-icon">'+(a.done?'✓':a.icon)+'</div>'+
+        '<div class="achievement-copy"><b>'+a.title+'</b><small>'+a.sub+'</small><div class="achievement-mini"><span style="width:'+pct+'%"></span></div><i>'+a.value+'</i></div>'+
+      '</div>';
+    }).join('');
+
+    const next=document.getElementById('achievementNext');
+    if(next){
+      const locked=defs.filter(function(x){return !x.done}).sort(function(a,b){return b.progress-a.progress});
+      if(!locked.length){
+        next.innerHTML='<div class="achievement-next-mark">✓</div><div><span>Первый набор собран</span><b>Все базовые победы открыты</b><p>Дальше важнее удерживать удобный ритм, а не собирать значки любой ценой.</p></div>';
+      }else{
+        const a=locked[0],pct=Math.round(a.progress*100);
+        next.innerHTML='<div class="achievement-next-mark">'+a.icon+'</div><div><span>Ближе всего</span><b>'+a.title+'</b><p>'+a.sub+' · '+a.value+'</p><div class="achievement-next-bar"><i style="width:'+pct+'%"></i></div></div>';
+      }
+    }
+  }
+
   function progressExperienceMarkup(){
     return '<div class="progress-experience" id="progressExperience">'+
       '<div class="progress-hero">'+
@@ -1933,6 +2025,7 @@
         '<div><span>Силовые</span><b id="progressWorkoutCount">0</b><small id="progressWorkoutNote">за период</small></div>'+
       '</div>'+
       '<div class="progress-insight" id="progressInsight"></div>'+
+      achievementsMarkup()+
       '<div class="photo-compare-card" id="photoCompareCard"></div>'+
     '</div>';
   }
@@ -2076,6 +2169,7 @@
       insight.innerHTML='<div class="progress-insight-mark">'+mark+'</div><div><span>Вывод MY 60</span><b>'+head+'</b><p>'+copy+'</p></div>';
     }
 
+    updateAchievements();
     const photo=document.getElementById('photoCompareCard'),pair=progressPhotoPair();
     if(photo){
       if(pair){
