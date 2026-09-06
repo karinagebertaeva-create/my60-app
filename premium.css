@@ -2700,3 +2700,57 @@ canvas{margin-top:14px;height:220px;border:0;border-radius:20px;background:linea
     text-align:left;
   }
 }
+
+/* Smart meal flex-conflict hotfix v32 */
+#food .smart-meal-section{
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+}
+#food .smart-meal-section .smart-tip{
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+}
+#food .smart-meal-section .smart-meal-head,
+#food .smart-meal-section .smart-meal-options,
+#food .smart-meal-section .smart-meal-foot{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+}
+#food .smart-meal-section .smart-meal-options{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+}
+#food .smart-meal-section .smart-meal-option{
+  display:block!important;
+  flex:none!important;
+  align-self:stretch!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+}
+#food .smart-meal-section .smart-meal-option h4,
+#food .smart-meal-section .smart-meal-option p,
+#food .smart-meal-section .smart-meal-option b,
+#food .smart-meal-section .smart-meal-option span{
+  word-break:normal!important;
+}
+#food .smart-meal-section .smart-meal-option h4{
+  overflow-wrap:normal!important;
+  white-space:normal!important;
+}
+#food .smart-meal-section .smart-meal-main{
+  width:100%!important;
+  min-width:0!important;
+}
+#food .smart-meal-section .smart-meal-main>div:first-child{
+  width:auto!important;
+  min-width:0!important;
+}
