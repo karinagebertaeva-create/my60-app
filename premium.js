@@ -759,6 +759,11 @@
         '<div class="macro-card carbs"><div class="macro-top"><span>Углеводы</span><b><i id="dashC">0</i> / 155 г</b></div><div class="macro-track"><span id="dashCBar"></span></div><small id="dashCLeft">осталось 155 г</small></div>'+
       '</div>'+
       '<div class="meal-pulse" id="mealPulse"></div>'+
+    '</div>';
+  }
+
+  function smartMealSectionMarkup(){
+    return '<div class="smart-meal-section" id="smartMealSection">'+
       '<div class="smart-tip" id="smartNutritionTip"></div>'+
     '</div>';
   }
@@ -941,7 +946,8 @@
           '<div class="smart-meal-option-top"><span>'+o.meal+'</span><b>'+Math.round(t.cal)+' ккал</b></div>'+
           '<h4>'+o.title+'</h4><p>'+o.note+'</p>'+
           '<div class="smart-meal-items">'+smartMealItemText(o)+'</div>'+
-          '<div class="smart-meal-macros"><span>Б '+Math.round(t.p)+' г</span><span>Ж '+Math.round(t.f)+' г</span><span>У '+Math.round(t.c)+' г</span><strong>+ в дневник</strong></div>'+
+          '<div class="smart-meal-macros"><span>Б '+Math.round(t.p)+' г</span><span>Ж '+Math.round(t.f)+' г</span><span>У '+Math.round(t.c)+' г</span></div>'+
+          '<div class="smart-meal-add"><span>Добавить весь вариант</span><i>＋</i></div>'+
         '</button>';
       }).join('')+'</div>'+
       '<div class="smart-meal-foot">Порции — ориентир для удобства, а не обязательное количество.</div>';
@@ -1345,6 +1351,13 @@
       const title=sec.querySelector('.premium-section-title');
       if(title)title.insertAdjacentHTML('afterend',nutritionDashboardMarkup());
       else sec.insertAdjacentHTML('afterbegin',nutritionDashboardMarkup());
+      dash=document.getElementById('nutritionDashboard');
+    }
+    let smartSection=document.getElementById('smartMealSection');
+    if(!smartSection){
+      if(dash)dash.insertAdjacentHTML('afterend',smartMealSectionMarkup());
+      else sec.insertAdjacentHTML('afterbegin',smartMealSectionMarkup());
+      smartSection=document.getElementById('smartMealSection');
     }
     const legacyDiary=document.getElementById('foodList');
     const legacyDiaryCard=legacyDiary&&legacyDiary.closest('.card');
