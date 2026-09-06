@@ -103,6 +103,135 @@
       '<div class="wellness-advice">'+recs.map(function(x){return '<div class="wellness-advice-item"><i>'+x.icon+'</i><div><b>'+x.title+'</b><p>'+x.text+'</p></div></div>'}).join('')+'</div>';
   }
 
+  function navButtonFor(section){
+    const buttons=Array.from(document.querySelectorAll('.nav button'));
+    const map={today:0,food:1,progress:2,plan:3,more:4};
+    return buttons[map[section]||0]||buttons[0];
+  }
+
+  function dailyAction(action){
+    if(action==='wellness')return openEntryForm('wellness');
+    if(action==='steps')return openEntryForm('steps');
+    if(action==='water')return addWater(250);
+    if(action==='weight')return openEntryForm('weight');
+    if(action==='food')return tab('food',navButtonFor('food'));
+    if(action==='plan')return tab('plan',navButtonFor('plan'));
+  }
+
+  function dailyCommandMarkup(){
+    return '<div class="daily-command" id="dailyCommand">'+
+      '<div class="daily-command-head"><div><span>План дня</span><h3 id="dailyCommandTitle">Три главных шага</h3><p id="dailyCommandSub">MY 60 выберет только то, что важно сегодня.</p></div><div class="daily-score" id="dailyScore"><b>0%</b><span>дня</span></div></div>'+
+      '<div class="daily-priorities" id="dailyPriorities"></div>'+
+      '<div class="daily-route" id="dailyRoute"></div>'+
+      '<div class="daily-left" id="dailyLeft"></div>'+
+    '</div>';
+  }
+
+  function todayFoodSummary(){
+    const list=(S.food&&S.food[key()])||[];
+    return list.reduce(function(a,x){a.cal+=+x.cal||0;a.p+=+x.p||0;return a},{cal:0,p:0});
+  }
+
+  function todayWorkoutPlan(){
+    if(typeof dayPlanForDate!=='function')return null;
+    return dayPlanForDate(new Date());
+  }
+
+  function dailyTaskData(){
+    const w=todayWellness(),food=todayFoodSummary(),stepsNow=+(S.steps[key()]||0),waterNow=+(S.water[key()]||0);
+    const stepGoalNow=typeof target==='function'?target():((S.profile&&+S.profile.steps)||7000);
+    const calGoal=(S.profile&&+S.profile.calories)||1500;
+    const workoutPlan=todayWorkoutPlan(),doneWork=(S.workouts[key()]||[]);
+    const tasks=[];
+
+    tasks.push({
+      id:'wellness',title:'Чек-ин состояния',sub:w?'Готово · рекомендации уже подстроены':'Сон, энергия, голод и стресс',
+      done:!!w,action:'wellness',cta:w?'Изменить':'Заполнить',icon:'♡',priority:w?8:1
+    });
+
+    if(food.cal<=0){
+      tasks.push({id:'food',title:'Записать первый приём пищи',sub:'Так MY 60 сможет считать остаток и белок',done:false,action:'food',cta:'Открыть питание',icon:'○',priority:2});
+    }else if(food.p<90){
+      tasks.push({id:'protein',title:'Добрать белок',sub:'Сейчас '+Math.round(food.p)+' г · ориентир 100–110 г',done:false,action:'food',cta:'Подобрать еду',icon:'P',priority:2});
+    }else{
+      tasks.push({id:'protein',title:'Белок на сегодня',sub:Math.round(food.p)+' г · хороший уровень',done:true,action:'food',cta:'Посмотреть',icon:'✓',priority:9});
+    }
+
+    if(workoutPlan&&(workoutPlan.type==='A'||workoutPlan.type==='B')){
+      const wd=doneWork.indexOf(workoutPlan.type)>=0;
+      const gentle=w&&((w.sleep&&w.sleep<6.5)||w.energy<=4||w.stress>=8);
+      tasks.push({
+        id:'workout',title:wd?'Силовая выполнена':'Тренировка '+workoutPlan.type,
+        sub:wd?'Готово на сегодня':(gentle?'Сегодня можно облегчить или перенести':'30–35 минут · по плану сегодня'),
+        done:wd,action:'plan',cta:wd?'Готово':'Открыть план',icon:'A',priority:wd?10:3
+      });
+    }
+
+    tasks.push({
+      id:'steps',title:'Шаги',sub:stepsNow.toLocaleString('ru-RU')+' из '+Math.round(stepGoalNow).toLocaleString('ru-RU'),
+      done:stepsNow>=stepGoalNow,action:'steps',cta:stepsNow>=stepGoalNow?'Готово':'Добавить шаги',icon:'↗',priority:4
+    });
+    tasks.push({
+      id:'water',title:'Вода',sub:waterNow.toLocaleString('ru-RU')+' мл · ориентир 1,5–2 л',
+      done:waterNow>=1500,action:'water',cta:waterNow>=1500?'Готово':'+250 мл',icon:'◌',priority:5
+    });
+
+    const calOkay=food.cal>=calGoal*.78&&food.cal<=calGoal*1.12;
+    if(food.cal>0)tasks.push({
+      id:'calories',title:'Баланс питания',sub:Math.round(food.cal)+' из '+calGoal+' ккал',
+      done:calOkay,action:'food',cta:'Посмотреть',icon:'≈',priority:6
+    });
+
+    return tasks;
+  }
+
+  function updateDailyCommand(){
+    const root=document.getElementById('dailyCommand');if(!root||!window.S)return;
+    const tasks=dailyTaskData(),done=tasks.filter(function(t){return t.done}).length;
+    const score=tasks.length?Math.round(done/tasks.length*100):0;
+    const scoreEl=document.getElementById('dailyScore');
+    if(scoreEl){scoreEl.querySelector('b').textContent=score+'%';scoreEl.style.setProperty('--daily-p',score+'%')}
+
+    const priorities=document.getElementById('dailyPriorities');
+    const chosen=tasks.slice().sort(function(a,b){
+      if(a.done!==b.done)return a.done?1:-1;
+      return a.priority-b.priority;
+    }).slice(0,3);
+    if(priorities)priorities.innerHTML=chosen.map(function(t,i){
+      return '<button type="button" class="daily-priority '+(t.done?'done':'')+'" onclick="dailyAction(\''+t.action+'\')">'+
+        '<div class="daily-priority-num">'+(t.done?'✓':'0'+(i+1))+'</div><div class="daily-priority-copy"><b>'+t.title+'</b><small>'+t.sub+'</small></div><span>'+t.cta+'</span>'+
+      '</button>';
+    }).join('');
+
+    const route=document.getElementById('dailyRoute');
+    if(route){
+      const hour=new Date().getHours(),w=todayWellness(),weightDone=!!(S.weights&&S.weights[key()]),food=todayFoodSummary(),stepsDone=+(S.steps[key()]||0)>0;
+      const segments=[
+        {name:'Утро',state:(w||weightDone)?'done':(hour<12?'now':'miss'),text:w?'чек-ин готов':weightDone?'вес записан':'чек-ин + вес по желанию'},
+        {name:'День',state:food.cal>0?'done':(hour>=12&&hour<18?'now':'wait'),text:food.cal>0?'питание ведётся':'еда + вода + движение'},
+        {name:'Вечер',state:stepsDone&&hour>=18?'done':(hour>=18?'now':'wait'),text:hour>=18?'закрыть остаток дня':'итоги и план на завтра'}
+      ];
+      route.innerHTML=segments.map(function(s){return '<div class="route-segment '+s.state+'"><i></i><div><b>'+s.name+'</b><small>'+s.text+'</small></div></div>'}).join('');
+    }
+
+    const left=document.getElementById('dailyLeft');
+    if(left){
+      const remaining=tasks.filter(function(t){return !t.done});
+      if(!remaining.length){
+        left.innerHTML='<div class="daily-left-mark">✓</div><div><span>На сегодня достаточно</span><b>Главные пункты закрыты</b><p>Не нужно добирать активность или еду только ради красивого процента.</p></div>';
+      }else{
+        const first=remaining.slice().sort(function(a,b){return a.priority-b.priority})[0];
+        left.innerHTML='<div class="daily-left-mark">→</div><div><span>Следующий шаг</span><b>'+first.title+'</b><p>'+first.sub+'</p></div>';
+      }
+    }
+
+    const title=document.getElementById('dailyCommandTitle'),sub=document.getElementById('dailyCommandSub');
+    if(title)title.textContent=score>=80?'День почти собран':score>=40?'Держим ритм':'Начнём с малого';
+    if(sub)sub.textContent=score>=80?'Осталось совсем немного. Не нужно делать больше плана.':score>=40?'Закрывай пункты по одному — порядок не важен.':'Выбери только первый пункт. Остальное MY 60 подстроит дальше.';
+  }
+
+  window.dailyAction=dailyAction;
+
   function decorateToday(){
     const sec=document.getElementById('today');
     if(!sec)return;
@@ -142,6 +271,16 @@
       if(anchor)anchor.insertAdjacentHTML('afterend',wellnessInsightMarkup());
     }
     updateTodayWellness();
+    let dc=document.getElementById('dailyCommand');
+    if(!dc){
+      const anchor=document.getElementById('todayWellnessCard')||sec.querySelector('.quick-strip')||hero;
+      if(anchor)anchor.insertAdjacentHTML('afterend',dailyCommandMarkup());
+    }
+    const oldWell=sec.querySelector('#wellText')&&sec.querySelector('#wellText').closest('.card');
+    if(oldWell)oldWell.classList.add('today-legacy-wellness');
+    const oldCheck=sec.querySelector('#score')&&sec.querySelector('#score').closest('.card');
+    if(oldCheck)oldCheck.classList.add('today-legacy-check');
+    updateDailyCommand();
   }
   function updateRing(){
     const bar=document.getElementById('goalBar'),ring=document.querySelector('.premium-ring'),pct=document.getElementById('premiumPct');
