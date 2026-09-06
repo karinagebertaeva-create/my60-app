@@ -263,15 +263,23 @@
 
   function calculatorMarkup(){
     return '<div class="card calorie-card" id="calorieCalculator">'+
-      '<div class="calorie-head"><div><div class="label">Счётчик калорий</div><div class="big calorie-title">Рассчитать порцию</div><div class="muted">Один раз внеси продукт — дальше выбирай его из сохранённых и меняй только граммы.</div></div><div class="calorie-icon"><svg viewBox="0 0 24 24"><path d="M8 3h8l2 4v13H6V7l2-4Z"/><path d="M9 9h6"/><path d="M9 13h2M13 13h2M9 17h2M13 17h2"/></svg></div></div>'+
+      '<div class="calorie-head"><div><div class="label">Быстро добавить</div><div class="big calorie-title">Найди продукт</div><div class="muted">Выбери из базы MY 60 или из своих сохранённых — КБЖУ подставится автоматически.</div></div><div class="calorie-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></svg></div></div>'+
+      '<div class="smart-search-block product-search-wrap"><div class="search-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></svg></div><input id="calcName" autocomplete="off" placeholder="Творог, картошка, гуляш…" onfocus="productSearch(this.value)" oninput="productSearch(this.value)"><div class="product-suggestions" id="productSuggestions"></div></div>'+
+      '<div class="quick-food-row">'+
+        '<button type="button" onclick="quickFood(\'base-cottage-5\')">Творог</button>'+
+        '<button type="button" onclick="quickFood(\'base-egg\')">Яйцо</button>'+
+        '<button type="button" onclick="quickFood(\'base-chicken-breast-boiled\')">Курица</button>'+
+        '<button type="button" onclick="quickFood(\'base-buckwheat\')">Гречка</button>'+
+        '<button type="button" onclick="quickFood(\'base-potato-puree\')">Пюре</button>'+
+        '<button type="button" onclick="quickFood(\'base-goulash\')">Гуляш</button>'+
+      '</div>'+
       productLibraryMarkup()+
       '<div class="calc-fields">'+
-        '<div class="calc-wide product-search-wrap"><label>Продукт</label><input id="calcName" autocomplete="off" placeholder="Начни вводить: творог, картошка, гуляш…" onfocus="productSearch(this.value)" oninput="productSearch(this.value)"><div class="product-suggestions" id="productSuggestions"></div></div>'+
         '<div><label>Приём пищи</label><select id="calcMeal"><option>Завтрак</option><option>Обед</option><option>Перекус</option><option>Ужин</option><option>Другое</option></select></div>'+
         '<div><label>Вес порции, г</label><input id="calcGrams" type="number" inputmode="decimal" min="0" step="1" placeholder="150" oninput="calorieCalc()"></div>'+
-        '<div><label>Ккал / 100 г</label><input id="calcKcal100" type="number" inputmode="decimal" min="0" step="1" placeholder="120" oninput="calorieCalc()"></div>'+
+        '<div class="calc-wide"><label>Ккал / 100 г</label><input id="calcKcal100" type="number" inputmode="decimal" min="0" step="1" placeholder="120" oninput="calorieCalc()"></div>'+
       '</div>'+
-      '<div class="calc-macros-title"><span>КБЖУ на 100 г</span><span class="muted">сохранится вместе с продуктом</span></div>'+
+      '<div class="calc-macros-title"><span>КБЖУ на 100 г</span><span class="muted">можно поправить вручную</span></div>'+
       '<div class="calc-macros">'+
         '<label><span>Белки</span><input id="calcP100" type="number" inputmode="decimal" min="0" step=".1" placeholder="0" oninput="calorieCalc()"></label>'+
         '<label><span>Жиры</span><input id="calcF100" type="number" inputmode="decimal" min="0" step=".1" placeholder="0" oninput="calorieCalc()"></label>'+
@@ -282,7 +290,7 @@
         '<div class="calc-result-macros"><span>Б <b id="calcPResult">0</b> г</span><span>Ж <b id="calcFResult">0</b> г</span><span>У <b id="calcCResult">0</b> г</span></div>'+
       '</div>'+
       '<button class="btn calc-add" id="calcAddButton" onclick="addCalculatedFood()" disabled>Добавить в дневник</button>'+
-      '<div class="calc-daily"><span>Сегодня съедено <b id="calcDailyUsed">0</b> ккал</span><span>Осталось <b id="calcDailyLeft">—</b> ккал</span></div>'+
+      '<div class="calc-daily"><span>Сегодня <b id="calcDailyUsed">0</b> ккал</span><span>Осталось <b id="calcDailyLeft">—</b> ккал</span></div>'+
     '</div>';
   }
 
@@ -429,18 +437,136 @@
     }
   }
 
+  function nutritionDashboardMarkup(){
+    return '<div class="nutrition-dashboard" id="nutritionDashboard">'+
+      '<div class="nutrition-hero">'+
+        '<div class="nutrition-hero-copy"><div class="label">Сегодня</div><div class="nutrition-status" id="nutritionStatus">Баланс дня</div><div class="nutrition-left"><strong id="nutritionLeft">—</strong><span>ккал осталось</span></div><div class="nutrition-sub" id="nutritionSub">Собираем твой день</div></div>'+
+        '<div class="nutrition-ring" id="nutritionRing"><div><b id="nutritionPct">0%</b><span>нормы</span></div></div>'+
+      '</div>'+
+      '<div class="macro-grid">'+
+        '<div class="macro-card protein"><div class="macro-top"><span>Белок</span><b><i id="dashP">0</i> / 105 г</b></div><div class="macro-track"><span id="dashPBar"></span></div><small id="dashPLeft">осталось 105 г</small></div>'+
+        '<div class="macro-card fat"><div class="macro-top"><span>Жиры</span><b><i id="dashF">0</i> / 55 г</b></div><div class="macro-track"><span id="dashFBar"></span></div><small id="dashFLeft">осталось 55 г</small></div>'+
+        '<div class="macro-card carbs"><div class="macro-top"><span>Углеводы</span><b><i id="dashC">0</i> / 155 г</b></div><div class="macro-track"><span id="dashCBar"></span></div><small id="dashCLeft">осталось 155 г</small></div>'+
+      '</div>'+
+      '<div class="meal-pulse" id="mealPulse"></div>'+
+      '<div class="smart-tip" id="smartNutritionTip"></div>'+
+    '</div>';
+  }
+
+  function quickFood(id){
+    const p=builtInProducts.find(function(x){return x.id===id});
+    if(!p)return;
+    applyProductToCalculator(p);
+    const calc=document.getElementById('calorieCalculator');
+    if(calc)calc.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+
+  function tipButton(id,label){
+    return '<button type="button" onclick="quickFood(\''+id+'\')">'+escapeHtml(label)+'</button>';
+  }
+
+  function updateNutritionDashboard(){
+    if(!window.S||typeof key!=='function')return;
+    const list=(S.food&&S.food[key()])||[];
+    const sum=list.reduce(function(a,x){a.cal+=+x.cal||0;a.p+=+x.p||0;a.f+=+x.f||0;a.c+=+x.c||0;return a},{cal:0,p:0,f:0,c:0});
+    const goals={cal:(S.profile&&+S.profile.calories)||1500,p:105,f:55,c:155};
+    const left=Math.round(goals.cal-sum.cal);
+    const pct=Math.max(0,Math.min(100,sum.cal/goals.cal*100));
+    const leftEl=document.getElementById('nutritionLeft');
+    const status=document.getElementById('nutritionStatus');
+    const sub=document.getElementById('nutritionSub');
+    const ring=document.getElementById('nutritionRing');
+    const pctEl=document.getElementById('nutritionPct');
+    if(leftEl)leftEl.textContent=Math.abs(left);
+    if(status)status.textContent=left>=0?'Баланс дня':'Норма набрана';
+    if(sub)sub.textContent=left>=0?('Съедено '+Math.round(sum.cal)+' из '+goals.cal+' ккал'):('Выше ориентира на '+Math.abs(left)+' ккал — просто продолжай день спокойно');
+    const leftLabel=leftEl&&leftEl.nextElementSibling;
+    if(leftLabel)leftLabel.textContent=left>=0?'ккал осталось':'ккал выше ориентира';
+    if(ring)ring.style.setProperty('--food-p',pct+'%');
+    if(pctEl)pctEl.textContent=Math.round(pct)+'%';
+
+    [['P','p',goals.p],['F','f',goals.f],['C','c',goals.c]].forEach(function(x){
+      const val=Math.round(sum[x[1]]*10)/10;
+      const el=document.getElementById('dash'+x[0]);
+      const bar=document.getElementById('dash'+x[0]+'Bar');
+      const le=document.getElementById('dash'+x[0]+'Left');
+      if(el)el.textContent=val;
+      if(bar)bar.style.width=Math.min(100,val/x[2]*100)+'%';
+      if(le)le.textContent=val>=x[2]?'цель выполнена':'осталось '+Math.round((x[2]-val)*10)/10+' г';
+    });
+
+    const mealNames=['Завтрак','Обед','Перекус','Ужин'];
+    const mealIcons={'Завтрак':'☀','Обед':'◐','Перекус':'◇','Ужин':'☾'};
+    const pulse=document.getElementById('mealPulse');
+    if(pulse){
+      pulse.innerHTML=mealNames.map(function(m){
+        const items=list.filter(function(x){return x.meal===m});
+        const kc=Math.round(items.reduce(function(a,x){return a+(+x.cal||0)},0));
+        return '<div class="meal-slot '+(items.length?'filled':'')+'"><span>'+mealIcons[m]+'</span><div><b>'+m+'</b><small>'+(items.length?kc+' ккал':'пока пусто')+'</small></div></div>';
+      }).join('');
+    }
+
+    const tip=document.getElementById('smartNutritionTip');
+    if(!tip)return;
+    const proteinLeft=goals.p-sum.p;
+    const hour=new Date().getHours();
+    let title='',copy='',buttons='';
+    if(!list.length){
+      title=hour<12?'Начни день с белка':'Соберём первый приём пищи';
+      copy='Хорошая база — белок + привычный гарнир. Выбери вариант, укажи граммы и добавь.';
+      buttons=tipButton('base-cottage-5','Творог 5%')+tipButton('base-egg','Яйцо')+tipButton('base-buckwheat','Гречка');
+    }else if(left<0){
+      title='День уже собран';
+      copy='Не нужно ничего компенсировать голоданием. Если позже проголодаешься, выбирай обычную лёгкую еду по аппетиту.';
+      buttons=tipButton('base-greek-yogurt','Греческий йогурт')+tipButton('base-cucumber','Огурец');
+    }else if(proteinLeft>30&&left>250){
+      title='Сейчас выгоднее добрать белок';
+      copy='По сегодняшнему дневнику белка пока меньше ориентира. Эти продукты удобно впишутся в оставшиеся калории.';
+      buttons=tipButton('base-chicken-breast-boiled','Курица')+tipButton('base-cottage-5','Творог')+tipButton('base-greek-yogurt','Йогурт');
+    }else if(left<=220){
+      title='До ориентира осталось немного';
+      copy='Если голод есть — выбери небольшую порцию. Если голода нет, не нужно доедать цифру ради цифры.';
+      buttons=tipButton('base-greek-yogurt','Йогурт')+tipButton('base-strawberry','Клубника');
+    }else{
+      title='Баланс выглядит хорошо';
+      copy='Белок уже близко к цели. Остаток дня можно собрать из обычной еды без жёстких ограничений.';
+      buttons=tipButton('base-potato-boiled','Картофель')+tipButton('base-greek-salad','Греческий салат')+tipButton('base-chicken-breast-boiled','Курица');
+    }
+    tip.innerHTML='<div class="tip-icon">✦</div><div class="tip-copy"><span>Рекомендация MY 60</span><b>'+title+'</b><p>'+copy+'</p><div class="tip-actions">'+buttons+'</div></div>';
+  }
+
   function decorateFood(){
     const sec=document.getElementById('food');
     if(!sec)return;
+    const legacy=sec.querySelector(':scope > .card');
+    if(legacy)legacy.classList.add('food-legacy-summary');
+    let dash=document.getElementById('nutritionDashboard');
+    if(!dash){
+      const title=sec.querySelector('.premium-section-title');
+      if(title)title.insertAdjacentHTML('afterend',nutritionDashboardMarkup());
+      else sec.insertAdjacentHTML('afterbegin',nutritionDashboardMarkup());
+    }
     let calc=document.getElementById('calorieCalculator');
     if(!calc){
-      const first=sec.querySelector('.card');
-      if(!first)return;
-      first.insertAdjacentHTML('afterend',calculatorMarkup());
+      const diary=document.getElementById('foodList');
+      const diaryCard=diary&&diary.closest('.card');
+      if(diaryCard)diaryCard.insertAdjacentHTML('beforebegin',calculatorMarkup());
+      else sec.insertAdjacentHTML('beforeend',calculatorMarkup());
       calc=document.getElementById('calorieCalculator');
     }
+    const diary=document.getElementById('foodList');
+    const diaryCard=diary&&diary.closest('.card');
+    if(diaryCard){
+      diaryCard.classList.add('food-diary-card');
+      const lab=diaryCard.querySelector('.label');
+      if(lab)lab.textContent='Дневник питания';
+    }
+    const caffeine=document.getElementById('caf');
+    const caffeineCard=caffeine&&caffeine.closest('.card');
+    if(caffeineCard)caffeineCard.classList.add('caffeine-card');
     renderProductLibrary();
     updateCalorieDaily();
+    updateNutritionDashboard();
     calorieCalc();
   }
 
@@ -521,6 +647,7 @@
   window.toggleFavoriteProduct=toggleFavoriteProduct;
   window.productSearch=productSearch;
   window.chooseProductSuggestion=chooseProductSuggestion;
+  window.quickFood=quickFood;
   document.addEventListener('click',function(e){if(!e.target.closest('.product-search-wrap'))hideProductSuggestions()});
 
   function decorate(){
