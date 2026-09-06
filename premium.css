@@ -3325,3 +3325,188 @@ canvas{margin-top:14px;height:220px;border:0;border-radius:20px;background:linea
     grid-template-columns:1fr
   }
 }
+
+/* Body measurements analytics v37 */
+.progress-measure-legacy{display:none!important}
+.body-progress-card{
+  margin-top:10px;
+  padding:17px;
+  border-radius:26px;
+  border:1px solid rgba(17,22,19,.055);
+  background:linear-gradient(145deg,#fff,#f8f7f3);
+  box-shadow:0 12px 32px rgba(22,29,25,.055)
+}
+.body-progress-head{
+  display:flex;
+  justify-content:space-between;
+  gap:14px;
+  align-items:flex-start
+}
+.body-progress-head>div:first-child{min-width:0}
+.body-progress-head h3{
+  margin:4px 0 3px;
+  font-size:21px;
+  letter-spacing:-.04em
+}
+.body-progress-head p{
+  margin:0;
+  max-width:330px;
+  font-size:9px;
+  line-height:1.45;
+  color:#8e9490
+}
+.body-progress-head>button{
+  flex:0 0 auto;
+  border:0;
+  border-radius:12px;
+  background:#1a211d;
+  color:#fff;
+  padding:9px 10px;
+  font-size:8px;
+  font-weight:850
+}
+.body-metric-tabs{
+  display:flex;
+  gap:6px;
+  overflow-x:auto;
+  padding:2px 0 3px;
+  margin-top:12px;
+  scrollbar-width:none
+}
+.body-metric-tabs::-webkit-scrollbar{display:none}
+.body-metric-tabs button{
+  flex:0 0 auto;
+  border:1px solid #e3e6e1;
+  border-radius:999px;
+  background:#f6f6f3;
+  color:#737b75;
+  padding:7px 10px;
+  font-size:8px;
+  font-weight:850
+}
+.body-metric-tabs button.active{
+  background:#1a211d;
+  border-color:#1a211d;
+  color:#fff
+}
+.body-change-hero{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:7px;
+  margin-top:10px
+}
+.body-change-hero>div{
+  min-width:0;
+  padding:11px;
+  border-radius:15px;
+  background:#f5f5f2
+}
+.body-change-hero>div.down{
+  background:#edf3ee
+}
+.body-change-hero>div.up{
+  background:#f5ecea
+}
+.body-change-hero span{
+  display:block;
+  font-size:7px;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:#999f9b
+}
+.body-change-hero b{
+  display:block;
+  margin-top:5px;
+  font-size:12px
+}
+.body-change-hero small{
+  display:block;
+  margin-top:3px;
+  font-size:7px;
+  color:#959b97
+}
+.body-change-hero .body-empty{
+  grid-column:1/-1
+}
+.body-change-hero .body-empty b{
+  font-size:13px
+}
+#bodyProgressChart{
+  width:100%;
+  height:170px;
+  margin-top:10px;
+  border:0;
+  border-radius:17px;
+  background:linear-gradient(180deg,#fbfbfa,#f5f5f2)
+}
+.body-measure-grid{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:6px;
+  margin-top:10px
+}
+.body-measure-grid button{
+  min-width:0;
+  border:1px solid #e7e9e5;
+  border-radius:14px;
+  background:#fafaf8;
+  color:var(--ink);
+  padding:9px 6px;
+  text-align:left
+}
+.body-measure-grid button.active{
+  border-color:#cfd9d1;
+  background:#eef3ee
+}
+.body-measure-grid span{
+  display:block;
+  font-size:6px;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:#979d99
+}
+.body-measure-grid b{
+  display:block;
+  margin-top:4px;
+  font-size:10px
+}
+.body-measure-grid small{
+  display:block;
+  margin-top:3px;
+  font-size:6px;
+  line-height:1.3;
+  color:#989e9a
+}
+@media(max-width:480px){
+  .body-progress-card{
+    padding:15px;
+    border-radius:22px
+  }
+  .body-progress-head{
+    display:block
+  }
+  .body-progress-head>button{
+    width:100%;
+    margin-top:10px
+  }
+  .body-change-hero{
+    grid-template-columns:1fr 1fr
+  }
+  .body-change-hero>div:last-child{
+    grid-column:1/-1
+  }
+  .body-measure-grid{
+    grid-template-columns:1fr 1fr
+  }
+  .body-measure-grid button:last-child{
+    grid-column:1/-1
+  }
+}
+@media(max-width:350px){
+  .body-change-hero{
+    grid-template-columns:1fr
+  }
+  .body-change-hero>div:last-child{
+    grid-column:auto
+  }
+}
