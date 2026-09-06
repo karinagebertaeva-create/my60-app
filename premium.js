@@ -400,7 +400,7 @@
     const p=ensureProductLibrary().find(function(x){return x.id===id});
     if(!p)return;
     p.favorite=!p.favorite;
-    if(typeof persist==='function')persist();
+    if(typeof save==='function')save();
     renderProductLibrary();
   }
 
