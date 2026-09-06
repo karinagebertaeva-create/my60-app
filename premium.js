@@ -602,6 +602,231 @@
     tip.innerHTML='<div class="tip-icon">✦</div><div class="tip-copy"><span>Рекомендация MY 60</span><b>'+title+'</b><p>'+copy+'</p><div class="tip-actions">'+buttons+'</div></div>';
   }
 
+
+  let recipeDraft=[];
+  let recipePendingProduct=null;
+  let editingRecipeId=null;
+
+  function ensureRecipes(){
+    if(!window.S)return [];
+    if(!Array.isArray(S.recipes))S.recipes=[];
+    return S.recipes;
+  }
+
+  function yesterdayKey(){
+    const d=new Date();d.setDate(d.getDate()-1);return key(d);
+  }
+
+  function foodToolsMarkup(){
+    return '<div class="food-tools-card" id="foodToolsCard">'+
+      '<div class="food-tools-head"><div><div class="label">Быстрые действия</div><h3>Ещё быстрее</h3><p>Повтори привычную еду или сохрани домашнее блюдо один раз.</p></div><div class="food-tools-mark">✦</div></div>'+
+      '<div class="food-tool-actions">'+
+        '<button type="button" class="food-tool primary" onclick="copyYesterdayAll()"><span>↻</span><div><b>Повторить вчера</b><small id="yesterdaySummary">Проверяю дневник…</small></div></button>'+
+        '<button type="button" class="food-tool" onclick="openRecipeBuilder()"><span>＋</span><div><b>Создать блюдо</b><small>Ингредиенты → КБЖУ на 100 г</small></div></button>'+
+      '</div>'+
+      '<div class="yesterday-meals" id="yesterdayMeals"></div>'+
+      '<div class="saved-recipes" id="savedRecipes"></div>'+
+    '</div>';
+  }
+
+  function renderFoodTools(){
+    const root=document.getElementById('foodToolsCard');if(!root||!window.S)return;
+    const y=(S.food&&S.food[yesterdayKey()])||[];
+    const summary=document.getElementById('yesterdaySummary');
+    const kcal=Math.round(y.reduce(function(a,x){return a+(+x.cal||0)},0));
+    if(summary)summary.textContent=y.length?(y.length+' записей · '+kcal+' ккал'):'Вчера записей нет';
+
+    const meals=document.getElementById('yesterdayMeals');
+    if(meals){
+      const order=['Завтрак','Обед','Перекус','Ужин','Другое','Напиток'];
+      const existing=order.filter(function(m){return y.some(function(x){return x.meal===m})});
+      meals.innerHTML=existing.length
+        ? '<div class="tool-subtitle">Повторить только приём пищи</div><div class="meal-copy-row">'+existing.map(function(m){
+            const items=y.filter(function(x){return x.meal===m});
+            const k=Math.round(items.reduce(function(a,x){return a+(+x.cal||0)},0));
+            return '<button type="button" onclick="copyYesterdayMeal(\''+escapeHtml(m)+'\')"><b>'+escapeHtml(m)+'</b><small>'+k+' ккал</small></button>';
+          }).join('')+'</div>'
+        : '';
+    }
+
+    const recipes=document.getElementById('savedRecipes');
+    if(recipes){
+      const list=ensureRecipes();
+      recipes.innerHTML=list.length
+        ? '<div class="recipes-head"><div class="tool-subtitle">Мои блюда</div><span>'+list.length+'</span></div><div class="recipe-list">'+list.slice().sort(function(a,b){return (b.updatedAt||0)-(a.updatedAt||0)}).map(function(r){
+            return '<div class="recipe-item"><button class="recipe-use" type="button" onclick="useRecipe(\''+r.id+'\')"><b>'+escapeHtml(r.name)+'</b><small>'+Math.round(+r.kcal100||0)+' ккал · Б '+round1(+r.p100||0)+' · Ж '+round1(+r.f100||0)+' · У '+round1(+r.c100||0)+' / 100 г</small></button><button class="recipe-more" type="button" onclick="openRecipeBuilder(\''+r.id+'\')">Изм.</button></div>';
+          }).join('')+'</div>'
+        : '<div class="recipes-empty">Здесь появятся твои домашние блюда: гуляш, пюре, суп, салат — любое.</div>';
+    }
+  }
+
+  function copyYesterdayMeal(meal){
+    if(!window.S||typeof key!=='function')return;
+    const src=((S.food&&S.food[yesterdayKey()])||[]).filter(function(x){return x.meal===meal});
+    if(!src.length)return;
+    if(!S.food[key()])S.food[key()]=[];
+    src.forEach(function(x){S.food[key()].push(Object.assign({},x,{copiedFrom:yesterdayKey()}))});
+    if(typeof save==='function')save();
+    renderFoodTools();
+  }
+
+  function copyYesterdayAll(){
+    if(!window.S||typeof key!=='function')return;
+    const src=((S.food&&S.food[yesterdayKey()])||[]);
+    if(!src.length){
+      const card=document.getElementById('foodToolsCard');
+      if(card){card.classList.add('nudge');setTimeout(function(){card.classList.remove('nudge')},500)}
+      return;
+    }
+    if(!S.food[key()])S.food[key()]=[];
+    src.forEach(function(x){S.food[key()].push(Object.assign({},x,{copiedFrom:yesterdayKey()}))});
+    if(typeof save==='function')save();
+    renderFoodTools();
+  }
+
+  function recipeProductByRef(source,id){
+    return source==='saved'
+      ? ensureProductLibrary().find(function(x){return x.id===id})
+      : builtInProducts.find(function(x){return x.id===id});
+  }
+
+  function openRecipeBuilder(id){
+    editingRecipeId=id||null;
+    recipePendingProduct=null;
+    const existing=id?ensureRecipes().find(function(r){return r.id===id}):null;
+    recipeDraft=existing&&Array.isArray(existing.ingredients)?existing.ingredients.map(function(x){return Object.assign({},x)}):[];
+    if(typeof sheet==='undefined'||typeof modal==='undefined')return;
+    sheet.innerHTML=
+      '<div class="recipe-builder">'+
+        '<div class="recipe-builder-head"><div><div class="label">Мои блюда</div><h3>'+(existing?'Редактировать блюдо':'Новое блюдо')+'</h3><p>Добавляй ингредиенты из базы. Вес готового блюда нужен, чтобы точно посчитать КБЖУ на 100 г.</p></div><div class="recipe-orb">◌</div></div>'+
+        '<label class="recipe-field"><span>Название блюда</span><input id="recipeName" value="'+escapeHtml(existing?existing.name:'')+'" placeholder="Например, мой гуляш"></label>'+
+        '<div class="recipe-add-box"><div class="recipe-search-wrap"><label>Ингредиент</label><input id="recipeIngredientSearch" autocomplete="off" placeholder="Начни вводить: говядина…" oninput="recipeIngredientSearch(this.value)" onfocus="recipeIngredientSearch(this.value)"><div id="recipeIngredientSuggestions" class="recipe-suggestions"></div></div><label class="recipe-grams"><span>Вес, г</span><input id="recipeIngredientGrams" type="number" inputmode="decimal" min="1" placeholder="200"></label><button class="recipe-add-btn" type="button" onclick="addRecipeIngredient()">Добавить ингредиент</button></div>'+
+        '<div id="recipeDraftList"></div>'+
+        '<label class="recipe-field final-weight"><span>Вес готового блюда, г</span><input id="recipeFinalWeight" type="number" inputmode="decimal" min="1" value="'+(existing&&existing.finalWeight?existing.finalWeight:'')+'" placeholder="Например, 950" oninput="renderRecipeDraft()"><small>После приготовления взвесь всё блюдо целиком.</small></label>'+
+        '<div class="recipe-result" id="recipeResult"></div>'+
+        '<button class="btn recipe-save" type="button" onclick="saveRecipe()">'+(existing?'Сохранить изменения':'Сохранить блюдо')+'</button>'+
+        (existing?'<button class="recipe-delete" type="button" onclick="deleteRecipe(\''+existing.id+'\')">Удалить блюдо</button>':'')+
+      '</div>';
+    modal.classList.add('open');
+    renderRecipeDraft();
+  }
+
+  function recipeIngredientSearch(query){
+    const box=document.getElementById('recipeIngredientSuggestions');if(!box)return;
+    const q=normalizeProductName(query);
+    let items=allSearchProducts();
+    if(q)items=items.filter(function(p){return normalizeProductName(p.name).includes(q)});
+    else items=items.slice().sort(function(a,b){return a.source==='saved'?-1:1}).slice(0,8);
+    items=items.slice(0,8);
+    box.innerHTML=items.length?items.map(function(p){
+      return '<button type="button" onmousedown="event.preventDefault()" onclick="chooseRecipeIngredient(\''+p.source+'\',\''+p.id+'\')"><b>'+escapeHtml(p.name)+'</b><small>'+Math.round(+p.kcal100||0)+' ккал / 100 г</small></button>';
+    }).join(''):'<div class="recipe-search-empty">Не нашла. Сначала сохрани продукт через основной калькулятор.</div>';
+    box.classList.add('show');
+  }
+
+  function chooseRecipeIngredient(source,id){
+    const p=recipeProductByRef(source,id);if(!p)return;
+    recipePendingProduct={source:source,id:id,name:p.name,kcal100:+p.kcal100||0,p100:+p.p100||0,f100:+p.f100||0,c100:+p.c100||0};
+    const input=document.getElementById('recipeIngredientSearch'),box=document.getElementById('recipeIngredientSuggestions'),grams=document.getElementById('recipeIngredientGrams');
+    if(input)input.value=p.name;
+    if(box)box.classList.remove('show');
+    if(grams)setTimeout(function(){grams.focus()},30);
+  }
+
+  function addRecipeIngredient(){
+    const gramsEl=document.getElementById('recipeIngredientGrams');
+    const grams=gramsEl?(+gramsEl.value||0):0;
+    if(!recipePendingProduct||grams<=0)return;
+    recipeDraft.push(Object.assign({},recipePendingProduct,{grams:grams}));
+    recipePendingProduct=null;
+    const search=document.getElementById('recipeIngredientSearch');
+    if(search)search.value='';
+    if(gramsEl)gramsEl.value='';
+    renderRecipeDraft();
+    if(search)search.focus();
+  }
+
+  function removeRecipeIngredient(i){
+    recipeDraft.splice(i,1);renderRecipeDraft();
+  }
+
+  function recipeTotals(){
+    return recipeDraft.reduce(function(a,x){
+      const k=(+x.grams||0)/100;
+      a.weight+=+x.grams||0;
+      a.kcal+=(+x.kcal100||0)*k;
+      a.p+=(+x.p100||0)*k;
+      a.f+=(+x.f100||0)*k;
+      a.c+=(+x.c100||0)*k;
+      return a;
+    },{weight:0,kcal:0,p:0,f:0,c:0});
+  }
+
+  function renderRecipeDraft(){
+    const list=document.getElementById('recipeDraftList'),result=document.getElementById('recipeResult');
+    const total=recipeTotals();
+    if(list){
+      list.innerHTML=recipeDraft.length
+        ? '<div class="recipe-draft-title">Ингредиенты <span>'+recipeDraft.length+'</span></div><div class="recipe-draft-items">'+recipeDraft.map(function(x,i){
+            return '<div><div><b>'+escapeHtml(x.name)+'</b><small>'+Math.round(+x.grams||0)+' г · '+Math.round((+x.kcal100||0)*(+x.grams||0)/100)+' ккал</small></div><button type="button" onclick="removeRecipeIngredient('+i+')">×</button></div>';
+          }).join('')+'</div>'
+        : '<div class="recipe-draft-empty">Выбери первый ингредиент выше.</div>';
+    }
+    if(result){
+      const fwEl=document.getElementById('recipeFinalWeight'),fw=fwEl?(+fwEl.value||0):0;
+      const factor=fw>0?100/fw:0;
+      result.innerHTML='<div><span>Всего в ингредиентах</span><b>'+Math.round(total.kcal)+' ккал</b><small>'+Math.round(total.weight)+' г до приготовления</small></div><div class="recipe-per100"><span>На 100 г готового блюда</span><b>'+(fw?Math.round(total.kcal*factor):'—')+' ккал</b><small>'+(fw?('Б '+round1(total.p*factor)+' · Ж '+round1(total.f*factor)+' · У '+round1(total.c*factor)):'Укажи итоговый вес')+'</small></div>';
+    }
+  }
+
+  function saveRecipe(){
+    const nameEl=document.getElementById('recipeName'),fwEl=document.getElementById('recipeFinalWeight');
+    const name=nameEl?nameEl.value.trim():'',fw=fwEl?(+fwEl.value||0):0,total=recipeTotals();
+    if(!name||!recipeDraft.length||fw<=0)return;
+    const factor=100/fw;
+    const recipes=ensureRecipes();
+    let r=editingRecipeId?recipes.find(function(x){return x.id===editingRecipeId}):null;
+    if(!r){r={id:'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,5)};recipes.push(r)}
+    r.name=name;r.finalWeight=fw;r.ingredients=recipeDraft.map(function(x){return Object.assign({},x)});
+    r.kcal100=round1(total.kcal*factor);r.p100=round1(total.p*factor);r.f100=round1(total.f*factor);r.c100=round1(total.c*factor);r.updatedAt=Date.now();
+
+    const lib=ensureProductLibrary();
+    let p=lib.find(function(x){return x.recipeId===r.id});
+    if(!p){p={id:'recipe-'+r.id,recipeId:r.id,favorite:true,lastUsed:0};lib.push(p)}
+    p.name=r.name;p.kcal100=r.kcal100;p.p100=r.p100;p.f100=r.f100;p.c100=r.c100;p.recipeId=r.id;
+    if(typeof save==='function')save();
+    if(typeof closeM==='function')closeM();
+    renderFoodTools();renderProductLibrary();
+  }
+
+  function useRecipe(id){
+    const r=ensureRecipes().find(function(x){return x.id===id});if(!r)return;
+    applyProductToCalculator({name:r.name,kcal100:r.kcal100,p100:r.p100,f100:r.f100,c100:r.c100});
+    const calc=document.getElementById('calorieCalculator');if(calc)calc.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+
+  function deleteRecipe(id){
+    const recipes=ensureRecipes(),i=recipes.findIndex(function(x){return x.id===id});
+    if(i>=0)recipes.splice(i,1);
+    const lib=ensureProductLibrary(),li=lib.findIndex(function(x){return x.recipeId===id});
+    if(li>=0)lib.splice(li,1);
+    if(typeof save==='function')save();
+    if(typeof closeM==='function')closeM();
+    renderFoodTools();renderProductLibrary();
+  }
+
+  window.copyYesterdayAll=copyYesterdayAll;
+  window.copyYesterdayMeal=copyYesterdayMeal;
+  window.openRecipeBuilder=openRecipeBuilder;
+  window.recipeIngredientSearch=recipeIngredientSearch;
+  window.chooseRecipeIngredient=chooseRecipeIngredient;
+  window.addRecipeIngredient=addRecipeIngredient;
+  window.removeRecipeIngredient=removeRecipeIngredient;
+  window.renderRecipeDraft=renderRecipeDraft;
+  window.saveRecipe=saveRecipe;
+  window.useRecipe=useRecipe;
+  window.deleteRecipe=deleteRecipe;
+
   function decorateFood(){
     const sec=document.getElementById('food');
     if(!sec)return;
@@ -613,11 +838,17 @@
       if(title)title.insertAdjacentHTML('afterend',nutritionDashboardMarkup());
       else sec.insertAdjacentHTML('afterbegin',nutritionDashboardMarkup());
     }
-    let calc=document.getElementById('calorieCalculator');
-    if(!calc){
+    let tools=document.getElementById('foodToolsCard');
+    if(!tools){
       const diary=document.getElementById('foodList');
       const diaryCard=diary&&diary.closest('.card');
-      if(diaryCard)diaryCard.insertAdjacentHTML('beforebegin',calculatorMarkup());
+      if(diaryCard)diaryCard.insertAdjacentHTML('beforebegin',foodToolsMarkup());
+      else sec.insertAdjacentHTML('beforeend',foodToolsMarkup());
+      tools=document.getElementById('foodToolsCard');
+    }
+    let calc=document.getElementById('calorieCalculator');
+    if(!calc){
+      if(tools)tools.insertAdjacentHTML('afterend',calculatorMarkup());
       else sec.insertAdjacentHTML('beforeend',calculatorMarkup());
       calc=document.getElementById('calorieCalculator');
     }
@@ -631,6 +862,7 @@
     const caffeine=document.getElementById('caf');
     const caffeineCard=caffeine&&caffeine.closest('.card');
     if(caffeineCard)caffeineCard.classList.add('caffeine-card');
+    renderFoodTools();
     renderProductLibrary();
     updateCalorieDaily();
     updateNutritionDashboard();
