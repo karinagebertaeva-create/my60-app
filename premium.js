@@ -1505,6 +1505,171 @@
 
   window.setProgressPeriod=setProgressPeriod;
 
+
+  function weekKeysEndingToday(offset){
+    const out=[];
+    for(let i=6+offset;i>=offset;i--)out.push(dateKeyOffset(i));
+    return out;
+  }
+
+  function weeklyMetrics(keys){
+    const weightEntries=Object.entries(S.weights||{}).filter(function(x){return keys.indexOf(x[0])>=0}).sort();
+    const foodDays=keys.map(function(k){
+      const list=(S.food&&S.food[k])||[];
+      return list.reduce(function(a,x){a.cal+=+x.cal||0;a.p+=+x.p||0;return a},{cal:0,p:0});
+    });
+    const loggedFood=foodDays.filter(function(x){return x.cal>0});
+    const stepVals=keys.map(function(k){return +(S.steps[k]||0)}).filter(function(v){return v>0});
+    const sleepVals=keys.map(function(k){return +(S.well[k]&&S.well[k].sleep||0)}).filter(function(v){return v>0});
+    const workouts=keys.reduce(function(n,k){
+      return n+((S.workouts[k]||[]).filter(function(x){return x==='A'||x==='B'}).length);
+    },0);
+    const checkins=keys.filter(function(k){return !!(S.well&&S.well[k])}).length;
+    const lastWeight=weightEntries.length?+weightEntries[weightEntries.length-1][1]:null;
+    const firstWeight=weightEntries.length?+weightEntries[0][1]:null;
+    return {
+      weights:weightEntries,
+      firstWeight:firstWeight,
+      lastWeight:lastWeight,
+      weightDelta:(firstWeight!=null&&lastWeight!=null)?lastWeight-firstWeight:null,
+      avgCalories:loggedFood.length?averageNumber(loggedFood.map(function(x){return x.cal})):0,
+      avgProtein:loggedFood.length?averageNumber(loggedFood.map(function(x){return x.p})):0,
+      foodLogged:loggedFood.length,
+      avgSteps:stepVals.length?averageNumber(stepVals):0,
+      stepLogged:stepVals.length,
+      avgSleep:sleepVals.length?averageNumber(sleepVals):0,
+      sleepLogged:sleepVals.length,
+      workouts:workouts,
+      checkins:checkins
+    };
+  }
+
+  function weeklyDashboardMarkup(){
+    return '<div class="weekly-experience" id="weeklyExperience">'+
+      '<div class="weekly-hero">'+
+        '<div class="weekly-copy"><div class="label">MY 60 · 7 дней</div><h3>Итог недели</h3><p id="weeklyHeroText">Собираю твои данные за последние 7 дней.</p><div class="weekly-dates" id="weeklyDates">—</div></div>'+
+        '<div class="weekly-ring" id="weeklyRing"><div><b id="weeklyRhythm">0%</b><span>ритм</span></div></div>'+
+      '</div>'+
+      '<div class="weekly-kpis">'+
+        '<div><span>Вес</span><b id="weeklyWeight">—</b><small id="weeklyWeightDelta">нет данных</small></div>'+
+        '<div><span>Питание</span><b id="weeklyCalories">—</b><small>ср. ккал</small></div>'+
+        '<div><span>Белок</span><b id="weeklyProtein">—</b><small>ср. г / день</small></div>'+
+        '<div><span>Шаги</span><b id="weeklySteps">—</b><small>среднее</small></div>'+
+        '<div><span>Сон</span><b id="weeklySleep">—</b><small>среднее</small></div>'+
+        '<div><span>Силовые</span><b id="weeklyWorkouts">0</b><small>за неделю</small></div>'+
+      '</div>'+
+      '<div class="weekly-analysis" id="weeklyAnalysis"></div>'+
+      '<div class="next-week-card" id="nextWeekCard"></div>'+
+    '</div>';
+  }
+
+  function weeklyRhythmScore(m){
+    const calGoal=(S.profile&&+S.profile.calories)||1500;
+    const stepGoal=typeof target==='function'?target():((S.profile&&+S.profile.steps)||7000);
+    const proteinGoal=100;
+    let score=0,parts=0;
+    if(m.foodLogged){score+=Math.min(1,m.foodLogged/5)*20;parts+=20}
+    if(m.avgCalories){const diff=Math.abs(m.avgCalories-calGoal)/calGoal;score+=(diff<=.12?20:diff<=.22?12:6);parts+=20}
+    if(m.avgProtein){score+=Math.min(1,m.avgProtein/proteinGoal)*20;parts+=20}
+    if(m.avgSteps){score+=Math.min(1,m.avgSteps/stepGoal)*20;parts+=20}
+    if(m.avgSleep){score+=Math.min(1,m.avgSleep/7)*10;parts+=10}
+    score+=Math.min(1,m.workouts/2)*10;parts+=10;
+    return parts?Math.max(0,Math.min(100,Math.round(score))):0;
+  }
+
+  function weeklyAnalysisItems(m){
+    const items=[];
+    const calGoal=(S.profile&&+S.profile.calories)||1500;
+    const stepGoal=typeof target==='function'?target():((S.profile&&+S.profile.steps)||7000);
+
+    if(m.weightDelta!=null&&m.weights.length>=2){
+      if(m.weightDelta<-0.15)items.push({state:'good',icon:'↘',title:'Вес движется вниз',text:'За неделю изменение '+round1(Math.abs(m.weightDelta))+' кг. Сохраняем текущий курс и не ужесточаем план.'});
+      else if(m.weightDelta>0.15)items.push({state:'neutral',icon:'≈',title:'Вес выше начала недели',text:'Одна неделя ещё не повод менять питание. Смотрим ещё на средний вес, талию и следующие измерения.'});
+      else items.push({state:'neutral',icon:'→',title:'Вес почти стабилен',text:'Для выводов о плато лучше смотреть 2–3 недели подряд, а не несколько дней.'});
+    }else{
+      items.push({state:'neutral',icon:'○',title:'Не хватает измерений веса',text:'Два–три утренних измерения в неделю уже дадут более понятную тенденцию.'});
+    }
+
+    if(m.avgProtein&&m.avgProtein<85)items.push({state:'focus',icon:'P',title:'Белок — главный фокус',text:'Среднее около '+Math.round(m.avgProtein)+' г. На следующей неделе проще всего добавить белок к 2–3 основным приёмам пищи.'});
+    else if(m.avgProtein>=95)items.push({state:'good',icon:'✓',title:'Белок держится хорошо',text:'Среднее около '+Math.round(m.avgProtein)+' г в дни с записями. Это можно оставить без изменений.'});
+
+    if(m.avgSteps&&m.avgSteps<stepGoal*.75)items.push({state:'focus',icon:'↗',title:'Движения можно немного добавить',text:'Среднее '+Math.round(m.avgSteps).toLocaleString('ru-RU')+' шагов. Лучше добавить короткие прогулки, а не резко поднимать цель.'});
+    else if(m.avgSteps>=stepGoal*.9)items.push({state:'good',icon:'✓',title:'Шаги близко к цели',text:'Среднее '+Math.round(m.avgSteps).toLocaleString('ru-RU')+' — хороший рабочий ритм.'});
+
+    if(m.avgSleep&&m.avgSleep<6.5)items.push({state:'focus',icon:'☾',title:'Восстановление просит внимания',text:'Средний сон '+round1(m.avgSleep)+' ч. На следующей неделе лучше не добавлять нагрузку раньше, чем улучшится сон.'});
+
+    if(m.workouts>=2)items.push({state:'good',icon:'A',title:'Силовые закрыты',text:m.workouts+' тренировки за 7 дней — достаточно. Дополнительные нужны только по желанию и при хорошем восстановлении.'});
+    else items.push({state:'focus',icon:'A',title:'Силовые: '+m.workouts+' из 2',text:'На следующей неделе оставляем две короткие тренировки A/B с паузой между ними.'});
+
+    return items.slice(0,4);
+  }
+
+  function nextWeekPlan(m){
+    const calGoal=(S.profile&&+S.profile.calories)||1500;
+    const steps=typeof target==='function'?target():((S.profile&&+S.profile.steps)||7000);
+    const focuses=[];
+    if(!m.foodLogged||m.foodLogged<4)focuses.push('Записывать питание хотя бы 4–5 дней');
+    if(m.avgProtein<90)focuses.push('Белок 100–110 г в день');
+    if(m.avgSteps<steps*.85)focuses.push('Добавить 1–2 короткие прогулки');
+    if(m.avgSleep&&m.avgSleep<6.5)focuses.push('Сон и восстановление важнее лишней нагрузки');
+    if(m.workouts<2)focuses.push('Силовые A + B');
+    if(!focuses.length)focuses.push('Повторить текущий ритм без усложнения');
+
+    let headline='Сохраняем курс';
+    if(m.avgSleep&&m.avgSleep<6.5)headline='Неделя восстановления';
+    else if(m.avgProtein<90)headline='Неделя белка';
+    else if(m.avgSteps<steps*.8)headline='Неделя движения';
+    else if(m.workouts<2)headline='Неделя двух силовых';
+
+    return {headline:headline,calories:calGoal,steps:steps,protein:'100–110 г',strength:'2',focuses:focuses.slice(0,3)};
+  }
+
+  function updateWeeklyExperience(){
+    if(!window.S)return;
+    const keys=weekKeysEndingToday(0),m=weeklyMetrics(keys),score=weeklyRhythmScore(m);
+    const ring=document.getElementById('weeklyRing'),rh=document.getElementById('weeklyRhythm');
+    if(ring)ring.style.setProperty('--week-p',score+'%');
+    if(rh)rh.textContent=score+'%';
+
+    const dates=document.getElementById('weeklyDates');
+    if(dates)dates.textContent=new Date(keys[0]+'T00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short'})+' — '+new Date(keys[6]+'T00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
+    const hero=document.getElementById('weeklyHeroText');
+    if(hero)hero.textContent=score>=80?'Неделя выглядит устойчиво. Не нужно усложнять то, что уже работает.':score>=55?'Есть рабочая база. Ниже — один-два фокуса, которые дадут больше всего пользы.':'Данных или стабильности пока мало. Следующая неделя будет про простые базовые действия.';
+
+    const weight=document.getElementById('weeklyWeight'),wd=document.getElementById('weeklyWeightDelta');
+    if(weight)weight.textContent=m.lastWeight!=null?round1(m.lastWeight)+' кг':'—';
+    if(wd)wd.textContent=m.weightDelta!=null?((m.weightDelta<0?'−':m.weightDelta>0?'+':'')+round1(Math.abs(m.weightDelta))+' кг за неделю'):'нужно ≥2 измерений';
+
+    const cal=document.getElementById('weeklyCalories'),pr=document.getElementById('weeklyProtein'),st=document.getElementById('weeklySteps'),sl=document.getElementById('weeklySleep'),wo=document.getElementById('weeklyWorkouts');
+    if(cal)cal.textContent=m.avgCalories?Math.round(m.avgCalories):'—';
+    if(pr)pr.textContent=m.avgProtein?Math.round(m.avgProtein):'—';
+    if(st)st.textContent=m.avgSteps?Math.round(m.avgSteps).toLocaleString('ru-RU'):'—';
+    if(sl)sl.textContent=m.avgSleep?round1(m.avgSleep)+' ч':'—';
+    if(wo)wo.textContent=m.workouts;
+
+    const analysis=document.getElementById('weeklyAnalysis'),items=weeklyAnalysisItems(m);
+    if(analysis)analysis.innerHTML='<div class="weekly-section-title"><span>Что видно по неделе</span><b>Без догадок — только по твоим записям</b></div><div class="weekly-analysis-list">'+items.map(function(x){return '<div class="weekly-analysis-item" data-state="'+x.state+'"><i>'+x.icon+'</i><div><b>'+x.title+'</b><p>'+x.text+'</p></div></div>'}).join('')+'</div>';
+
+    const plan=nextWeekPlan(m),card=document.getElementById('nextWeekCard');
+    if(card)card.innerHTML=
+      '<div class="next-week-head"><div><span>Следующие 7 дней</span><h3>'+plan.headline+'</h3><p>Цели не ужесточаем автоматически. Меняем только главный фокус.</p></div><div class="next-week-mark">→</div></div>'+
+      '<div class="next-week-targets"><div><span>Ккал</span><b>'+plan.calories+'</b></div><div><span>Белок</span><b>'+plan.protein+'</b></div><div><span>Шаги</span><b>'+Math.round(plan.steps).toLocaleString('ru-RU')+'</b></div><div><span>Силовые</span><b>'+plan.strength+'</b></div></div>'+
+      '<div class="next-week-focus">'+plan.focuses.map(function(x,i){return '<div><span>0'+(i+1)+'</span><b>'+x+'</b></div>'}).join('')+'</div>';
+  }
+
+  function decorateMore(){
+    const sec=document.getElementById('more');if(!sec)return;
+    const oldSummary=sec.querySelector('#summary')&&sec.querySelector('#summary').closest('.card');
+    if(oldSummary)oldSummary.classList.add('more-summary-legacy');
+    let exp=document.getElementById('weeklyExperience');
+    if(!exp){
+      const title=sec.querySelector('.premium-section-title');
+      if(title)title.insertAdjacentHTML('afterend',weeklyDashboardMarkup());
+      else sec.insertAdjacentHTML('afterbegin',weeklyDashboardMarkup());
+    }
+    updateWeeklyExperience();
+  }
+
   function decoratePlan(){
     const sec=document.getElementById('plan');if(!sec)return;
     const oldCards=Array.from(sec.children).filter(function(x){return x.classList&&x.classList.contains('card')});
@@ -1535,7 +1700,7 @@
   window.completePremiumWorkout=completePremiumWorkout;
 
   function decorate(){
-    decorateNav();sectionTitles();decorateToday();decorateFood();decorateProgress();decoratePlan();updateRing();
+    decorateNav();sectionTitles();decorateToday();decorateFood();decorateProgress();decoratePlan();decorateMore();updateRing();
   }
   document.addEventListener('DOMContentLoaded',decorate);
   if(typeof window.render==='function'){
