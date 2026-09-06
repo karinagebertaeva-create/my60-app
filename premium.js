@@ -1289,6 +1289,222 @@
     updateWeekRoute();renderTodayPlan();renderWorkoutPicker();renderInteractiveWorkout();updatePlanInsight();
   }
 
+
+  let progressPeriod=30;
+
+  function progressExperienceMarkup(){
+    return '<div class="progress-experience" id="progressExperience">'+
+      '<div class="progress-hero">'+
+        '<div class="progress-hero-copy"><div class="label">Твой прогресс</div><div class="progress-current"><strong id="progressCurrentWeight">—</strong><span>кг сейчас</span></div><div class="progress-change" id="progressChangeText">Добавь измерения веса</div></div>'+
+        '<div class="progress-goal-ring" id="progressGoalRing"><div><b id="progressGoalPct">0%</b><span>к цели</span></div></div>'+
+      '</div>'+
+      '<div class="progress-period"><button id="progress7" onclick="setProgressPeriod(7)">7 дней</button><button id="progress30" onclick="setProgressPeriod(30)">30 дней</button></div>'+
+      '<div class="progress-chart-card"><div class="progress-chart-head"><div><span>Динамика веса</span><b id="progressTrendTitle">Смотрим тенденцию</b></div><div class="trend-pill" id="progressTrendPill">—</div></div><canvas id="premiumProgressChart"></canvas><div class="progress-chart-foot"><span id="progressPeriodStart">—</span><span id="progressPeriodEnd">—</span></div></div>'+
+      '<div class="progress-stat-grid">'+
+        '<div><span>Средний вес</span><b id="progressAvgWeight">—</b><small id="progressAvgNote">за период</small></div>'+
+        '<div><span>Талия</span><b id="progressWaist">—</b><small id="progressWaistNote">нет замеров</small></div>'+
+        '<div><span>Шаги</span><b id="progressAvgSteps">—</b><small>среднее / день</small></div>'+
+        '<div><span>Силовые</span><b id="progressWorkoutCount">0</b><small id="progressWorkoutNote">за период</small></div>'+
+      '</div>'+
+      '<div class="progress-insight" id="progressInsight"></div>'+
+      '<div class="photo-compare-card" id="photoCompareCard"></div>'+
+    '</div>';
+  }
+
+  function setProgressPeriod(days){
+    progressPeriod=days===7?7:30;
+    const a=document.getElementById('progress7'),b=document.getElementById('progress30');
+    if(a)a.classList.toggle('active',progressPeriod===7);
+    if(b)b.classList.toggle('active',progressPeriod===30);
+    updateProgressExperience();
+    setTimeout(drawProgressChart,30);
+  }
+
+  function dateKeyOffset(daysAgo){
+    const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-daysAgo);return key(d);
+  }
+
+  function progressWeightEntries(){
+    const cutoff=dateKeyOffset(progressPeriod-1);
+    return Object.entries(S.weights||{}).filter(function(x){return x[0]>=cutoff}).sort();
+  }
+
+  function periodKeys(days){
+    const out=[];
+    for(let i=days-1;i>=0;i--)out.push(dateKeyOffset(i));
+    return out;
+  }
+
+  function averageNumber(arr){
+    return arr.length?arr.reduce(function(a,b){return a+b},0)/arr.length:0;
+  }
+
+  function nearestWeightBefore(targetKey){
+    const all=Object.entries(S.weights||{}).sort();
+    let found=null;
+    all.forEach(function(x){if(x[0]<=targetKey)found=x});
+    return found;
+  }
+
+  function progressTrend(){
+    const data=progressWeightEntries();
+    if(data.length<2)return {delta:0,label:'Мало данных',direction:'flat'};
+    const first=+data[0][1],last=+data[data.length-1][1],delta=last-first;
+    if(delta<-0.15)return {delta:delta,label:'Тренд вниз',direction:'down'};
+    if(delta>0.15)return {delta:delta,label:'Тренд вверх',direction:'up'};
+    return {delta:delta,label:'Вес стабилен',direction:'flat'};
+  }
+
+  function progressPhotoPair(){
+    const photos=(S.photos||[]).slice().sort(function(a,b){return String(a.date).localeCompare(String(b.date))});
+    const preferred=['front','side','back'];
+    for(const type of preferred){
+      const same=photos.filter(function(p){return p.type===type&&p.data});
+      if(same.length>=2)return {type:type,first:same[0],last:same[same.length-1]};
+    }
+    return null;
+  }
+
+  function updateProgressExperience(){
+    if(!window.S)return;
+    const latest=lastWeight(),start=+START||latest,goal=+GOAL||latest;
+    const total=start-goal,done=start-latest,pct=total>0?Math.max(0,Math.min(100,done/total*100)):0;
+    const current=document.getElementById('progressCurrentWeight');
+    if(current)current.textContent=round1(latest);
+    const ring=document.getElementById('progressGoalRing'),pctEl=document.getElementById('progressGoalPct');
+    if(ring)ring.style.setProperty('--goal-p',pct+'%');
+    if(pctEl)pctEl.textContent=Math.round(pct)+'%';
+
+    const data=progressWeightEntries(),trend=progressTrend();
+    const change=document.getElementById('progressChangeText');
+    if(change){
+      if(data.length>=2){
+        const d=trend.delta;
+        change.textContent=(d<0?'−':d>0?'+':'')+round1(Math.abs(d))+' кг за '+progressPeriod+' дней';
+      }else change.textContent='Добавь хотя бы 2 измерения за период';
+    }
+
+    const p7=document.getElementById('progress7'),p30=document.getElementById('progress30');
+    if(p7)p7.classList.toggle('active',progressPeriod===7);
+    if(p30)p30.classList.toggle('active',progressPeriod===30);
+
+    const avg=data.length?averageNumber(data.map(function(x){return +x[1]})):0;
+    const avgEl=document.getElementById('progressAvgWeight');
+    if(avgEl)avgEl.textContent=avg?round1(avg)+' кг':'—';
+
+    const measures=Object.entries(S.measures||{}).filter(function(x){return x[1]&&+x[1].waist}).sort();
+    const mCut=dateKeyOffset(progressPeriod-1);
+    const pm=measures.filter(function(x){return x[0]>=mCut});
+    const latestM=measures.length?measures[measures.length-1]:null;
+    const firstM=pm.length?pm[0]:null;
+    const waist=document.getElementById('progressWaist'),waistNote=document.getElementById('progressWaistNote');
+    if(waist)waist.textContent=latestM?round1(+latestM[1].waist)+' см':'—';
+    if(waistNote){
+      if(firstM&&latestM&&firstM!==latestM){
+        const wd=(+latestM[1].waist)-(+firstM[1].waist);
+        waistNote.textContent=(wd<0?'−':wd>0?'+':'')+round1(Math.abs(wd))+' см за период';
+      }else waistNote.textContent=latestM?'нужен ещё замер':'нет замеров';
+    }
+
+    const keys=periodKeys(progressPeriod);
+    const stepVals=keys.map(function(k){return +(S.steps[k]||0)}).filter(function(v){return v>0});
+    const avgSteps=stepVals.length?Math.round(averageNumber(stepVals)):0;
+    const stepsEl=document.getElementById('progressAvgSteps');
+    if(stepsEl)stepsEl.textContent=avgSteps?avgSteps.toLocaleString('ru-RU'):'—';
+
+    const workoutCount=keys.reduce(function(n,k){
+      return n+((S.workouts[k]||[]).filter(function(x){return x==='A'||x==='B'}).length);
+    },0);
+    const wo=document.getElementById('progressWorkoutCount');
+    if(wo)wo.textContent=workoutCount;
+    const woNote=document.getElementById('progressWorkoutNote');
+    if(woNote)woNote.textContent='за '+progressPeriod+' дней';
+
+    const title=document.getElementById('progressTrendTitle'),pill=document.getElementById('progressTrendPill');
+    if(title)title.textContent=trend.label;
+    if(pill){pill.textContent=data.length>=2?((trend.delta<0?'−':trend.delta>0?'+':'')+round1(Math.abs(trend.delta))+' кг'):'—';pill.dataset.dir=trend.direction}
+
+    const st=document.getElementById('progressPeriodStart'),en=document.getElementById('progressPeriodEnd');
+    if(st)st.textContent=data.length?new Date(data[0][0]+'T00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short'}):'—';
+    if(en)en.textContent=data.length?new Date(data[data.length-1][0]+'T00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short'}):'—';
+
+    const insight=document.getElementById('progressInsight');
+    if(insight){
+      let head='',copy='',mark='✦';
+      if(data.length<2){
+        head='Пока рано оценивать тенденцию';
+        copy='Добавляй вес регулярно. Один день почти ничего не говорит — полезнее смотреть среднее и направление за неделю.';
+      }else if(trend.direction==='down'){
+        head='Направление хорошее';
+        copy='Вес за период движется вниз. Смотри не на отдельные скачки, а на общую линию и средний вес.';
+        mark='↘';
+      }else if(trend.direction==='up'){
+        head='Не делаем вывод по одной неделе';
+        copy='Вес сейчас выше начала периода. Это может быть вода, соль, цикл или содержимое ЖКТ — важнее посмотреть ещё несколько измерений и талию.';
+        mark='≈';
+      }else{
+        head='Вес сейчас в плато';
+        copy='Если так держится 2–3 недели подряд, тогда уже есть смысл пересматривать план. Несколько стабильных дней — нормальная часть процесса.';
+        mark='→';
+      }
+      insight.innerHTML='<div class="progress-insight-mark">'+mark+'</div><div><span>Вывод MY 60</span><b>'+head+'</b><p>'+copy+'</p></div>';
+    }
+
+    const photo=document.getElementById('photoCompareCard'),pair=progressPhotoPair();
+    if(photo){
+      if(pair){
+        const label={front:'Спереди',side:'Сбоку',back:'Сзади'}[pair.type]||'Фото';
+        photo.innerHTML='<div class="photo-compare-head"><div><span>Фото прогресса</span><b>'+label+' · раньше / сейчас</b></div><button onclick="openEntryForm(\'photo\')">+ Фото</button></div><div class="photo-compare-grid"><div><img src="'+pair.first.data+'"><small>'+new Date(pair.first.date+'T00:00').toLocaleDateString('ru-RU')+'</small></div><div><img src="'+pair.last.data+'"><small>'+new Date(pair.last.date+'T00:00').toLocaleDateString('ru-RU')+'</small></div></div>';
+      }else{
+        photo.innerHTML='<div class="photo-compare-head"><div><span>Фото прогресса</span><b>Сравнение появится автоматически</b><p>Добавь хотя бы два фото одного ракурса.</p></div><button onclick="openEntryForm(\'photo\')">+ Фото</button></div>';
+      }
+    }
+  }
+
+  function drawProgressChart(){
+    const cv=document.getElementById('premiumProgressChart');
+    if(!cv||!window.S)return;
+    const rect=cv.getBoundingClientRect(),W=Math.max(300,Math.floor(rect.width||300)),H=210,dpr=Math.min(window.devicePixelRatio||1,2);
+    cv.width=W*dpr;cv.height=H*dpr;
+    const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);
+    const data=progressWeightEntries();
+    if(data.length<2){
+      ctx.fillStyle='#929894';ctx.font='600 12px -apple-system,BlinkMacSystemFont,sans-serif';
+      ctx.fillText('Добавь ещё несколько измерений веса',16,36);return;
+    }
+    const vals=data.map(function(x){return +x[1]}),mn=Math.min.apply(null,vals)-.35,mx=Math.max.apply(null,vals)+.35;
+    const px=16,py=18,usableW=W-px*2,usableH=H-py*2;
+    ctx.strokeStyle='#e7e9e5';ctx.lineWidth=1;
+    for(let i=0;i<4;i++){const y=py+usableH*i/3;ctx.beginPath();ctx.moveTo(px,y);ctx.lineTo(W-px,y);ctx.stroke()}
+    const pts=data.map(function(x,i){return {x:px+usableW*i/(data.length-1),y:py+usableH*(mx-(+x[1]))/(mx-mn)}});
+    const fill=ctx.createLinearGradient(0,py,0,H-py);fill.addColorStop(0,'rgba(120,146,126,.20)');fill.addColorStop(1,'rgba(120,146,126,0)');
+    ctx.beginPath();ctx.moveTo(pts[0].x,H-py);pts.forEach(function(p){ctx.lineTo(p.x,p.y)});ctx.lineTo(pts[pts.length-1].x,H-py);ctx.closePath();ctx.fillStyle=fill;ctx.fill();
+    ctx.beginPath();pts.forEach(function(p,i){i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)});ctx.strokeStyle='#78927e';ctx.lineWidth=3;ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke();
+    const last=pts[pts.length-1];ctx.beginPath();ctx.arc(last.x,last.y,5,0,Math.PI*2);ctx.fillStyle='#bd6e78';ctx.fill();
+  }
+
+  function decorateProgress(){
+    const sec=document.getElementById('progress');if(!sec)return;
+    const legacy=sec.querySelector(':scope > .card');
+    if(legacy)legacy.classList.add('progress-legacy-hidden');
+    let exp=document.getElementById('progressExperience');
+    if(!exp){
+      const title=sec.querySelector('.premium-section-title');
+      if(title)title.insertAdjacentHTML('afterend',progressExperienceMarkup());
+      else sec.insertAdjacentHTML('afterbegin',progressExperienceMarkup());
+    }
+    const measure=sec.querySelector('#measureList')&&sec.querySelector('#measureList').closest('.card');
+    const gallery=sec.querySelector('#gallery')&&sec.querySelector('#gallery').closest('.card');
+    const milestones=sec.querySelector('#milestones')&&sec.querySelector('#milestones').closest('.card');
+    if(measure)measure.classList.add('progress-detail-card');
+    if(gallery)gallery.classList.add('progress-detail-card','progress-gallery-legacy');
+    if(milestones)milestones.classList.add('progress-detail-card');
+    updateProgressExperience();
+    if(sec.classList.contains('active'))setTimeout(drawProgressChart,30);
+  }
+
+  window.setProgressPeriod=setProgressPeriod;
+
   function decoratePlan(){
     const sec=document.getElementById('plan');if(!sec)return;
     const oldCards=Array.from(sec.children).filter(function(x){return x.classList&&x.classList.contains('card')});
@@ -1319,7 +1535,7 @@
   window.completePremiumWorkout=completePremiumWorkout;
 
   function decorate(){
-    decorateNav();sectionTitles();decorateToday();decorateFood();decoratePlan();updateRing();
+    decorateNav();sectionTitles();decorateToday();decorateFood();decorateProgress();decoratePlan();updateRing();
   }
   document.addEventListener('DOMContentLoaded',decorate);
   if(typeof window.render==='function'){
@@ -1329,7 +1545,7 @@
   if(typeof window.draw==='function')window.draw=premiumDraw;
   if(typeof window.tab==='function'){
     const oldTab=window.tab;
-    window.tab=function(id,b){oldTab(id,b);requestAnimationFrame(()=>{decorate();if(id==='progress')setTimeout(premiumDraw,60);});}
+    window.tab=function(id,b){oldTab(id,b);requestAnimationFrame(()=>{decorate();if(id==='progress')setTimeout(()=>{premiumDraw();drawProgressChart();},60);});}
   }
   window.addEventListener('resize',()=>{if((function(){var p=document.getElementById('progress');return p&&p.classList.contains('active')})())premiumDraw();});
 })();
