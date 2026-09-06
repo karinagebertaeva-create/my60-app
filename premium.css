@@ -1603,3 +1603,64 @@ canvas{margin-top:14px;height:220px;border:0;border-radius:20px;background:linea
   .history-summary-grid{grid-template-columns:1fr 1fr}
   .history-well-grid{grid-template-columns:1fr 1fr}
 }
+
+/* Personal goals v24 */
+.goals-card{
+  margin-top:9px;padding:16px;border-radius:24px;border:1px solid rgba(17,22,19,.055);
+  background:
+    radial-gradient(circle at 96% 4%,rgba(189,110,120,.07),transparent 11rem),
+    linear-gradient(145deg,#fff,#f8f7f3);
+  box-shadow:0 10px 28px rgba(22,29,25,.05)
+}
+.goals-card-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.goals-card-head h3{margin:4px 0 3px;font-size:21px;letter-spacing:-.04em}
+.goals-card-head p{margin:0;font-size:9px;line-height:1.45;color:#8e9490}
+.goals-card-head button{
+  border:0;border-radius:12px;background:#1a211d;color:#fff;padding:9px 11px;
+  font-size:8px;font-weight:850;flex:0 0 auto
+}
+.goals-overview{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:13px}
+.goals-overview>div{
+  min-width:0;padding:10px 7px;border-radius:14px;background:rgba(255,255,255,.74);
+  border:1px solid #e9ebe7;text-align:center
+}
+.goals-overview span{
+  display:block;font-size:6px;text-transform:uppercase;letter-spacing:.08em;color:#9ba09c
+}
+.goals-overview b{display:block;margin-top:5px;font-size:10px;white-space:nowrap}
+.goals-overview small{display:block;margin-top:2px;font-size:6px;color:#a0a5a1}
+.goals-note{
+  margin-top:10px;padding:10px 11px;border-radius:14px;background:#f4efeb;
+  font-size:8px;line-height:1.45;color:#887d78
+}
+.goals-sheet-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
+.goals-sheet-head h3{margin:4px 0 3px!important;font-size:24px!important;letter-spacing:-.045em}
+.goals-sheet-head p{margin:0;max-width:320px;font-size:9px;line-height:1.45;color:#8e9490}
+.goals-sheet-mark{
+  width:44px;height:44px;border-radius:15px;display:grid;place-items:center;flex:0 0 auto;
+  background:#1a211d;color:#fff;font-size:11px;font-weight:900
+}
+.goals-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}
+.goals-form-grid label{
+  display:block;padding:11px;border-radius:16px;background:#f7f7f4;border:1px solid #e8eae6
+}
+.goals-form-grid label.wide{grid-column:1/-1}
+.goals-form-grid label>span{
+  display:block;margin-bottom:6px;font-size:8px;text-transform:uppercase;letter-spacing:.08em;font-weight:850;color:#8f9691
+}
+.goals-form-grid label>div{display:flex;align-items:center;gap:8px}
+.goals-form-grid input{
+  flex:1;min-width:0;height:42px!important;min-height:42px!important;padding:8px 10px!important;
+  border-radius:12px!important;font-size:16px;font-weight:900;letter-spacing:-.03em
+}
+.goals-form-grid i{font-style:normal;font-size:8px;color:#959b97;white-space:nowrap}
+.goals-safety{
+  margin-top:11px;padding:11px 12px;border-radius:15px;background:#f5ecea;
+  font-size:8px;line-height:1.45;color:#776865
+}
+.goals-save{width:100%;min-height:48px!important;margin-top:10px;border-radius:15px!important}
+@media(max-width:390px){
+  .goals-overview{grid-template-columns:repeat(3,1fr)}
+  .goals-form-grid{grid-template-columns:1fr}
+  .goals-form-grid label.wide{grid-column:auto}
+}
