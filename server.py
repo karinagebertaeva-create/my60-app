@@ -115,11 +115,11 @@ def home():
         html = source.read()
     html = html.replace(
         "</head>",
-        '<link rel="stylesheet" href="premium.css?v=7"><meta name="theme-color" content="#101513"></head>',
+        '<link rel="stylesheet" href="premium.css?v=8"><meta name="theme-color" content="#101513"></head>',
     )
     html = html.replace(
         "</body>",
-        '<script src="premium.js?v=7"></script></body>',
+        '<script src="premium.js?v=8"></script></body>',
     )
     return Response(html, mimetype="text/html", headers={"Cache-Control": "no-cache"})
 
