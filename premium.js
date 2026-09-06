@@ -775,6 +775,98 @@
     return '<button type="button" onclick="quickFood(\''+id+'\')">'+escapeHtml(label)+'</button>';
   }
 
+  function baseProduct(id){
+    return builtInProducts.find(function(x){return x.id===id});
+  }
+
+  function comboTotals(combo){
+    return combo.items.reduce(function(a,it){
+      const p=baseProduct(it.id);if(!p)return a;
+      const factor=(+it.grams||0)/100;
+      a.cal+=(+p.kcal100||0)*factor;
+      a.p+=(+p.p100||0)*factor;
+      a.f+=(+p.f100||0)*factor;
+      a.c+=(+p.c100||0)*factor;
+      return a;
+    },{cal:0,p:0,f:0,c:0});
+  }
+
+  function smartMealLibrary(){
+    return [
+      {id:'cottage-banana',meal:'Завтрак',title:'Творог + банан',note:'Сытный сладкий завтрак без сложной готовки',items:[{id:'base-cottage-5',grams:180},{id:'base-banana',grams:80}]},
+      {id:'eggs-buckwheat',meal:'Завтрак',title:'Яйца + гречка',note:'Тёплый вариант с белком и гарниром',items:[{id:'base-egg',grams:100},{id:'base-buckwheat',grams:130}]},
+      {id:'chicken-buckwheat',meal:'Обед',title:'Курица + гречка',note:'Много белка и понятная порция',items:[{id:'base-chicken-breast-boiled',grams:150},{id:'base-buckwheat',grams:150}]},
+      {id:'chicken-potato',meal:'Обед',title:'Курица + картофель',note:'Обычная домашняя еда, без «диетического» ощущения',items:[{id:'base-chicken-breast-boiled',grams:130},{id:'base-potato-boiled',grams:200}]},
+      {id:'yogurt-berries',meal:'Перекус',title:'Йогурт + клубника',note:'Лёгкий перекус с белком',items:[{id:'base-greek-yogurt',grams:200},{id:'base-strawberry',grams:150}]},
+      {id:'cottage-apple',meal:'Перекус',title:'Творог + яблоко',note:'Когда хочется чего-то сладкого и сытного',items:[{id:'base-cottage-5',grams:150},{id:'base-apple',grams:130}]},
+      {id:'chicken-salad',meal:'Ужин',title:'Курица + греческий салат',note:'Белковый ужин с овощами',items:[{id:'base-chicken-breast-boiled',grams:130},{id:'base-greek-salad',grams:180}]},
+      {id:'egg-potato',meal:'Ужин',title:'Яйца + картофель',note:'Простой домашний вариант на вечер',items:[{id:'base-egg',grams:100},{id:'base-potato-boiled',grams:180}]}
+    ];
+  }
+
+  function nextMealName(){
+    const hour=new Date().getHours();
+    const list=(S.food&&S.food[key()])||[];
+    const has=function(m){return list.some(function(x){return x.meal===m})};
+    if(hour<11&&!has('Завтрак'))return 'Завтрак';
+    if(hour<15&&!has('Обед'))return 'Обед';
+    if(hour<18&&!has('Перекус'))return 'Перекус';
+    return 'Ужин';
+  }
+
+  function smartMealOptions(sum,goals){
+    const left=Math.max(0,goals.cal-sum.cal),proteinLeft=Math.max(0,goals.p-sum.p),meal=nextMealName();
+    let pool=smartMealLibrary().filter(function(x){return x.meal===meal});
+    const all=smartMealLibrary();
+    if(pool.length<3)pool=pool.concat(all.filter(function(x){return x.meal!==meal}));
+    pool=pool.filter(function(x){
+      const t=comboTotals(x);
+      if(left>0&&left<220)return t.cal<=260;
+      if(left>220&&left<450)return t.cal<=470;
+      return true;
+    });
+    pool.sort(function(a,b){
+      const ta=comboTotals(a),tb=comboTotals(b);
+      const proteinBias=proteinLeft>25;
+      const sa=(proteinBias?-ta.p:0)+Math.abs((left||350)-ta.cal)/500;
+      const sb=(proteinBias?-tb.p:0)+Math.abs((left||350)-tb.cal)/500;
+      if(a.meal===meal&&b.meal!==meal)return -1;
+      if(b.meal===meal&&a.meal!==meal)return 1;
+      return sa-sb;
+    });
+    const seen={};
+    return pool.filter(function(x){if(seen[x.id])return false;seen[x.id]=true;return true}).slice(0,3);
+  }
+
+  function smartMealItemText(combo){
+    return combo.items.map(function(it){
+      const p=baseProduct(it.id);
+      return p?(p.name.replace(', варёная','').replace(' куриное, варёное','')+' '+it.grams+' г'):'';
+    }).filter(Boolean).join(' + ');
+  }
+
+  function addSmartMeal(id){
+    const combo=smartMealLibrary().find(function(x){return x.id===id});if(!combo||!window.S)return;
+    if(!S.food[key()])S.food[key()]=[];
+    combo.items.forEach(function(it){
+      const p=baseProduct(it.id);if(!p)return;
+      const factor=(+it.grams||0)/100;
+      S.food[key()].push({
+        meal:combo.meal,
+        name:p.name+' · '+Math.round(it.grams)+' г',
+        cal:round1((+p.kcal100||0)*factor),
+        p:round1((+p.p100||0)*factor),
+        f:round1((+p.f100||0)*factor),
+        c:round1((+p.c100||0)*factor),
+        smartMeal:combo.id
+      });
+    });
+    if(typeof save==='function')save();
+  }
+
+  window.addSmartMeal=addSmartMeal;
+
+
   function updateNutritionDashboard(){
     if(!window.S||typeof key!=='function')return;
     const list=(S.food&&S.food[key()])||[];
@@ -819,30 +911,34 @@
     const tip=document.getElementById('smartNutritionTip');
     if(!tip)return;
     const proteinLeft=goals.p-sum.p;
-    const hour=new Date().getHours();
-    let title='',copy='',buttons='';
-    if(!list.length){
-      title=hour<12?'Начни день с белка':'Соберём первый приём пищи';
-      copy='Хорошая база — белок + привычный гарнир. Выбери вариант, укажи граммы и добавь.';
-      buttons=tipButton('base-cottage-5','Творог 5%')+tipButton('base-egg','Яйцо')+tipButton('base-buckwheat','Гречка');
-    }else if(left<0){
-      title='День уже собран';
-      copy='Не нужно ничего компенсировать голоданием. Если позже проголодаешься, выбирай обычную лёгкую еду по аппетиту.';
-      buttons=tipButton('base-greek-yogurt','Греческий йогурт')+tipButton('base-cucumber','Огурец');
-    }else if(proteinLeft>30&&left>250){
-      title='Сейчас выгоднее добрать белок';
-      copy='По сегодняшнему дневнику белка пока меньше ориентира. Эти продукты удобно впишутся в оставшиеся калории.';
-      buttons=tipButton('base-chicken-breast-boiled','Курица')+tipButton('base-cottage-5','Творог')+tipButton('base-greek-yogurt','Йогурт');
+    const mealName=nextMealName();
+    const options=smartMealOptions(sum,goals);
+    let title='',copy='';
+    if(left<0){
+      title='Ориентир уже набран';
+      copy='Не нужно компенсировать это голоданием. Ниже — варианты только на случай реального голода.';
+    }else if(proteinLeft>30){
+      title='Следующий приём пищи — с белком';
+      copy='MY 60 подобрал варианты под остаток дня. Порции примерные — их можно менять после добавления.';
     }else if(left<=220){
-      title='До ориентира осталось немного';
-      copy='Если голод есть — выбери небольшую порцию. Если голода нет, не нужно доедать цифру ради цифры.';
-      buttons=tipButton('base-greek-yogurt','Йогурт')+tipButton('base-strawberry','Клубника');
+      title='Осталось немного';
+      copy='Если голода нет, можно ничего не добавлять. Если есть — выбери более лёгкий вариант.';
     }else{
-      title='Баланс выглядит хорошо';
-      copy='Белок уже близко к цели. Остаток дня можно собрать из обычной еды без жёстких ограничений.';
-      buttons=tipButton('base-potato-boiled','Картофель')+tipButton('base-greek-salad','Греческий салат')+tipButton('base-chicken-breast-boiled','Курица');
+      title='Что съесть дальше?';
+      copy='Готовые варианты для '+mealName.toLowerCase()+'. Один тап — и весь вариант попадёт в дневник.';
     }
-    tip.innerHTML='<div class="tip-icon">✦</div><div class="tip-copy"><span>Рекомендация MY 60</span><b>'+title+'</b><p>'+copy+'</p><div class="tip-actions">'+buttons+'</div></div>';
+    tip.innerHTML=
+      '<div class="smart-meal-head"><div><span>MY 60 · следующий приём пищи</span><b>'+title+'</b><p>'+copy+'</p></div><div class="smart-meal-mark">✦</div></div>'+
+      '<div class="smart-meal-options">'+options.map(function(o){
+        const t=comboTotals(o);
+        return '<button type="button" class="smart-meal-option" onclick="addSmartMeal(\''+o.id+'\')">'+
+          '<div class="smart-meal-option-top"><span>'+o.meal+'</span><b>'+Math.round(t.cal)+' ккал</b></div>'+
+          '<h4>'+o.title+'</h4><p>'+o.note+'</p>'+
+          '<div class="smart-meal-items">'+smartMealItemText(o)+'</div>'+
+          '<div class="smart-meal-macros"><span>Б '+Math.round(t.p)+' г</span><span>Ж '+Math.round(t.f)+' г</span><span>У '+Math.round(t.c)+' г</span><strong>+ в дневник</strong></div>'+
+        '</button>';
+      }).join('')+'</div>'+
+      '<div class="smart-meal-foot">Порции — ориентир для удобства, а не обязательное количество.</div>';
   }
 
 
