@@ -138,9 +138,9 @@
   }
 
   function dailyTaskData(){
-    const w=todayWellness(),food=todayFoodSummary(),stepsNow=+(S.steps[key()]||0),waterNow=+(S.water[key()]||0);
-    const stepGoalNow=typeof target==='function'?target():((S.profile&&+S.profile.steps)||7000);
-    const calGoal=(S.profile&&+S.profile.calories)||1500;
+    const w=todayWellness(),food=todayFoodSummary(),stepsNow=+(S.steps[key()]||0),waterNow=+(S.water[key()]||0),g=appGoals();
+    const stepGoalNow=typeof target==='function'?target():g.steps;
+    const calGoal=g.calories;
     const workoutPlan=todayWorkoutPlan(),doneWork=(S.workouts[key()]||[]);
     const tasks=[];
 
@@ -151,8 +151,8 @@
 
     if(food.cal<=0){
       tasks.push({id:'food',title:'Записать первый приём пищи',sub:'Так MY 60 сможет считать остаток и белок',done:false,action:'food',cta:'Открыть питание',icon:'○',priority:2});
-    }else if(food.p<90){
-      tasks.push({id:'protein',title:'Добрать белок',sub:'Сейчас '+Math.round(food.p)+' г · ориентир 100–110 г',done:false,action:'food',cta:'Подобрать еду',icon:'P',priority:2});
+    }else if(food.p<g.protein*.86){
+      tasks.push({id:'protein',title:'Добрать белок',sub:'Сейчас '+Math.round(food.p)+' г · цель '+Math.round(g.protein)+' г',done:false,action:'food',cta:'Подобрать еду',icon:'P',priority:2});
     }else{
       tasks.push({id:'protein',title:'Белок на сегодня',sub:Math.round(food.p)+' г · хороший уровень',done:true,action:'food',cta:'Посмотреть',icon:'✓',priority:9});
     }
@@ -172,8 +172,8 @@
       done:stepsNow>=stepGoalNow,action:'steps',cta:stepsNow>=stepGoalNow?'Готово':'Добавить шаги',icon:'↗',priority:4
     });
     tasks.push({
-      id:'water',title:'Вода',sub:waterNow.toLocaleString('ru-RU')+' мл · ориентир 1,5–2 л',
-      done:waterNow>=1500,action:'water',cta:waterNow>=1500?'Готово':'+250 мл',icon:'◌',priority:5
+      id:'water',title:'Вода',sub:waterNow.toLocaleString('ru-RU')+' из '+Math.round(g.water).toLocaleString('ru-RU')+' мл',
+      done:waterNow>=g.water,action:'water',cta:waterNow>=g.water?'Готово':'+250 мл',icon:'◌',priority:5
     });
 
     const calOkay=food.cal>=calGoal*.78&&food.cal<=calGoal*1.12;
@@ -240,7 +240,7 @@
     const stepGoalNow=typeof target==='function'?target():((S.profile&&+S.profile.steps)||7000);
     const plan=typeof dayPlanForDate==='function'?dayPlanForDate(tomorrowDate()):null;
     if(w&&((w.sleep&&w.sleep<6.5)||w.energy<=4||w.stress>=8))return {title:'Восстановление',text:'Завтра не добавляем нагрузку сверх плана. Сон, обычная еда и спокойный ритм — приоритет.',icon:'☾'};
-    if(food.p>0&&food.p<90)return {title:'Белок с первого приёма пищи',text:'Сегодня белка было меньше ориентира. Завтра проще начать с яйца, творога, йогурта или другого привычного белкового продукта.',icon:'P'};
+    if(food.p>0&&food.p<appGoals().protein*.86)return {title:'Белок с первого приёма пищи',text:'Сегодня белка было меньше ориентира. Завтра проще начать с яйца, творога, йогурта или другого привычного белкового продукта.',icon:'P'};
     if(plan&&(plan.type==='A'||plan.type==='B'))return {title:'Силовая '+plan.type,text:'Завтра по плану тренировка '+plan.type+'. Достаточно 30–35 минут без попытки сделать больше.',icon:'A'};
     if(stepsNow>0&&stepsNow<stepGoalNow*.7)return {title:'Немного больше движения',text:'Не нужно резко повышать шаги. Добавь одну короткую прогулку в удобное время.',icon:'↗'};
     return {title:'Повторить рабочий ритм',text:'Сегодня нет сигнала, что завтра нужно что-то ужесточать. Повторяем базовый план.',icon:'✓'};
@@ -282,16 +282,16 @@
     const card=document.getElementById('eveningCard');if(!card||!window.S)return;
     ensureDayCloseState();
     const hour=new Date().getHours(),closed=!!S.dayClosed[key()];
-    const food=todayFoodSummary(),stepsNow=+(S.steps[key()]||0),waterNow=+(S.water[key()]||0),w=todayWellness();
-    const stepGoalNow=typeof target==='function'?target():((S.profile&&+S.profile.steps)||7000);
-    const calGoal=(S.profile&&+S.profile.calories)||1500;
+    const food=todayFoodSummary(),stepsNow=+(S.steps[key()]||0),waterNow=+(S.water[key()]||0),w=todayWellness(),g=appGoals();
+    const stepGoalNow=typeof target==='function'?target():g.steps;
+    const calGoal=g.calories;
     const tomorrow=tomorrowDate(),tPlan=typeof dayPlanForDate==='function'?dayPlanForDate(tomorrow):null,focus=tomorrowFocus(),prep=tomorrowPrep();
     const tomorrowLabel=tomorrow.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'short'});
     const todayChecks=[
       {name:'Питание',done:food.cal>0,text:food.cal>0?Math.round(food.cal)+' ккал':'не записано'},
-      {name:'Белок',done:food.p>=90,text:food.p?Math.round(food.p)+' г':'—'},
+      {name:'Белок',done:food.p>=g.protein*.86,text:food.p?Math.round(food.p)+' г':'—'},
       {name:'Шаги',done:stepsNow>=stepGoalNow,text:stepsNow.toLocaleString('ru-RU')},
-      {name:'Вода',done:waterNow>=1500,text:waterNow+' мл'},
+      {name:'Вода',done:waterNow>=g.water,text:waterNow+' мл'},
       {name:'Чек-ин',done:!!w,text:w?'готов':'нет'}
     ];
     const doneCount=todayChecks.filter(function(x){return x.done}).length;
@@ -754,7 +754,7 @@
         '<div class="nutrition-ring" id="nutritionRing"><div><b id="nutritionPct">0%</b><span>нормы</span></div></div>'+
       '</div>'+
       '<div class="macro-grid">'+
-        '<div class="macro-card protein"><div class="macro-top"><span>Белок</span><b><i id="dashP">0</i> / 105 г</b></div><div class="macro-track"><span id="dashPBar"></span></div><small id="dashPLeft">осталось 105 г</small></div>'+
+        '<div class="macro-card protein"><div class="macro-top"><span>Белок</span><b><i id="dashP">0</i> / <i id="dashPGoal">105</i> г</b></div><div class="macro-track"><span id="dashPBar"></span></div><small id="dashPLeft">осталось 105 г</small></div>'+
         '<div class="macro-card fat"><div class="macro-top"><span>Жиры</span><b><i id="dashF">0</i> / 55 г</b></div><div class="macro-track"><span id="dashFBar"></span></div><small id="dashFLeft">осталось 55 г</small></div>'+
         '<div class="macro-card carbs"><div class="macro-top"><span>Углеводы</span><b><i id="dashC">0</i> / 155 г</b></div><div class="macro-track"><span id="dashCBar"></span></div><small id="dashCLeft">осталось 155 г</small></div>'+
       '</div>'+
@@ -779,7 +779,7 @@
     if(!window.S||typeof key!=='function')return;
     const list=(S.food&&S.food[key()])||[];
     const sum=list.reduce(function(a,x){a.cal+=+x.cal||0;a.p+=+x.p||0;a.f+=+x.f||0;a.c+=+x.c||0;return a},{cal:0,p:0,f:0,c:0});
-    const goals={cal:(S.profile&&+S.profile.calories)||1500,p:105,f:55,c:155};
+    const appG=appGoals(),goals={cal:appG.calories,p:appG.protein,f:55,c:155};
     const left=Math.round(goals.cal-sum.cal);
     const pct=Math.max(0,Math.min(100,sum.cal/goals.cal*100));
     const leftEl=document.getElementById('nutritionLeft');
@@ -1256,7 +1256,7 @@
       '<div class="plan-targets">'+
         '<div><span>Шаги</span><b id="planStepTarget">7 000</b><small>в день</small></div>'+
         '<div><span>Силовые</span><b id="planStrengthTarget">2</b><small>за неделю</small></div>'+
-        '<div><span>Белок</span><b>100–110</b><small>г / день</small></div>'+
+        '<div><span>Белок</span><b id="planProteinTarget">105</b><small>г / день</small></div>'+
       '</div>'+
       '<div class="week-route" id="weekRoute"></div>'+
       '<div class="today-plan-card" id="todayPlanCard"></div>'+
@@ -1521,6 +1521,7 @@
     const no=document.getElementById('planWeekNo');if(no)no.textContent=w;
     const st=document.getElementById('planStepTarget');if(st)st.textContent=settings.steps.toLocaleString('ru-RU');
     const strength=document.getElementById('planStrengthTarget');if(strength)strength.textContent=settings.strength;
+    const proteinTarget=document.getElementById('planProteinTarget');if(proteinTarget)proteinTarget.textContent=Math.round(appGoals().protein);
     const sub=document.getElementById('planHeroSub');if(sub)sub.textContent=settings.note+' · ориентир '+settings.steps.toLocaleString('ru-RU')+' шагов в день';
     const dates=weekDates();
     const workoutsDone=dates.reduce(function(n,d){return n+(S.workouts[key(d)]||[]).filter(function(x){return x==='A'||x==='B'}).length},0);
@@ -1809,7 +1810,7 @@
   function weeklyRhythmScore(m){
     const calGoal=(S.profile&&+S.profile.calories)||1500;
     const stepGoal=typeof target==='function'?target():((S.profile&&+S.profile.steps)||7000);
-    const proteinGoal=100;
+    const proteinGoal=appGoals().protein;
     let score=0,parts=0;
     if(m.foodLogged){score+=Math.min(1,m.foodLogged/5)*20;parts+=20}
     if(m.avgCalories){const diff=Math.abs(m.avgCalories-calGoal)/calGoal;score+=(diff<=.12?20:diff<=.22?12:6);parts+=20}
@@ -1852,7 +1853,7 @@
     const steps=typeof target==='function'?target():((S.profile&&+S.profile.steps)||7000);
     const focuses=[];
     if(!m.foodLogged||m.foodLogged<4)focuses.push('Записывать питание хотя бы 4–5 дней');
-    if(m.avgProtein<90)focuses.push('Белок 100–110 г в день');
+    if(m.avgProtein<appGoals().protein*.86)focuses.push('Белок '+Math.round(appGoals().protein)+' г в день');
     if(m.avgSteps<steps*.85)focuses.push('Добавить 1–2 короткие прогулки');
     if(m.avgSleep&&m.avgSleep<6.5)focuses.push('Сон и восстановление важнее лишней нагрузки');
     if(m.workouts<2)focuses.push('Силовые A + B');
@@ -1864,7 +1865,7 @@
     else if(m.avgSteps<steps*.8)headline='Неделя движения';
     else if(m.workouts<2)headline='Неделя двух силовых';
 
-    return {headline:headline,calories:calGoal,steps:steps,protein:'100–110 г',strength:'2',focuses:focuses.slice(0,3)};
+    return {headline:headline,calories:calGoal,steps:steps,protein:Math.round(appGoals().protein)+' г',strength:'2',focuses:focuses.slice(0,3)};
   }
 
   function updateWeeklyExperience(){
@@ -2029,6 +2030,91 @@
   window.openHistoryDay=openHistoryDay;
   window.repeatHistoryFood=repeatHistoryFood;
 
+  function ensureProfileGoals(){
+    if(!window.S||!S.profile)return {calories:1500,protein:105,steps:7000,water:1800,goal:60};
+    if(!(+S.profile.calories>0))S.profile.calories=1500;
+    if(!(+S.profile.protein>0))S.profile.protein=105;
+    if(!(+S.profile.steps>0))S.profile.steps=7000;
+    if(!(+S.profile.water>0))S.profile.water=1800;
+    return S.profile;
+  }
+
+  function appGoals(){
+    const p=ensureProfileGoals();
+    return {
+      calories:+p.calories||1500,
+      protein:+p.protein||105,
+      steps:+p.steps||7000,
+      water:+p.water||1800,
+      goal:+p.goal||60
+    };
+  }
+
+  function goalsCardMarkup(){
+    return '<div class="goals-card" id="goalsCard">'+
+      '<div class="goals-card-head"><div><div class="label">Персонализация</div><h3>Мои цели</h3><p>Эти значения используются по всему MY 60.</p></div><button type="button" onclick="openGoalsSettings()">Изменить</button></div>'+
+      '<div class="goals-overview">'+
+        '<div><span>Вес</span><b id="goalSettingWeight">—</b><small>цель</small></div>'+
+        '<div><span>Ккал</span><b id="goalSettingCalories">—</b><small>в день</small></div>'+
+        '<div><span>Белок</span><b id="goalSettingProtein">—</b><small>г / день</small></div>'+
+        '<div><span>Шаги</span><b id="goalSettingSteps">—</b><small>в день</small></div>'+
+        '<div><span>Вода</span><b id="goalSettingWater">—</b><small>мл / день</small></div>'+
+      '</div>'+
+      '<div class="goals-note">Меняй цели осознанно. MY 60 не будет автоматически снижать калории из-за нескольких дней без изменения веса.</div>'+
+    '</div>';
+  }
+
+  function updateGoalsCard(){
+    const root=document.getElementById('goalsCard');if(!root||!window.S)return;
+    const g=appGoals();
+    const map={
+      goalSettingWeight:round1(g.goal)+' кг',
+      goalSettingCalories:Math.round(g.calories),
+      goalSettingProtein:Math.round(g.protein)+' г',
+      goalSettingSteps:Math.round(g.steps).toLocaleString('ru-RU'),
+      goalSettingWater:Math.round(g.water)+' мл'
+    };
+    Object.keys(map).forEach(function(id){const el=document.getElementById(id);if(el)el.textContent=map[id]});
+  }
+
+  function openGoalsSettings(){
+    if(typeof sheet==='undefined'||typeof modal==='undefined'||!S.profile)return;
+    const g=appGoals();
+    sheet.innerHTML=
+      '<div class="goals-sheet">'+
+        '<div class="goals-sheet-head"><div><div class="label">Настройки MY 60</div><h3>Мои цели</h3><p>После сохранения все экраны пересчитаются автоматически.</p></div><div class="goals-sheet-mark">60</div></div>'+
+        '<div class="goals-form-grid">'+
+          '<label><span>Цель веса</span><div><input id="settingsGoalWeight" type="number" inputmode="decimal" step=".1" min="35" max="200" value="'+round1(g.goal)+'"><i>кг</i></div></label>'+
+          '<label><span>Калории</span><div><input id="settingsCalories" type="number" inputmode="numeric" step="10" min="1000" max="4000" value="'+Math.round(g.calories)+'"><i>ккал</i></div></label>'+
+          '<label><span>Белок</span><div><input id="settingsProtein" type="number" inputmode="numeric" step="5" min="40" max="250" value="'+Math.round(g.protein)+'"><i>г</i></div></label>'+
+          '<label><span>Шаги</span><div><input id="settingsSteps" type="number" inputmode="numeric" step="500" min="1000" max="30000" value="'+Math.round(g.steps)+'"><i>шагов</i></div></label>'+
+          '<label class="wide"><span>Вода</span><div><input id="settingsWater" type="number" inputmode="numeric" step="100" min="500" max="5000" value="'+Math.round(g.water)+'"><i>мл</i></div></label>'+
+        '</div>'+
+        '<div class="goals-safety">Это пользовательские цели трекера, а не автоматическое медицинское назначение. Если меняешь калории существенно, лучше делать это осознанно, а не из-за краткосрочного скачка веса.</div>'+
+        '<button class="btn goals-save" type="button" onclick="saveGoalsSettings()">Сохранить цели</button>'+
+      '</div>';
+    modal.classList.add('open');
+  }
+
+  function saveGoalsSettings(){
+    if(!S.profile)return;
+    const get=function(id){const el=document.getElementById(id);return el?(+el.value||0):0};
+    const goal=get('settingsGoalWeight'),cal=get('settingsCalories'),protein=get('settingsProtein'),steps=get('settingsSteps'),water=get('settingsWater');
+    if(!(goal>=35&&goal<=200&&cal>=1000&&cal<=4000&&protein>=40&&protein<=250&&steps>=1000&&steps<=30000&&water>=500&&water<=5000))return;
+    S.profile.goal=goal;
+    S.profile.calories=Math.round(cal);
+    S.profile.protein=Math.round(protein);
+    S.profile.steps=Math.round(steps);
+    S.profile.water=Math.round(water);
+    GOAL=goal;
+    if(typeof applyProfile==='function')applyProfile();
+    if(typeof save==='function')save();
+    if(typeof closeM==='function')closeM();
+  }
+
+  window.openGoalsSettings=openGoalsSettings;
+  window.saveGoalsSettings=saveGoalsSettings;
+
   function decorateMore(){
     const sec=document.getElementById('more');if(!sec)return;
     const oldSummary=sec.querySelector('#summary')&&sec.querySelector('#summary').closest('.card');
@@ -2047,6 +2133,13 @@
       else sec.insertAdjacentHTML('afterbegin',historyCardMarkup());
     }
     renderHistoryCalendar();
+    let goals=document.getElementById('goalsCard');
+    if(!goals){
+      const anchor=document.getElementById('historyCard')||document.getElementById('weeklyExperience');
+      if(anchor)anchor.insertAdjacentHTML('afterend',goalsCardMarkup());
+      else sec.insertAdjacentHTML('afterbegin',goalsCardMarkup());
+    }
+    updateGoalsCard();
   }
 
   function decoratePlan(){
