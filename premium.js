@@ -230,6 +230,104 @@
     if(sub)sub.textContent=score>=80?'Осталось совсем немного. Не нужно делать больше плана.':score>=40?'Закрывай пункты по одному — порядок не важен.':'Выбери только первый пункт. Остальное MY 60 подстроит дальше.';
   }
 
+
+  function tomorrowDate(){
+    const d=new Date();d.setDate(d.getDate()+1);return d;
+  }
+
+  function tomorrowFocus(){
+    const food=todayFoodSummary(),w=todayWellness(),stepsNow=+(S.steps[key()]||0);
+    const stepGoalNow=typeof target==='function'?target():((S.profile&&+S.profile.steps)||7000);
+    const plan=typeof dayPlanForDate==='function'?dayPlanForDate(tomorrowDate()):null;
+    if(w&&((w.sleep&&w.sleep<6.5)||w.energy<=4||w.stress>=8))return {title:'Восстановление',text:'Завтра не добавляем нагрузку сверх плана. Сон, обычная еда и спокойный ритм — приоритет.',icon:'☾'};
+    if(food.p>0&&food.p<90)return {title:'Белок с первого приёма пищи',text:'Сегодня белка было меньше ориентира. Завтра проще начать с яйца, творога, йогурта или другого привычного белкового продукта.',icon:'P'};
+    if(plan&&(plan.type==='A'||plan.type==='B'))return {title:'Силовая '+plan.type,text:'Завтра по плану тренировка '+plan.type+'. Достаточно 30–35 минут без попытки сделать больше.',icon:'A'};
+    if(stepsNow>0&&stepsNow<stepGoalNow*.7)return {title:'Немного больше движения',text:'Не нужно резко повышать шаги. Добавь одну короткую прогулку в удобное время.',icon:'↗'};
+    return {title:'Повторить рабочий ритм',text:'Сегодня нет сигнала, что завтра нужно что-то ужесточать. Повторяем базовый план.',icon:'✓'};
+  }
+
+  function tomorrowPrep(){
+    const plan=typeof dayPlanForDate==='function'?dayPlanForDate(tomorrowDate()):null;
+    const items=[];
+    if(plan&&(plan.type==='A'||plan.type==='B'))items.push('Оставить 30–35 минут под силовую '+plan.type);
+    items.push('Подготовить белковый продукт на первый приём пищи');
+    items.push('Поставить воду на видное место');
+    return items.slice(0,3);
+  }
+
+  function eveningCardMarkup(){
+    return '<div class="evening-card" id="eveningCard"></div>';
+  }
+
+  function ensureDayCloseState(){
+    if(!window.S)return;
+    if(!S.dayClosed||typeof S.dayClosed!=='object')S.dayClosed={};
+  }
+
+  function closeToday(){
+    ensureDayCloseState();
+    S.dayClosed[key()]=true;
+    if(typeof save==='function')save();
+    updateEveningCard();
+  }
+
+  function reopenToday(){
+    ensureDayCloseState();
+    delete S.dayClosed[key()];
+    if(typeof save==='function')save();
+    updateEveningCard();
+  }
+
+  function updateEveningCard(){
+    const card=document.getElementById('eveningCard');if(!card||!window.S)return;
+    ensureDayCloseState();
+    const hour=new Date().getHours(),closed=!!S.dayClosed[key()];
+    const food=todayFoodSummary(),stepsNow=+(S.steps[key()]||0),waterNow=+(S.water[key()]||0),w=todayWellness();
+    const stepGoalNow=typeof target==='function'?target():((S.profile&&+S.profile.steps)||7000);
+    const calGoal=(S.profile&&+S.profile.calories)||1500;
+    const tomorrow=tomorrowDate(),tPlan=typeof dayPlanForDate==='function'?dayPlanForDate(tomorrow):null,focus=tomorrowFocus(),prep=tomorrowPrep();
+    const tomorrowLabel=tomorrow.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'short'});
+    const todayChecks=[
+      {name:'Питание',done:food.cal>0,text:food.cal>0?Math.round(food.cal)+' ккал':'не записано'},
+      {name:'Белок',done:food.p>=90,text:food.p?Math.round(food.p)+' г':'—'},
+      {name:'Шаги',done:stepsNow>=stepGoalNow,text:stepsNow.toLocaleString('ru-RU')},
+      {name:'Вода',done:waterNow>=1500,text:waterNow+' мл'},
+      {name:'Чек-ин',done:!!w,text:w?'готов':'нет'}
+    ];
+    const doneCount=todayChecks.filter(function(x){return x.done}).length;
+    const daySummary=doneCount>=4?'День собран достаточно':doneCount>=2?'База дня есть':'Сегодня было мало данных — и это тоже нормально';
+    const tomorrowActivity=tPlan?(
+      tPlan.type==='A'||tPlan.type==='B'?'Силовая '+tPlan.type:
+      tPlan.type==='rest'?'Восстановление':
+      tPlan.type==='mobility'?'Мобилизация + шаги':
+      tPlan.type==='walk'?'Активный день':'Свободная активность'
+    ):'По плану';
+
+    if(hour<17&&!closed){
+      card.dataset.state='preview';
+      card.innerHTML=
+        '<div class="evening-preview-head"><div><span>Завтра</span><h3>'+tomorrowActivity+'</h3><p>'+tomorrowLabel+' · план уже готов</p></div><div class="evening-preview-icon">→</div></div>'+
+        '<div class="tomorrow-focus-mini"><i>'+focus.icon+'</i><div><b>'+focus.title+'</b><p>'+focus.text+'</p></div></div>';
+      return;
+    }
+
+    card.dataset.state=closed?'closed':'evening';
+    card.innerHTML=
+      '<div class="evening-head"><div><span>'+(closed?'День завершён':'Вечерний итог')+'</span><h3>'+daySummary+'</h3><p>'+(closed?'Можно отпустить сегодняшний день и перейти к завтра.':'Посмотри итог и закрой день без попытки исправить всё вечером.')+'</p></div><div class="evening-moon">'+(closed?'✓':'☾')+'</div></div>'+
+      '<div class="evening-checks">'+todayChecks.map(function(x){return '<div class="'+(x.done?'done':'')+'"><i>'+(x.done?'✓':'•')+'</i><span>'+x.name+'</span><b>'+x.text+'</b></div>'}).join('')+'</div>'+
+      '<div class="tomorrow-card">'+
+        '<div class="tomorrow-head"><div><span>План на завтра</span><b>'+tomorrowActivity+'</b><small>'+tomorrowLabel+'</small></div><div class="tomorrow-focus-icon">'+focus.icon+'</div></div>'+
+        '<div class="tomorrow-focus"><b>'+focus.title+'</b><p>'+focus.text+'</p></div>'+
+        '<div class="tomorrow-prep">'+prep.map(function(x){return '<div><i>✓</i><span>'+x+'</span></div>'}).join('')+'</div>'+
+      '</div>'+
+      (closed
+        ? '<button class="evening-reopen" type="button" onclick="reopenToday()">Изменить записи сегодняшнего дня</button>'
+        : '<button class="evening-close" type="button" onclick="closeToday()">Завершить день</button>');
+  }
+
+  window.closeToday=closeToday;
+  window.reopenToday=reopenToday;
+
   window.dailyAction=dailyAction;
 
   function decorateToday(){
@@ -281,6 +379,12 @@
     const oldCheck=sec.querySelector('#score')&&sec.querySelector('#score').closest('.card');
     if(oldCheck)oldCheck.classList.add('today-legacy-check');
     updateDailyCommand();
+    let ec=document.getElementById('eveningCard');
+    if(!ec){
+      const anchor=document.getElementById('dailyCommand')||document.getElementById('todayWellnessCard')||sec.querySelector('.quick-strip')||hero;
+      if(anchor)anchor.insertAdjacentHTML('afterend',eveningCardMarkup());
+    }
+    updateEveningCard();
   }
   function updateRing(){
     const bar=document.getElementById('goalBar'),ring=document.querySelector('.premium-ring'),pct=document.getElementById('premiumPct');
