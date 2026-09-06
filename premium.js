@@ -69,10 +69,10 @@
       qs=document.createElement('div');
       qs.className='quick-strip';
       qs.innerHTML=
-        '<button onclick="form(\'weight\')"><span class="qi">⚖️</span>Вес</button>'+
-        '<button onclick="form(\'food\')"><span class="qi">🥗</span>Еда</button>'+
-        '<button onclick="addWater(250)"><span class="qi">💧</span>+250 мл</button>'+
-        '<button onclick="form(\'steps\')"><span class="qi">👟</span>Шаги</button>';
+        '<button onclick="form(\'weight\')"><span class="qi"><svg viewBox="0 0 24 24"><path d="M5 19h14"/><path d="M7 19l1.2-9h7.6L17 19"/><path d="M9 10a3 3 0 0 1 6 0"/><path d="M12 8.5v2.5"/></svg></span>Вес</button>'+
+        '<button onclick="form(\'food\')"><span class="qi"><svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M7 12a5 5 0 0 1 10 0"/><path d="M4 16h16"/><path d="M8 19h8"/></svg></span>Еда</button>'+
+        '<button onclick="addWater(250)"><span class="qi"><svg viewBox="0 0 24 24"><path d="M12 3s5 5.4 5 10a5 5 0 0 1-10 0c0-4.6 5-10 5-10Z"/><path d="M10 15c.5.7 1.1 1 2 1.1"/></svg></span>+250 мл</button>'+
+        '<button onclick="form(\'steps\')"><span class="qi"><svg viewBox="0 0 24 24"><path d="M9 4c1.7 2.6 1.8 5.1.7 7.6L8 15"/><path d="M8 15c-1.1 1.6-.7 3.5.9 4.4 1.6.9 3.5.3 4.4-1.3l1.4-2.4"/><path d="M15 5c1.2 1.9 1.4 3.8.7 5.7"/></svg></span>Шаги</button>';
       hero.insertAdjacentElement('afterend',qs);
     }
   }
