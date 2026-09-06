@@ -2014,3 +2014,494 @@ canvas{margin-top:14px;height:220px;border:0;border-radius:20px;background:linea
 @media(max-width:390px){
   .history-edit-grid{grid-template-columns:repeat(3,1fr)}
 }
+
+/* Nutrition responsive rebuild v30 */
+#food{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  overflow-x:hidden!important;
+}
+#food > *,
+#food .nutrition-dashboard,
+#food .smart-meal-section,
+#food .meal-diary,
+#food .food-tools-card,
+#food .calorie-card,
+#food .caffeine-card{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+}
+#food *,
+#food *:before,
+#food *:after{
+  min-width:0;
+}
+#food input,
+#food select,
+#food textarea{
+  width:100%;
+  max-width:100%;
+}
+#food button,
+#food b,
+#food small,
+#food p,
+#food span{
+  overflow-wrap:anywhere;
+}
+#food .nutrition-hero-copy,
+#food .food-tools-head>div:first-child,
+#food .meal-diary-head>div:first-child,
+#food .smart-meal-head>div:first-child,
+#food .calorie-head>div:first-child,
+#food .saved-main,
+#food .recipe-use{
+  min-width:0;
+}
+#food .macro-grid{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+#food .meal-pulse{
+  grid-template-columns:repeat(4,minmax(0,1fr));
+}
+#food .macro-top b,
+#food .macro-card small,
+#food .meal-slot small{
+  white-space:normal;
+}
+#food .quick-food-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  overflow:visible;
+}
+#food .quick-food-row button{
+  flex:0 1 auto;
+  max-width:100%;
+}
+#food .calc-fields,
+#food .calc-macros{
+  min-width:0;
+}
+#food .calc-fields>div,
+#food .calc-macros>label{
+  min-width:0;
+}
+#food .product-library,
+#food .saved-product,
+#food .recipe-item{
+  max-width:100%;
+}
+#food .saved-meta,
+#food .recipe-use small{
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+#food .meal-item-main small{
+  white-space:normal;
+}
+#food .smart-meal-items{
+  overflow-wrap:anywhere;
+}
+
+@media(max-width:520px){
+  #food .premium-section-title{
+    padding-left:1px;
+    padding-right:1px;
+  }
+  #food .nutrition-hero{
+    min-height:178px;
+    padding:19px 17px;
+    gap:10px;
+    border-radius:25px;
+  }
+  #food .nutrition-left strong{
+    font-size:38px;
+  }
+  #food .nutrition-left span{
+    max-width:58px;
+    font-size:9px;
+  }
+  #food .nutrition-sub{
+    max-width:210px;
+    font-size:9px;
+  }
+  #food .nutrition-ring{
+    width:80px;
+    height:80px;
+  }
+  #food .nutrition-ring:before{
+    inset:7px;
+  }
+  #food .nutrition-ring b{
+    font-size:18px;
+  }
+
+  #food .macro-grid{
+    gap:6px;
+  }
+  #food .macro-card{
+    padding:10px 8px 9px;
+    border-radius:16px;
+  }
+  #food .macro-top span{
+    font-size:7px;
+  }
+  #food .macro-top b{
+    font-size:9px;
+    line-height:1.25;
+  }
+  #food .macro-top i{
+    font-size:14px;
+  }
+  #food .macro-card small{
+    display:block;
+    font-size:7px;
+    line-height:1.25;
+  }
+
+  #food .meal-pulse{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:6px;
+    padding:7px;
+    border-radius:18px;
+  }
+  #food .meal-slot{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    text-align:left;
+    padding:8px;
+  }
+  #food .meal-slot>span{
+    width:30px;
+    height:30px;
+    margin:0;
+    flex:0 0 auto;
+  }
+  #food .meal-slot b{
+    font-size:8px;
+  }
+
+  #food .smart-meal-section .smart-tip{
+    padding:15px;
+    border-radius:22px;
+  }
+  #food .smart-meal-section .smart-meal-head{
+    gap:10px;
+  }
+  #food .smart-meal-section .smart-meal-head b{
+    font-size:19px;
+  }
+  #food .smart-meal-section .smart-meal-head p{
+    font-size:10px;
+  }
+  #food .smart-meal-section .smart-meal-mark{
+    width:40px;
+    height:40px;
+    border-radius:13px;
+  }
+  #food .smart-meal-section .smart-meal-option{
+    padding:13px;
+    border-radius:17px;
+  }
+  #food .smart-meal-section .smart-meal-option-top{
+    flex-wrap:wrap;
+  }
+  #food .smart-meal-section .smart-meal-option h4{
+    font-size:15px;
+  }
+  #food .smart-meal-section .smart-meal-option p{
+    font-size:9px;
+  }
+  #food .smart-meal-section .smart-meal-items{
+    font-size:8px;
+  }
+  #food .smart-meal-section .smart-meal-add{
+    min-height:42px;
+  }
+
+  #food .meal-diary{
+    padding:15px;
+    border-radius:22px;
+  }
+  #food .meal-diary-head{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+  #food .meal-diary-head>button{
+    width:100%;
+    min-height:42px;
+    font-size:9px;
+  }
+  #food .meal-card-head{
+    align-items:flex-start;
+  }
+  #food .meal-name{
+    align-items:flex-start;
+  }
+  #food .meal-total{
+    max-width:92px;
+  }
+  #food .meal-total b,
+  #food .meal-total small{
+    white-space:normal;
+  }
+  #food .meal-item-edit{
+    padding:9px;
+  }
+  #food .meal-item-edit>span{
+    flex:0 0 auto;
+  }
+
+  #food .food-tools-card{
+    padding:15px;
+    border-radius:22px;
+  }
+  #food .food-tool-actions{
+    grid-template-columns:1fr;
+  }
+  #food .food-tool{
+    width:100%;
+  }
+  #food .meal-copy-row{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:6px;
+    overflow:visible;
+  }
+  #food .meal-copy-row button{
+    min-width:0;
+    width:100%;
+  }
+
+  #food .calorie-card{
+    padding:15px!important;
+    border-radius:22px!important;
+  }
+  #food .calorie-head{
+    gap:10px;
+  }
+  #food .calorie-title{
+    font-size:21px!important;
+  }
+  #food .calorie-icon{
+    width:40px;
+    height:40px;
+    border-radius:13px;
+  }
+  #food .smart-search-block input{
+    height:50px;
+    min-height:50px;
+    padding-left:42px!important;
+    padding-right:12px!important;
+    font-size:13px;
+  }
+  #food .calc-fields{
+    grid-template-columns:1fr;
+    gap:8px;
+  }
+  #food .calc-fields .calc-wide{
+    grid-column:auto;
+  }
+  #food .calc-macros-title{
+    align-items:flex-start;
+    gap:4px;
+    flex-direction:column;
+  }
+  #food .calc-macros{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:6px;
+  }
+  #food .calc-macros label{
+    padding:8px 7px;
+  }
+  #food .calc-macros input{
+    width:100%;
+    min-width:0;
+    padding:7px 5px;
+    font-size:13px;
+  }
+  #food .calc-result{
+    gap:10px;
+    padding:14px;
+  }
+  #food .calc-kcal strong{
+    font-size:28px;
+  }
+  #food .calc-result-macros{
+    gap:7px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+  }
+  #food .calc-daily{
+    flex-wrap:wrap;
+  }
+  #food .product-library{
+    padding:11px;
+    border-radius:17px;
+  }
+  #food .saved-product{
+    gap:0;
+  }
+  #food .saved-main{
+    padding:10px;
+  }
+  #food .saved-name{
+    white-space:normal;
+  }
+  #food .favorite-btn{
+    width:40px;
+    flex:0 0 40px;
+  }
+  #food .product-suggestion{
+    align-items:flex-start;
+  }
+  #food .suggestion-main b{
+    white-space:normal;
+  }
+}
+
+@media(max-width:390px){
+  #food .nutrition-hero{
+    padding:17px 15px;
+  }
+  #food .nutrition-left strong{
+    font-size:35px;
+  }
+  #food .nutrition-ring{
+    width:72px;
+    height:72px;
+  }
+  #food .nutrition-ring b{
+    font-size:16px;
+  }
+  #food .nutrition-ring span{
+    font-size:6px;
+  }
+
+  #food .macro-grid{
+    grid-template-columns:1fr;
+  }
+  #food .macro-card{
+    padding:10px 11px;
+  }
+  #food .macro-top{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:10px;
+  }
+  #food .macro-top span{
+    font-size:8px;
+  }
+  #food .macro-top b{
+    margin-top:0;
+    font-size:10px;
+    text-align:right;
+  }
+  #food .macro-track{
+    margin:7px 0 5px;
+  }
+
+  #food .smart-meal-section .smart-meal-head b{
+    font-size:18px;
+  }
+  #food .smart-meal-section .smart-meal-head p{
+    font-size:9px;
+  }
+  #food .smart-meal-section .smart-meal-option{
+    padding:12px;
+  }
+  #food .smart-meal-section .smart-meal-macros{
+    gap:5px;
+  }
+  #food .smart-meal-section .smart-meal-macros span{
+    padding:5px 6px;
+    font-size:7px;
+  }
+
+  #food .meal-card-head{
+    gap:8px;
+  }
+  #food .meal-name>i{
+    width:31px;
+    height:31px;
+  }
+  #food .meal-total{
+    max-width:78px;
+  }
+  #food .meal-item{
+    gap:0;
+  }
+  #food .meal-item-edit{
+    gap:6px;
+  }
+  #food .meal-item-edit>span{
+    display:none;
+  }
+
+  #food .meal-copy-row{
+    grid-template-columns:1fr;
+  }
+
+  #food .calc-macros{
+    grid-template-columns:1fr;
+  }
+  #food .calc-macros label{
+    display:grid;
+    grid-template-columns:72px 1fr;
+    gap:8px;
+    align-items:center;
+  }
+  #food .calc-macros label span{
+    margin:0;
+  }
+  #food .calc-result{
+    flex-direction:column;
+    align-items:stretch;
+  }
+  #food .calc-result-macros{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    width:100%;
+  }
+  #food .calc-result-macros span{
+    text-align:center;
+  }
+  #food .calc-daily{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:4px;
+  }
+}
+
+@media(max-width:340px){
+  #food .nutrition-hero{
+    display:grid;
+    grid-template-columns:1fr auto;
+    padding:15px 13px;
+  }
+  #food .nutrition-left strong{
+    font-size:32px;
+  }
+  #food .nutrition-sub{
+    max-width:180px;
+  }
+  #food .meal-pulse{
+    grid-template-columns:1fr;
+  }
+  #food .smart-meal-section .smart-meal-mark,
+  #food .food-tools-mark,
+  #food .calorie-icon{
+    display:none;
+  }
+  #food .smart-meal-section .smart-meal-head,
+  #food .food-tools-head,
+  #food .calorie-head{
+    display:block;
+  }
+}
