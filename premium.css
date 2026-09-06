@@ -1161,3 +1161,105 @@ canvas{margin-top:14px;height:220px;border:0;border-radius:20px;background:linea
   .recipe-result{grid-template-columns:1fr}
   .recipe-per100{border-left:0;border-top:1px solid rgba(255,255,255,.09)}
 }
+
+/* Progress analytics v19 */
+.progress-legacy-hidden{display:none!important}
+.progress-experience{margin:2px 0 12px}
+.progress-hero{
+  position:relative;overflow:hidden;display:flex;justify-content:space-between;align-items:center;gap:18px;
+  min-height:190px;padding:23px;border-radius:29px;color:white;
+  background:
+    radial-gradient(circle at 88% 10%,rgba(189,110,120,.28),transparent 13rem),
+    radial-gradient(circle at 4% 110%,rgba(120,146,126,.28),transparent 17rem),
+    linear-gradient(145deg,#101613,#1d2621 60%,#29332e);
+  box-shadow:0 24px 60px rgba(18,25,21,.20)
+}
+.progress-hero:before{
+  content:"";position:absolute;right:-95px;top:-110px;width:230px;height:230px;border-radius:50%;
+  border:1px solid rgba(255,255,255,.11);
+  box-shadow:0 0 0 26px rgba(255,255,255,.024),0 0 0 52px rgba(255,255,255,.013)
+}
+.progress-hero-copy{position:relative;z-index:2}
+.progress-hero .label{color:rgba(255,255,255,.48)!important}
+.progress-current{display:flex;align-items:baseline;gap:7px;margin-top:11px}
+.progress-current strong{font-size:46px;line-height:.95;letter-spacing:-.07em}
+.progress-current span{font-size:10px;color:rgba(255,255,255,.58)}
+.progress-change{margin-top:10px;font-size:10px;color:rgba(255,255,255,.55)}
+.progress-goal-ring{
+  --goal-p:0%;position:relative;z-index:2;width:102px;height:102px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;
+  background:conic-gradient(#dda0a9 var(--goal-p),rgba(255,255,255,.10) 0);box-shadow:0 15px 36px rgba(0,0,0,.18)
+}
+.progress-goal-ring:before{
+  content:"";position:absolute;inset:9px;border-radius:50%;background:linear-gradient(145deg,#202923,#151c18);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.07)
+}
+.progress-goal-ring>div{position:relative;z-index:1;text-align:center}
+.progress-goal-ring b{display:block;font-size:21px;letter-spacing:-.05em}
+.progress-goal-ring span{display:block;margin-top:2px;font-size:8px;text-transform:uppercase;letter-spacing:.11em;color:rgba(255,255,255,.42)}
+.progress-period{
+  display:flex;gap:5px;margin-top:9px;padding:4px;border-radius:14px;background:#edeee9;width:max-content
+}
+.progress-period button{
+  min-width:84px;height:35px;border:0;border-radius:11px;background:transparent;color:#8c928e;font-size:9px;font-weight:850
+}
+.progress-period button.active{background:#1a211d;color:#fff;box-shadow:0 6px 14px rgba(18,25,21,.12)}
+.progress-chart-card{
+  margin-top:9px;padding:16px;border-radius:24px;background:#fff;border:1px solid rgba(17,22,19,.055);
+  box-shadow:0 10px 28px rgba(22,29,25,.05)
+}
+.progress-chart-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.progress-chart-head span{display:block;font-size:8px;text-transform:uppercase;letter-spacing:.1em;font-weight:850;color:#999f9b}
+.progress-chart-head b{display:block;margin-top:4px;font-size:14px;letter-spacing:-.025em}
+.trend-pill{
+  padding:7px 9px;border-radius:999px;background:#eef1ed;color:#6a736d;font-size:8px;font-weight:850
+}
+.trend-pill[data-dir="down"]{background:#e9f1ea;color:#64806c}
+.trend-pill[data-dir="up"]{background:#f5e9e9;color:#9d646c}
+#premiumProgressChart{width:100%;height:210px;margin-top:12px;border-radius:18px;background:linear-gradient(180deg,#fbfbf9,#f5f6f2)}
+.progress-chart-foot{display:flex;justify-content:space-between;gap:10px;margin:6px 2px 0;font-size:7px;color:#9ba09c}
+.progress-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}
+.progress-stat-grid>div{
+  padding:13px;border-radius:18px;background:rgba(255,255,255,.88);border:1px solid rgba(17,22,19,.055);
+  box-shadow:0 7px 22px rgba(22,29,25,.035)
+}
+.progress-stat-grid span{display:block;font-size:8px;text-transform:uppercase;letter-spacing:.09em;font-weight:850;color:#999f9b}
+.progress-stat-grid b{display:block;margin-top:6px;font-size:17px;letter-spacing:-.035em}
+.progress-stat-grid small{display:block;margin-top:3px;font-size:8px;color:#9aa09c}
+.progress-insight{
+  display:flex;gap:12px;margin-top:9px;padding:15px;border-radius:22px;
+  background:linear-gradient(145deg,#f4ecea,#f6f4ee 58%,#edf2ee);border:1px solid rgba(189,110,120,.08)
+}
+.progress-insight-mark{
+  width:38px;height:38px;border-radius:14px;display:grid;place-items:center;flex:0 0 auto;background:#1a211d;color:white;font-size:14px
+}
+.progress-insight span{font-size:8px;text-transform:uppercase;letter-spacing:.11em;font-weight:850;color:#98747a}
+.progress-insight b{display:block;margin-top:4px;font-size:13px}
+.progress-insight p{margin:5px 0 0;font-size:9px;line-height:1.45;color:#7b817d}
+.photo-compare-card{
+  margin-top:9px;padding:15px;border-radius:23px;background:#fff;border:1px solid rgba(17,22,19,.055);
+  box-shadow:0 9px 26px rgba(22,29,25,.045)
+}
+.photo-compare-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.photo-compare-head span{display:block;font-size:8px;text-transform:uppercase;letter-spacing:.1em;font-weight:850;color:#999f9b}
+.photo-compare-head b{display:block;margin-top:4px;font-size:12px}
+.photo-compare-head p{margin:4px 0 0;font-size:8px;color:#969c98}
+.photo-compare-head button{
+  border:0;border-radius:11px;background:#f0efeb;color:#666d68;padding:8px 10px;font-size:8px;font-weight:800
+}
+.photo-compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:11px}
+.photo-compare-grid>div{
+  position:relative;overflow:hidden;border-radius:17px;background:#f0f1ed;aspect-ratio:3/4
+}
+.photo-compare-grid img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-compare-grid small{
+  position:absolute;left:8px;bottom:8px;padding:5px 7px;border-radius:999px;background:rgba(15,20,17,.68);
+  color:white;font-size:7px;backdrop-filter:blur(8px)
+}
+.progress-detail-card{border-radius:25px!important}
+.progress-gallery-legacy{display:none!important}
+@media(max-width:390px){
+  .progress-hero{min-height:176px;padding:20px 18px}
+  .progress-current strong{font-size:40px}
+  .progress-goal-ring{width:86px;height:86px}
+  .progress-goal-ring b{font-size:18px}
+}
