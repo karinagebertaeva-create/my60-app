@@ -1721,3 +1721,47 @@ canvas{margin-top:14px;height:220px;border:0;border-radius:20px;background:linea
   .meal-diary{padding:15px}
   .meal-diary-head>button{padding:8px 9px}
 }
+
+/* Smart meal builder v26 */
+.smart-tip{
+  margin-top:10px;padding:14px;border-radius:20px;
+  background:linear-gradient(145deg,#f7f2ee,#eef3ee);
+  border:1px solid rgba(17,22,19,.05)
+}
+.smart-meal-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.smart-meal-head span{
+  display:block;font-size:7px;text-transform:uppercase;letter-spacing:.1em;font-weight:850;color:#9a7a7e
+}
+.smart-meal-head b{display:block;margin-top:4px;font-size:14px;letter-spacing:-.025em}
+.smart-meal-head p{margin:4px 0 0;font-size:8px;line-height:1.45;color:#8c928e;max-width:340px}
+.smart-meal-mark{
+  width:36px;height:36px;border-radius:12px;display:grid;place-items:center;flex:0 0 auto;
+  background:#1a211d;color:#fff;font-size:12px
+}
+.smart-meal-options{display:flex;flex-direction:column;gap:7px;margin-top:11px}
+.smart-meal-option{
+  width:100%;padding:11px;border:1px solid #e4e7e2;border-radius:16px;background:rgba(255,255,255,.82);
+  text-align:left;color:var(--ink)
+}
+.smart-meal-option:active{transform:scale(.995)}
+.smart-meal-option-top{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.smart-meal-option-top span{
+  font-size:7px;text-transform:uppercase;letter-spacing:.09em;font-weight:850;color:#8f9691
+}
+.smart-meal-option-top b{font-size:9px}
+.smart-meal-option h4{margin:6px 0 0;font-size:12px;letter-spacing:-.02em}
+.smart-meal-option p{margin:3px 0 0;font-size:8px;line-height:1.4;color:#8e9490}
+.smart-meal-items{
+  margin-top:7px;padding:7px 8px;border-radius:11px;background:#f5f5f2;
+  font-size:7px;line-height:1.4;color:#737b75
+}
+.smart-meal-macros{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.smart-meal-macros span{
+  padding:5px 7px;border-radius:999px;background:#edf1ed;color:#66706a;font-size:7px;font-weight:800
+}
+.smart-meal-macros strong{
+  margin-left:auto;font-size:8px;color:#8f6269;font-weight:900
+}
+.smart-meal-foot{
+  margin-top:8px;font-size:7px;line-height:1.4;color:#9aa09c
+}
