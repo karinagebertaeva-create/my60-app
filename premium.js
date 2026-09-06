@@ -940,12 +940,13 @@
     }
     tip.innerHTML=
       '<div class="smart-meal-head"><div><span>MY 60 · следующий приём пищи</span><b>'+title+'</b><p>'+copy+'</p></div><div class="smart-meal-mark">✦</div></div>'+
-      '<div class="smart-meal-options">'+options.map(function(o){
+      '<div class="smart-meal-options">'+options.map(function(o,idx){
         const t=comboTotals(o);
-        return '<button type="button" class="smart-meal-option" onclick="addSmartMeal(\''+o.id+'\')">'+
+        return '<button type="button" class="smart-meal-option '+(idx===0?'featured':'alternative')+'" onclick="addSmartMeal(\''+o.id+'\')">'+
+          (idx===0?'<div class="smart-meal-best">Лучший вариант сейчас</div>':'')+
           '<div class="smart-meal-option-top"><span>'+o.meal+'</span><b>'+Math.round(t.cal)+' ккал</b></div>'+
-          '<h4>'+o.title+'</h4><p>'+o.note+'</p>'+
-          '<div class="smart-meal-items">'+smartMealItemText(o)+'</div>'+
+          '<div class="smart-meal-main"><div><h4>'+o.title+'</h4><p>'+o.note+'</p></div><div class="smart-meal-protein"><small>Белок</small><b>'+Math.round(t.p)+' г</b></div></div>'+
+          '<div class="smart-meal-items"><span>Порция</span><b>'+smartMealItemText(o)+'</b></div>'+
           '<div class="smart-meal-macros"><span>Б '+Math.round(t.p)+' г</span><span>Ж '+Math.round(t.f)+' г</span><span>У '+Math.round(t.c)+' г</span></div>'+
           '<div class="smart-meal-add"><span>Добавить весь вариант</span><i>＋</i></div>'+
         '</button>';
