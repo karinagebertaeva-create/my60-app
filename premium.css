@@ -4517,3 +4517,23 @@ canvas{margin-top:14px;height:220px;border:0;border-radius:20px;background:linea
 .achievement-item.done .achievement-copy i{
   color:#6f7d73
 }
+
+
+/* Product category filters */
+#food .product-category-row{
+  display:flex;gap:7px;overflow-x:auto;margin-top:9px;padding:1px 1px 4px;
+  scrollbar-width:none;-webkit-overflow-scrolling:touch
+}
+#food .product-category-row::-webkit-scrollbar{display:none}
+#food .product-category-row button{
+  flex:0 0 auto;border:1px solid rgba(25,31,27,.08);background:#f7f6f2;color:#666d68;
+  border-radius:999px;padding:8px 11px;font-size:9px;font-weight:820;white-space:nowrap;
+  transition:transform .16s ease,background .16s ease,color .16s ease,border-color .16s ease
+}
+#food .product-category-row button.active{
+  background:#292e2b;color:#fff;border-color:#292e2b;box-shadow:0 7px 16px rgba(30,36,32,.12)
+}
+#food .product-category-row button:active{transform:scale(.97)}
+@media (max-width:520px){
+  #food .product-category-row{margin-left:-2px;margin-right:-2px;padding-left:2px;padding-right:2px}
+}
