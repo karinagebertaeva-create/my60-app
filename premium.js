@@ -689,7 +689,7 @@
         '<button type="button" onclick="quickFood(\'base-potato-puree\')">Пюре</button>'+
         '<button type="button" onclick="quickFood(\'base-goulash\')">Гуляш</button>'+
         '<button type="button" onclick="quickFood(\'base-spaghetti-gravy\')">Спагетти</button>'+
-        '<button type="button" onclick="quickFood(\'base-adrenaline-rush-449\')">Adrenaline</button>'+
+        '<button type="button" onclick="addAdrenalineRush449()">Adrenaline · 449 мл</button>'+
       '</div>'+
       productLibraryMarkup()+
       '<div class="calc-fields">'+
@@ -850,15 +850,21 @@
     if(box)box.classList.remove('show');
   }
 
+  function isAdrenalineProduct(p){
+    return !!p&&(p.id==='base-adrenaline-rush-449'||normalizeProductName(p.name)==='adrenaline rush классический 449 мл');
+  }
+
   function chooseProductSuggestion(source,id){
     const p=source==='saved'
       ? ensureProductLibrary().find(function(x){return x.id===id})
       : builtInProducts.find(function(x){return x.id===id});
+    if(isAdrenalineProduct(p)){hideProductSuggestions();addAdrenalineRush449();return}
     applyProductToCalculator(p);
   }
 
   function selectSavedProduct(id){
     const p=ensureProductLibrary().find(function(x){return x.id===id});
+    if(isAdrenalineProduct(p)){addAdrenalineRush449();return}
     applyProductToCalculator(p);
   }
 
@@ -1538,7 +1544,7 @@
       '<div class="caffeine-track"><span id="caffeineTrackBar"></span></div>'+
       '<div class="caffeine-breakdown" id="caffeineBreakdown"></div>'+
       '<div class="caffeine-note" id="caffeineNote"></div>'+
-      '<div class="caffeine-actions"><button type="button" onclick="quickFood(\'base-adrenaline-rush-449\')">+ Adrenaline</button><button type="button" onclick="openEntryForm(\'caffeine\')">+ Кофеин вручную</button></div>'+
+      '<div class="caffeine-actions"><button type="button" onclick="addAdrenalineRush449()">+ Adrenaline · 1 банка</button><button type="button" onclick="openEntryForm(\'caffeine\')">+ Кофеин вручную</button></div>'+
     '</div>';
   }
 
