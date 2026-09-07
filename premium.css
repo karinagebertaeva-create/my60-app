@@ -4051,3 +4051,54 @@ canvas{margin-top:14px;height:220px;border:0;border-radius:20px;background:linea
     width:100%
   }
 }
+
+/* Quick servings v47 */
+.quick-serving-wrap{
+  margin:10px 0 2px;
+  padding:10px;
+  border-radius:15px;
+  background:#f5f3ee;
+  border:1px solid #e8e6e0
+}
+.quick-serving-wrap[hidden]{display:none!important}
+.quick-serving-label{
+  margin-bottom:7px;
+  font-size:7px;
+  text-transform:uppercase;
+  letter-spacing:.09em;
+  font-weight:850;
+  color:#959b97
+}
+.quick-serving-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px
+}
+.quick-serving-row button{
+  min-height:34px;
+  padding:7px 10px;
+  border:1px solid #dddeda;
+  border-radius:11px;
+  background:#fff;
+  color:#666e69;
+  font-size:8px;
+  font-weight:800;
+  line-height:1.2
+}
+.quick-serving-row button.active{
+  background:#1a211d;
+  border-color:#1a211d;
+  color:#fff
+}
+@media(max-width:390px){
+  .quick-serving-row{
+    display:grid;
+    grid-template-columns:1fr 1fr
+  }
+  .quick-serving-row button{
+    width:100%
+  }
+  .quick-serving-row button:nth-child(3):last-child{
+    grid-column:1/-1
+  }
+}
