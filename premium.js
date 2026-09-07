@@ -1511,6 +1511,13 @@
   window.openHistoryFood=openHistoryFood;
   window.returnFoodToToday=returnFoodToToday;
 
+  function openFoodCaffeineEntry(){
+    if(typeof openEntryForm!=='function')return;
+    openEntryForm('caffeine',foodActiveKey());
+  }
+
+  window.openFoodCaffeineEntry=openFoodCaffeineEntry;
+
   function mealDiaryMarkup(){
     return '<div class="meal-diary" id="mealDiary">'+
       '<div class="meal-diary-head"><div><div class="label">Сегодня</div><h3>Дневник питания</h3><p>Каждый приём пищи отдельно — сразу видно калории и белок.</p></div><button type="button" onclick="openMealAdd(\'Завтрак\')">+ Добавить</button></div>'+
@@ -1639,7 +1646,7 @@
       meal:meal,baseName:e.baseName,grams:grams,
       kcal100:e.kcal100,p100:e.p100,f100:e.f100,c100:e.c100,caffeine100:e.caffeine100||0,
       name:e.baseName+' · '+Math.round(grams)+' г',
-      cal:t.kcal,p:t.p,f:t.f,c:t.c,caffeineMg:t.caffeine||0,caffeineAt:t.caffeine?Date.now():0,
+      cal:t.kcal,p:t.p,f:t.f,c:t.c,caffeineMg:t.caffeine||0,caffeineAt:t.caffeine&&dk===key()?Date.now():0,
       copiedEntry:true
     });
     if(t.caffeine)adjustDayCaffeine(t.caffeine,dk);
@@ -1704,7 +1711,7 @@
       '<div class="caffeine-track"><span id="caffeineTrackBar"></span></div>'+
       '<div class="caffeine-breakdown" id="caffeineBreakdown"></div>'+
       '<div class="caffeine-note" id="caffeineNote"></div>'+
-      '<div class="caffeine-actions"><button type="button" onclick="addAdrenalineRush449()">+ Adrenaline · 1 банка</button><button type="button" onclick="openEntryForm(\'caffeine\')">+ Кофеин вручную</button></div>'+
+      '<div class="caffeine-actions"><button type="button" onclick="addAdrenalineRush449()">+ Adrenaline · 1 банка</button><button type="button" onclick="openFoodCaffeineEntry()">+ Кофеин вручную</button></div>'+
     '</div>';
   }
 
