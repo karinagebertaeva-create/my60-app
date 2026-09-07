@@ -2615,6 +2615,183 @@
 
   window.setBodyMetric=setBodyMetric;
 
+  let monthlyReportMonth=key().slice(0,7);
+
+  function reportMonthBounds(month){
+    const parts=String(month||monthlyReportMonth).split('-'),y=+parts[0],m=+parts[1];
+    const start=new Date(y,m-1,1),end=new Date(y,m,0);
+    start.setHours(0,0,0,0);end.setHours(0,0,0,0);
+    return {start:start,end:end,startKey:key(start),endKey:key(end)};
+  }
+
+  function reportMonthLabel(month){
+    const b=reportMonthBounds(month);
+    return b.start.toLocaleDateString('ru-RU',{month:'long',year:'numeric'});
+  }
+
+  function reportMonthKeys(month){
+    const b=reportMonthBounds(month),out=[],d=new Date(b.start);
+    while(d<=b.end){out.push(key(d));d.setDate(d.getDate()+1)}
+    return out;
+  }
+
+  function reportDataDays(keys){
+    return keys.filter(function(k){
+      return ((S.food&&S.food[k])||[]).length||
+        +(S.steps&&S.steps[k]||0)>0||
+        +(S.water&&S.water[k]||0)>0||
+        !!(S.well&&S.well[k])||
+        ((S.workouts&&S.workouts[k])||[]).length||
+        !!(S.weights&&S.weights[k]);
+    }).length;
+  }
+
+  function monthlyReportMetrics(month){
+    const bounds=reportMonthBounds(month),keys=reportMonthKeys(month);
+    const todayKey=key(),isCurrent=month===todayKey.slice(0,7);
+    const elapsedKeys=isCurrent?keys.filter(function(k){return k<=todayKey}):keys;
+    const weights=Object.entries(S.weights||{}).filter(function(x){return x[0]>=bounds.startKey&&x[0]<=bounds.endKey}).sort();
+    const firstWeight=weights.length?+weights[0][1]:null,lastWeight=weights.length?+weights[weights.length-1][1]:null;
+
+    const foodDays=keys.map(function(k){
+      const list=(S.food&&S.food[k])||[];
+      return list.reduce(function(a,x){a.cal+=+x.cal||0;a.p+=+x.p||0;return a},{cal:0,p:0});
+    }).filter(function(x){return x.cal>0});
+
+    const steps=keys.map(function(k){return +(S.steps&&S.steps[k]||0)}).filter(function(v){return v>0});
+    const workouts=keys.reduce(function(n,k){return n+((S.workouts&&S.workouts[k])||[]).filter(function(x){return x==='A'||x==='B'}).length},0);
+    const checkins=keys.filter(function(k){return !!(S.well&&S.well[k])}).length;
+    const photos=(S.photos||[]).filter(function(p){return p&&p.date>=bounds.startKey&&p.date<=bounds.endKey}).length;
+
+    const defs=bodyMetricDefinitions(),measurements={};
+    Object.keys(defs).forEach(function(metric){
+      const vals=bodyMeasurementEntries(metric).filter(function(x){return x[0]>=bounds.startKey&&x[0]<=bounds.endKey});
+      measurements[metric]={
+        first:vals.length?vals[0]:null,
+        last:vals.length?vals[vals.length-1]:null,
+        delta:vals.length>1?vals[vals.length-1][1]-vals[0][1]:null
+      };
+    });
+
+    const dataDays=reportDataDays(elapsedKeys),rhythm=elapsedKeys.length?Math.round(dataDays/elapsedKeys.length*100):0;
+    return {
+      month:month,label:reportMonthLabel(month),keys:keys,elapsedDays:elapsedKeys.length,dataDays:dataDays,rhythm:rhythm,
+      weights:weights,firstWeight:firstWeight,lastWeight:lastWeight,weightDelta:(weights.length>1?lastWeight-firstWeight:null),
+      avgWeight:weights.length?averageNumber(weights.map(function(x){return +x[1]})):0,
+      foodLogged:foodDays.length,
+      avgCalories:foodDays.length?averageNumber(foodDays.map(function(x){return x.cal})):0,
+      avgProtein:foodDays.length?averageNumber(foodDays.map(function(x){return x.p})):0,
+      avgSteps:steps.length?averageNumber(steps):0,
+      stepLogged:steps.length,workouts:workouts,checkins:checkins,photos:photos,
+      measurements:measurements
+    };
+  }
+
+  function monthlyReportInsight(m){
+    if(m.weights.length>=2&&m.weightDelta<-0.15)return 'Вес за месяц движется вниз. Сохраняй рабочий ритм без дополнительного ужесточения.';
+    if(m.weights.length>=2&&m.weightDelta>0.15)return 'Вес выше первого измерения месяца. Одного месяца недостаточно для резких изменений — смотри также на объёмы и средние значения.';
+    const w=m.measurements&&m.measurements.waist;
+    if(w&&w.delta!=null&&w.delta<-.5)return 'Вес может быть стабильным, но талия уменьшилась — это тоже важная часть прогресса.';
+    if(m.dataDays<4)return 'Данных пока немного. Даже несколько регулярных записей в неделю уже сделают следующий отчёт намного понятнее.';
+    return 'Месяц собран. Смотри на общую тенденцию, а не на отдельные дни.';
+  }
+
+  function monthlyReportMarkup(){
+    return '<div class="monthly-report-card" id="monthlyReportCard">'+
+      '<div class="monthly-report-head"><div><div class="label">Итог месяца</div><h3>Мой отчёт MY 60</h3><p>Вес, объёмы, питание и движение — в одном месте.</p></div><div class="monthly-report-actions"><input id="monthlyReportMonth" type="month" onchange="setMonthlyReportMonth(this.value)"><button type="button" onclick="printMonthlyReport()">Сохранить как PDF</button></div></div>'+
+      '<div class="monthly-report-hero" id="monthlyReportHero"></div>'+
+      '<div class="monthly-report-grid" id="monthlyReportGrid"></div>'+
+      '<div class="monthly-measures" id="monthlyMeasures"></div>'+
+      '<div class="monthly-report-insight" id="monthlyReportInsight"></div>'+
+    '</div>';
+  }
+
+  function setMonthlyReportMonth(month){
+    if(!/^\d{4}-\d{2}$/.test(month))return;
+    monthlyReportMonth=month;
+    updateMonthlyReport();
+  }
+
+  function updateMonthlyReport(){
+    const root=document.getElementById('monthlyReportCard');if(!root||!window.S)return;
+    const m=monthlyReportMetrics(monthlyReportMonth),g=appGoals();
+    const input=document.getElementById('monthlyReportMonth');if(input)input.value=monthlyReportMonth;
+
+    const hero=document.getElementById('monthlyReportHero');
+    if(hero){
+      const d=m.weightDelta,deltaText=d==null?'нужно 2 измерения':((d<0?'−':d>0?'+':'')+round1(Math.abs(d))+' кг');
+      hero.innerHTML=
+        '<div class="monthly-report-main"><span>'+escapeHtml(m.label)+'</span><b>'+(m.lastWeight!=null?round1(m.lastWeight)+' кг':'—')+'</b><small>последний вес месяца</small></div>'+
+        '<div class="monthly-report-change '+(d<0?'down':d>0?'up':'flat')+'"><span>Изменение веса</span><b>'+deltaText+'</b><small>'+(m.weights.length?m.weights.length+' измерений':'нет измерений')+'</small></div>'+
+        '<div class="monthly-report-rhythm"><span>Дней с данными</span><b>'+m.dataDays+' / '+m.elapsedDays+'</b><small>'+m.rhythm+'% месяца</small></div>';
+    }
+
+    const grid=document.getElementById('monthlyReportGrid');
+    if(grid)grid.innerHTML=
+      '<div><span>Средний вес</span><b>'+(m.avgWeight?round1(m.avgWeight)+' кг':'—')+'</b><small>'+m.weights.length+' измерений</small></div>'+
+      '<div><span>Питание</span><b>'+(m.avgCalories?Math.round(m.avgCalories)+' ккал':'—')+'</b><small>'+m.foodLogged+' дней с записями</small></div>'+
+      '<div><span>Белок</span><b>'+(m.avgProtein?Math.round(m.avgProtein)+' г':'—')+'</b><small>цель '+Math.round(g.protein)+' г</small></div>'+
+      '<div><span>Шаги</span><b>'+(m.avgSteps?Math.round(m.avgSteps).toLocaleString('ru-RU'):'—')+'</b><small>'+m.stepLogged+' дней с шагами</small></div>'+
+      '<div><span>Силовые</span><b>'+m.workouts+'</b><small>за месяц</small></div>'+
+      '<div><span>Чек-ины</span><b>'+m.checkins+'</b><small>самочувствие</small></div>'+
+      '<div><span>Фото</span><b>'+m.photos+'</b><small>за месяц</small></div>'+
+      '<div><span>Цель веса</span><b>'+round1(g.goal)+' кг</b><small>текущая цель</small></div>';
+
+    const measures=document.getElementById('monthlyMeasures'),defs=bodyMetricDefinitions();
+    if(measures)measures.innerHTML=
+      '<div class="monthly-measures-head"><span>Объёмы тела</span><b>изменение внутри месяца</b></div>'+
+      '<div class="monthly-measures-grid">'+Object.keys(defs).map(function(metric){
+        const x=m.measurements[metric],d=x.delta;
+        return '<div><span>'+defs[metric].label+'</span><b>'+(x.last?round1(x.last[1])+' см':'—')+'</b><small>'+(d==null?(x.last?'нужен ещё замер':'нет данных'):((d<0?'−':d>0?'+':'')+round1(Math.abs(d))+' см'))+'</small></div>';
+      }).join('')+'</div>';
+
+    const insight=document.getElementById('monthlyReportInsight');
+    if(insight)insight.innerHTML='<i>✦</i><div><span>Итог MY 60</span><b>'+monthlyReportInsight(m)+'</b><small>Отчёт показывает тенденции и записи, а не медицинское заключение.</small></div>';
+  }
+
+  function monthlyReportPrintHtml(){
+    const m=monthlyReportMetrics(monthlyReportMonth),g=appGoals(),defs=bodyMetricDefinitions();
+    const d=m.weightDelta;
+    const weightChange=d==null?'—':((d<0?'−':d>0?'+':'')+round1(Math.abs(d))+' кг');
+    const measureRows=Object.keys(defs).map(function(metric){
+      const x=m.measurements[metric],delta=x.delta;
+      const change=delta==null?'—':((delta<0?'−':delta>0?'+':'')+round1(Math.abs(delta))+' см');
+      return '<tr><td>'+escapeHtml(defs[metric].label)+'</td><td>'+(x.first?round1(x.first[1])+' см':'—')+'</td><td>'+(x.last?round1(x.last[1])+' см':'—')+'</td><td>'+change+'</td></tr>';
+    }).join('');
+    return '<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>MY 60 · '+escapeHtml(m.label)+'</title><style>'+
+      '@page{size:A4;margin:14mm}*{box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#18201b;margin:0;background:#fff}'+
+      '.top{padding:24px;border-radius:24px;background:#111713;color:#fff}.brand{font-size:12px;letter-spacing:.14em}.top h1{margin:8px 0 2px;font-size:30px}.top p{margin:0;color:#bfc6c1}.hero{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}.box,.metric{border:1px solid #e6e8e3;border-radius:16px;padding:14px}.box span,.metric span{display:block;font-size:10px;color:#858b87}.box b{display:block;margin-top:5px;font-size:20px}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.metric b{display:block;margin-top:5px;font-size:15px}.metric small{display:block;margin-top:3px;color:#909691}.section{margin-top:18px}.section h2{font-size:16px;margin:0 0 8px}table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:9px;border-bottom:1px solid #e7e9e5;text-align:left}th{color:#747b76}.insight{margin-top:18px;padding:15px;border-radius:16px;background:#f2f5f2}.foot{margin-top:18px;font-size:9px;color:#8a918c}.no-print{margin:16px 0 0;text-align:right}.no-print button{padding:10px 14px;border:0;border-radius:10px;background:#111713;color:#fff;font-weight:700}@media print{.no-print{display:none}}'+
+      '</style></head><body>'+
+      '<div class="top"><div class="brand">MY 60 · MONTHLY REPORT</div><h1>'+escapeHtml(m.label)+'</h1><p>Персональный отчёт прогресса</p></div>'+
+      '<div class="hero"><div class="box"><span>Последний вес</span><b>'+(m.lastWeight!=null?round1(m.lastWeight)+' кг':'—')+'</b></div><div class="box"><span>Изменение</span><b>'+weightChange+'</b></div><div class="box"><span>Дней с данными</span><b>'+m.dataDays+' / '+m.elapsedDays+'</b></div></div>'+
+      '<div class="metrics">'+
+        '<div class="metric"><span>Средний вес</span><b>'+(m.avgWeight?round1(m.avgWeight)+' кг':'—')+'</b><small>'+m.weights.length+' измерений</small></div>'+
+        '<div class="metric"><span>Средние калории</span><b>'+(m.avgCalories?Math.round(m.avgCalories):'—')+'</b><small>'+m.foodLogged+' дней</small></div>'+
+        '<div class="metric"><span>Средний белок</span><b>'+(m.avgProtein?Math.round(m.avgProtein)+' г':'—')+'</b><small>цель '+Math.round(g.protein)+' г</small></div>'+
+        '<div class="metric"><span>Средние шаги</span><b>'+(m.avgSteps?Math.round(m.avgSteps).toLocaleString('ru-RU'):'—')+'</b><small>'+m.stepLogged+' дней</small></div>'+
+        '<div class="metric"><span>Силовые</span><b>'+m.workouts+'</b><small>за месяц</small></div>'+
+        '<div class="metric"><span>Чек-ины</span><b>'+m.checkins+'</b><small>за месяц</small></div>'+
+        '<div class="metric"><span>Фото</span><b>'+m.photos+'</b><small>за месяц</small></div>'+
+        '<div class="metric"><span>Цель веса</span><b>'+round1(g.goal)+' кг</b><small>текущая</small></div>'+
+      '</div>'+
+      '<div class="section"><h2>Объёмы тела</h2><table><thead><tr><th>Параметр</th><th>Первый</th><th>Последний</th><th>Изменение</th></tr></thead><tbody>'+measureRows+'</tbody></table></div>'+
+      '<div class="insight"><b>Итог MY 60</b><p>'+escapeHtml(monthlyReportInsight(m))+'</p></div>'+
+      '<div class="foot">Сформировано MY 60. Отчёт отражает внесённые данные и не является медицинским заключением.</div>'+
+      '<div class="no-print"><button onclick="window.print()">Печать / сохранить PDF</button></div>'+
+      '</body></html>';
+  }
+
+  function printMonthlyReport(){
+    const html=monthlyReportPrintHtml();
+    const w=window.open('','_blank');
+    if(!w)return;
+    w.document.open();w.document.write(html);w.document.close();
+    setTimeout(function(){try{w.focus();w.print()}catch(e){}},450);
+  }
+
+  window.setMonthlyReportMonth=setMonthlyReportMonth;
+  window.printMonthlyReport=printMonthlyReport;
+
   function progressExperienceMarkup(){
     return '<div class="progress-experience" id="progressExperience">'+
       '<div class="progress-hero">'+
@@ -2630,6 +2807,7 @@
         '<div><span>Силовые</span><b id="progressWorkoutCount">0</b><small id="progressWorkoutNote">за период</small></div>'+
       '</div>'+
       '<div class="progress-insight" id="progressInsight"></div>'+
+      monthlyReportMarkup()+
       bodyProgressMarkup()+
       achievementsMarkup()+
       '<div class="photo-compare-card" id="photoCompareCard"></div>'+
@@ -2775,6 +2953,7 @@
       insight.innerHTML='<div class="progress-insight-mark">'+mark+'</div><div><span>Вывод MY 60</span><b>'+head+'</b><p>'+copy+'</p></div>';
     }
 
+    updateMonthlyReport();
     updateBodyProgress();
     updateAchievements();
     const photo=document.getElementById('photoCompareCard'),pair=progressPhotoPair();
