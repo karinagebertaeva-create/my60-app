@@ -527,28 +527,28 @@
   }
 
   const builtInProducts=[
-    {id:'base-egg',name:'Яйцо куриное, варёное',kcal100:155,p100:12.6,f100:10.6,c100:1.1},
+    {id:'base-egg',name:'Яйцо куриное, варёное',kcal100:155,p100:12.6,f100:10.6,c100:1.1,defaultGrams:50,servings:[{label:'1 яйцо',grams:50},{label:'2 яйца',grams:100},{label:'3 яйца',grams:150}]},
     {id:'base-egg-fried',name:'Яйцо жареное',kcal100:196,p100:13.6,f100:14.8,c100:1.0},
     {id:'base-omelet',name:'Омлет с молоком',kcal100:154,p100:10.0,f100:11.9,c100:1.9},
     {id:'base-cottage-0',name:'Творог 0–2%',kcal100:89,p100:18.0,f100:1.8,c100:3.3},
-    {id:'base-cottage-5',name:'Творог 5%',kcal100:121,p100:17.2,f100:5.0,c100:1.8},
+    {id:'base-cottage-5',name:'Творог 5%',kcal100:121,p100:17.2,f100:5.0,c100:1.8,defaultGrams:180,servings:[{label:'150 г',grams:150},{label:'1 порция · 180 г',grams:180},{label:'200 г',grams:200}]},
     {id:'base-cottage-9',name:'Творог 9%',kcal100:159,p100:16.7,f100:9.0,c100:2.0},
     {id:'base-kefir-1',name:'Кефир 1%',kcal100:40,p100:3.0,f100:1.0,c100:4.0},
     {id:'base-kefir-25',name:'Кефир 2,5%',kcal100:53,p100:2.9,f100:2.5,c100:4.0},
     {id:'base-milk-25',name:'Молоко 2,5%',kcal100:52,p100:2.8,f100:2.5,c100:4.7},
     {id:'base-yogurt-natural',name:'Йогурт натуральный без сахара',kcal100:61,p100:4.3,f100:3.0,c100:4.7},
-    {id:'base-greek-yogurt',name:'Йогурт греческий 2%',kcal100:73,p100:9.0,f100:2.0,c100:4.0},
+    {id:'base-greek-yogurt',name:'Йогурт греческий 2%',kcal100:73,p100:9.0,f100:2.0,c100:4.0,defaultGrams:200,servings:[{label:'150 г',grams:150},{label:'1 порция · 200 г',grams:200},{label:'250 г',grams:250}]},
     {id:'base-sour-cream-15',name:'Сметана 15%',kcal100:162,p100:2.6,f100:15.0,c100:3.6},
     {id:'base-cheese-hard',name:'Сыр твёрдый',kcal100:350,p100:25.0,f100:27.0,c100:1.5},
     {id:'base-mozzarella',name:'Моцарелла',kcal100:280,p100:22.0,f100:21.0,c100:2.2},
     {id:'base-butter',name:'Масло сливочное 82%',kcal100:748,p100:0.5,f100:82.0,c100:0.8},
-    {id:'base-chicken-breast-boiled',name:'Куриная грудка, варёная',kcal100:165,p100:31.0,f100:3.6,c100:0},
+    {id:'base-chicken-breast-boiled',name:'Куриная грудка, варёная',kcal100:165,p100:31.0,f100:3.6,c100:0,defaultGrams:150,servings:[{label:'100 г',grams:100},{label:'1 порция · 150 г',grams:150},{label:'200 г',grams:200}]},
     {id:'base-chicken-breast-baked',name:'Куриная грудка, запечённая',kcal100:171,p100:30.0,f100:4.8,c100:0},
     {id:'base-chicken-thigh',name:'Куриное бедро без кожи, готовое',kcal100:209,p100:26.0,f100:11.0,c100:0},
     {id:'base-turkey',name:'Индейка, филе готовое',kcal100:135,p100:29.0,f100:1.6,c100:0},
     {id:'base-beef-boiled',name:'Говядина отварная',kcal100:187,p100:26.0,f100:9.0,c100:0},
     {id:'base-beef-stewed',name:'Говядина тушёная',kcal100:205,p100:25.0,f100:11.0,c100:2.0},
-    {id:'base-goulash',name:'Гуляш из говядины',kcal100:145,p100:12.5,f100:8.5,c100:5.0},
+    {id:'base-goulash',name:'Гуляш из говядины',kcal100:145,p100:12.5,f100:8.5,c100:5.0,defaultGrams:200,servings:[{label:'150 г',grams:150},{label:'1 порция · 200 г',grams:200},{label:'250 г',grams:250}]},
     {id:'base-meatballs',name:'Котлета домашняя мясная',kcal100:230,p100:16.0,f100:16.0,c100:6.0},
     {id:'base-meatballs-chicken',name:'Котлета куриная',kcal100:180,p100:19.0,f100:10.0,c100:4.0},
     {id:'base-minced-beef',name:'Фарш говяжий готовый',kcal100:250,p100:26.0,f100:16.0,c100:0},
@@ -562,22 +562,22 @@
     {id:'base-potato-boiled',name:'Картофель варёный',kcal100:82,p100:2.0,f100:0.1,c100:18.0},
     {id:'base-potato-baked',name:'Картофель запечённый без масла',kcal100:93,p100:2.5,f100:0.1,c100:21.0},
     {id:'base-potato-fried',name:'Картошка жареная',kcal100:192,p100:2.8,f100:9.5,c100:24.0},
-    {id:'base-potato-puree',name:'Картофельное пюре с молоком и маслом',kcal100:113,p100:2.1,f100:4.2,c100:17.0},
+    {id:'base-potato-puree',name:'Картофельное пюре с молоком и маслом',kcal100:113,p100:2.1,f100:4.2,c100:17.0,defaultGrams:200,servings:[{label:'150 г',grams:150},{label:'1 порция · 200 г',grams:200},{label:'250 г',grams:250}]},
     {id:'base-rice-white',name:'Рис белый варёный',kcal100:130,p100:2.7,f100:0.3,c100:28.0},
     {id:'base-rice-brown',name:'Рис бурый варёный',kcal100:123,p100:2.7,f100:1.0,c100:25.6},
-    {id:'base-buckwheat',name:'Гречка варёная',kcal100:110,p100:4.2,f100:1.1,c100:21.3},
+    {id:'base-buckwheat',name:'Гречка варёная',kcal100:110,p100:4.2,f100:1.1,c100:21.3,defaultGrams:150,servings:[{label:'100 г',grams:100},{label:'1 порция · 150 г',grams:150},{label:'200 г',grams:200}]},
     {id:'base-oatmeal-water',name:'Овсяная каша на воде',kcal100:88,p100:3.0,f100:1.7,c100:15.0},
     {id:'base-oatmeal-milk',name:'Овсяная каша на молоке',kcal100:113,p100:4.0,f100:4.0,c100:16.0},
     {id:'base-pasta',name:'Макароны варёные',kcal100:131,p100:5.0,f100:1.1,c100:25.0},
     {id:'base-couscous',name:'Кускус готовый',kcal100:112,p100:3.8,f100:0.2,c100:23.2},
     {id:'base-bulgur',name:'Булгур варёный',kcal100:83,p100:3.1,f100:0.2,c100:18.6},
     {id:'base-quinoa',name:'Киноа варёная',kcal100:120,p100:4.4,f100:1.9,c100:21.3},
-    {id:'base-bread-white',name:'Хлеб белый',kcal100:265,p100:8.5,f100:3.2,c100:49.0},
+    {id:'base-bread-white',name:'Хлеб белый',kcal100:265,p100:8.5,f100:3.2,c100:49.0,defaultGrams:35,servings:[{label:'1 кусок · 35 г',grams:35},{label:'2 куска · 70 г',grams:70},{label:'3 куска · 105 г',grams:105}]},
     {id:'base-bread-rye',name:'Хлеб ржаной',kcal100:214,p100:6.6,f100:1.2,c100:43.0},
     {id:'base-lavash',name:'Лаваш тонкий',kcal100:275,p100:9.0,f100:1.2,c100:57.0},
     {id:'base-crispbread',name:'Хлебцы цельнозерновые',kcal100:350,p100:10.0,f100:4.0,c100:65.0},
-    {id:'base-apple',name:'Яблоко',kcal100:52,p100:0.3,f100:0.2,c100:14.0},
-    {id:'base-banana',name:'Банан',kcal100:89,p100:1.1,f100:0.3,c100:22.8},
+    {id:'base-apple',name:'Яблоко',kcal100:52,p100:0.3,f100:0.2,c100:14.0,defaultGrams:160,servings:[{label:'½ яблока · 80 г',grams:80},{label:'1 яблоко · 160 г',grams:160},{label:'Крупное · 220 г',grams:220}]},
+    {id:'base-banana',name:'Банан',kcal100:89,p100:1.1,f100:0.3,c100:22.8,defaultGrams:120,servings:[{label:'½ банана · 60 г',grams:60},{label:'1 банан · 120 г',grams:120},{label:'Крупный · 160 г',grams:160}]},
     {id:'base-orange',name:'Апельсин',kcal100:47,p100:0.9,f100:0.1,c100:11.8},
     {id:'base-mandarin',name:'Мандарин',kcal100:53,p100:0.8,f100:0.3,c100:13.3},
     {id:'base-pear',name:'Груша',kcal100:57,p100:0.4,f100:0.1,c100:15.2},
@@ -628,7 +628,7 @@
     {id:'base-stuffed-pepper',name:'Перец фаршированный мясом и рисом',kcal100:145,p100:7.5,f100:8.0,c100:10.0},
     {id:'base-cabbage-rolls',name:'Голубцы с мясом и рисом',kcal100:140,p100:7.0,f100:8.0,c100:10.0},
     {id:'base-pasta-bolognese',name:'Паста болоньезе',kcal100:170,p100:8.0,f100:6.0,c100:21.0},
-    {id:'base-spaghetti-gravy',name:'Спагетти с подливой, домашние',kcal100:160,p100:6.5,f100:4.5,c100:24.0,defaultGrams:250},
+    {id:'base-spaghetti-gravy',name:'Спагетти с подливой, домашние',kcal100:160,p100:6.5,f100:4.5,c100:24.0,defaultGrams:250,servings:[{label:'½ тарелки · 150 г',grams:150},{label:'1 тарелка · 250 г',grams:250},{label:'Большая · 350 г',grams:350}]},
     {id:'base-beef-stroganoff',name:'Бефстроганов из говядины',kcal100:180,p100:13.0,f100:12.0,c100:5.0},
     {id:'base-chicken-cream',name:'Курица в сливочном соусе',kcal100:175,p100:16.0,f100:11.0,c100:3.0},
     {id:'base-casserole-cottage',name:'Запеканка творожная',kcal100:180,p100:13.0,f100:7.0,c100:17.0},
@@ -661,6 +661,11 @@
         p.mealDefault='Напиток';
         p.caffeine100=30;
       }
+      const base=builtInProducts.find(function(x){return normalizeProductName(x.name)===normalizeProductName(p.name)});
+      if(base){
+        if(base.defaultGrams&&!p.defaultGrams)p.defaultGrams=base.defaultGrams;
+        if(Array.isArray(base.servings)&&base.servings.length&&!Array.isArray(p.servings))p.servings=base.servings.map(function(s){return {label:s.label,grams:s.grams}});
+      }
     });
     return S.productLibrary;
   }
@@ -683,6 +688,7 @@
     return '<div class="card calorie-card" id="calorieCalculator">'+
       '<div class="calorie-head"><div><div class="label">Быстро добавить</div><div class="big calorie-title">Найди продукт</div><div class="muted">Выбери из базы MY 60 или из своих сохранённых — КБЖУ подставится автоматически.</div></div><div class="calorie-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></svg></div></div>'+
       '<div class="smart-search-block product-search-wrap"><div class="search-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></svg></div><input id="calcName" autocomplete="off" placeholder="Творог, картошка, гуляш…" onfocus="productSearch(this.value)" oninput="clearSelectedProductMeta();productSearch(this.value)"><div class="product-suggestions" id="productSuggestions"></div></div>'+
+      '<div class="quick-serving-wrap" id="quickServingWrap" hidden><div class="quick-serving-label">Быстрая порция</div><div class="quick-serving-row" id="quickServingRow"></div></div>'+
       '<div class="quick-food-row">'+
         '<button type="button" onclick="quickFood(\'base-cottage-5\')">Творог</button>'+
         '<button type="button" onclick="quickFood(\'base-egg\')">Яйцо</button>'+
@@ -771,6 +777,7 @@
       calc.dataset.productId='';
       calc.dataset.defaultGrams='';
       calc.dataset.mealDefault='';
+      calc.dataset.servings='';
     }
   }
 
@@ -835,6 +842,28 @@
 
   window.undoLastFoodAction=undoLastFoodAction;
 
+  function setQuickServing(grams){
+    const el=document.getElementById('calcGrams');
+    if(!el)return;
+    el.value=String(+grams||'');
+    calorieCalc();
+    const row=document.getElementById('quickServingRow');
+    if(row)Array.from(row.querySelectorAll('button')).forEach(function(b){b.classList.toggle('active',+b.dataset.grams===+grams)});
+  }
+
+  function renderQuickServings(p){
+    const wrap=document.getElementById('quickServingWrap'),row=document.getElementById('quickServingRow');
+    if(!wrap||!row)return;
+    const list=p&&Array.isArray(p.servings)?p.servings:[];
+    wrap.hidden=!list.length;
+    if(!list.length){row.innerHTML='';return}
+    row.innerHTML=list.map(function(s){
+      return '<button type="button" data-grams="'+(+s.grams||0)+'" onclick="setQuickServing(this.dataset.grams)">'+escapeHtml(s.label)+'</button>';
+    }).join('');
+  }
+
+  window.setQuickServing=setQuickServing;
+
   function applyProductToCalculator(p){
     if(!p)return;
     const values={calcName:p.name,calcKcal100:p.kcal100,calcP100:p.p100,calcF100:p.f100,calcC100:p.c100};
@@ -848,7 +877,9 @@
       calc.dataset.productId=p.id||'';
       calc.dataset.defaultGrams=p.defaultGrams?String(p.defaultGrams):'';
       calc.dataset.mealDefault=p.mealDefault||'';
+      calc.dataset.servings=Array.isArray(p.servings)?JSON.stringify(p.servings):'';
     }
+    renderQuickServings(p);
     hideProductSuggestions();
     const meal=document.getElementById('calcMeal');
     if(meal&&p.mealDefault)meal.value=p.mealDefault;
@@ -858,6 +889,7 @@
       if(!p.defaultGrams)setTimeout(function(){grams.focus()},40);
     }
     calorieCalc();
+    if(p.defaultGrams)setQuickServing(p.defaultGrams);
   }
 
   function allSearchProducts(){
@@ -956,6 +988,9 @@
     const calc=document.getElementById('calorieCalculator');
     p.defaultGrams=calc&&+calc.dataset.defaultGrams?+calc.dataset.defaultGrams:(p.defaultGrams||0);
     p.mealDefault=calc&&calc.dataset.mealDefault?calc.dataset.mealDefault:(p.mealDefault||'');
+    if(calc&&calc.dataset.servings){
+      try{p.servings=JSON.parse(calc.dataset.servings)}catch(e){}
+    }
     p.lastUsed=Date.now();
     if(library.length>100){
       const removable=library.filter(function(x){return !x.favorite}).sort(function(a,b){return (a.lastUsed||0)-(b.lastUsed||0)});
@@ -1926,6 +1961,7 @@
       const el=document.getElementById(id); if(el)el.value='';
     });
     clearSelectedProductMeta();
+    renderQuickServings(null);
     calorieCalc();
     updateCalorieDaily();
     renderProductLibrary();
