@@ -3700,3 +3700,15 @@ canvas{margin-top:14px;height:220px;border:0;border-radius:20px;background:linea
     gap:7px
   }
 }
+
+/* Caffeine-linked food entries v40 */
+.food-edit-preview .food-edit-caffeine{
+  grid-column:1/-1;
+  background:linear-gradient(145deg,#f3eee8,#eef3ee)
+}
+.food-edit-preview .food-edit-caffeine span{
+  color:#9a7a7f
+}
+.food-edit-preview .food-edit-caffeine b{
+  color:#59635d
+}
