@@ -4503,3 +4503,17 @@ canvas{margin-top:14px;height:220px;border:0;border-radius:20px;background:linea
     grid-column:auto
   }
 }
+
+/* Persistent achievement dates v50 */
+.achievement-copy em{
+  display:block;
+  margin-top:4px;
+  font-style:normal;
+  font-size:7px;
+  line-height:1.25;
+  color:#78927e;
+  font-weight:800
+}
+.achievement-item.done .achievement-copy i{
+  color:#6f7d73
+}
