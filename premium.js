@@ -2473,6 +2473,119 @@
     return defs;
   }
 
+  function ensureAchievementUnlocks(){
+    if(!S.achievementUnlocks||typeof S.achievementUnlocks!=='object'||Array.isArray(S.achievementUnlocks))S.achievementUnlocks={};
+    return S.achievementUnlocks;
+  }
+
+  function achievementUnlockDate(id){
+    if(id==='first-workout'){
+      return Object.keys(S.workouts||{}).sort().find(function(k){
+        return ((S.workouts[k]||[]).some(function(x){return x==='A'||x==='B'}));
+      })||null;
+    }
+
+    if(id==='two-strength'){
+      const buckets={};
+      Object.keys(S.workouts||{}).sort().forEach(function(k){
+        const count=(S.workouts[k]||[]).filter(function(x){return x==='A'||x==='B'}).length;
+        if(!count)return;
+        const d=new Date(k+'T00:00:00'),day=(d.getDay()+6)%7,monday=new Date(d);
+        monday.setDate(d.getDate()-day);
+        const wk=key(monday);
+        if(!buckets[wk])buckets[wk]=[];
+        for(let i=0;i<count;i++)buckets[wk].push(k);
+      });
+      const weeks=Object.keys(buckets).sort();
+      for(const wk of weeks){
+        if(buckets[wk].length>=2)return buckets[wk].sort()[1];
+      }
+      return null;
+    }
+
+    if(id==='food-seven'){
+      const days=Object.keys(S.food||{}).filter(function(k){return (S.food[k]||[]).length>0}).sort();
+      return days.length>=7?days[6]:null;
+    }
+
+    if(id==='well-seven'){
+      const days=Object.keys(S.well||{}).filter(function(k){return !!S.well[k]}).sort();
+      return days.length>=7?days[6]:null;
+    }
+
+    if(id==='minus-one'){
+      const start=+START||0;
+      if(!start)return null;
+      const hit=Object.entries(S.weights||{}).sort().find(function(x){return +x[1]<=start-1});
+      return hit?hit[0]:null;
+    }
+
+    if(id==='waist-two'){
+      const vals=Object.entries(S.measures||{}).filter(function(x){return x[1]&&+x[1].waist>0}).sort();
+      if(!vals.length)return null;
+      const first=+vals[0][1].waist;
+      const hit=vals.find(function(x){return +x[1].waist<=first-2});
+      return hit?hit[0]:null;
+    }
+
+    if(id==='steps-ten'){
+      const hit=Object.entries(S.steps||{}).sort().find(function(x){return +x[1]>=10000});
+      return hit?hit[0]:null;
+    }
+
+    if(id==='photo-pair'){
+      const photos=(S.photos||[]).filter(function(p){return p&&p.data&&p.date}).slice().sort(function(a,b){return String(a.date).localeCompare(String(b.date))});
+      for(const type of ['front','side','back']){
+        const same=photos.filter(function(p){return p.type===type});
+        if(same.length>=2)return same[1].date||null;
+      }
+      return null;
+    }
+
+    if(id==='day-fourteen'||id==='day-twenty-eight'){
+      if(!S.planStartedAt)return null;
+      const d=new Date(S.planStartedAt+'T00:00:00');
+      if(isNaN(d.getTime()))return null;
+      d.setDate(d.getDate()+(id==='day-fourteen'?13:27));
+      return key(d);
+    }
+
+    return null;
+  }
+
+  function achievementDateLabel(raw){
+    if(!raw)return 'Открыто ранее';
+    const d=new Date(raw+'T00:00:00');
+    if(isNaN(d.getTime()))return 'Открыто ранее';
+    return 'Открыто '+d.toLocaleDateString('ru-RU',{day:'numeric',month:'long'});
+  }
+
+  function persistentAchievementDefinitions(){
+    const defs=achievementDefinitions(),store=ensureAchievementUnlocks();
+    let changed=false;
+
+    defs.forEach(function(a){
+      if(a.done&&!store[a.id]){
+        store[a.id]={
+          unlockedAt:achievementUnlockDate(a.id),
+          value:a.value||''
+        };
+        changed=true;
+      }
+
+      if(store[a.id]){
+        a.done=true;
+        a.progress=1;
+        a.unlockedAt=store[a.id].unlockedAt||null;
+        a.unlockLabel=achievementDateLabel(a.unlockedAt);
+        if(store[a.id].value)a.value=store[a.id].value;
+      }
+    });
+
+    if(changed&&typeof save==='function')setTimeout(function(){save()},0);
+    return defs;
+  }
+
   function achievementsMarkup(){
     return '<div class="achievements-card" id="achievementsCard">'+
       '<div class="achievements-head"><div><div class="label">Мои победы</div><h3>Прогресс, который уже есть</h3><p>Без стриков и обнулений. Открытое достижение остаётся твоим.</p></div><div class="achievement-count" id="achievementCount">0 / 10</div></div>'+
@@ -2484,7 +2597,7 @@
   function updateAchievements(){
     const grid=document.getElementById('achievementGrid');
     if(!grid||!window.S)return;
-    const defs=achievementDefinitions(),done=defs.filter(function(x){return x.done});
+    const defs=persistentAchievementDefinitions(),done=defs.filter(function(x){return x.done});
     const count=document.getElementById('achievementCount');
     if(count)count.textContent=done.length+' / '+defs.length;
 
@@ -2492,7 +2605,7 @@
       const pct=Math.round(a.progress*100);
       return '<div class="achievement-item '+(a.done?'done':'locked')+'">'+
         '<div class="achievement-icon">'+(a.done?'✓':a.icon)+'</div>'+
-        '<div class="achievement-copy"><b>'+a.title+'</b><small>'+a.sub+'</small><div class="achievement-mini"><span style="width:'+pct+'%"></span></div><i>'+a.value+'</i></div>'+
+        '<div class="achievement-copy"><b>'+a.title+'</b><small>'+a.sub+'</small><div class="achievement-mini"><span style="width:'+pct+'%"></span></div><i>'+a.value+'</i>'+(a.done?'<em>'+a.unlockLabel+'</em>':'')+'</div>'+
       '</div>';
     }).join('');
 
