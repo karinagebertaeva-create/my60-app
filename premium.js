@@ -1629,7 +1629,7 @@
 
   function duplicateFoodEntry(index){
     const e=editableFoodEntry(index);if(!e)return;
-    const undo=foodUndoSnapshot(key());
+    const dk=foodActiveKey(),undo=foodUndoSnapshot(dk);
     const mealEl=document.getElementById('foodEditMeal'),gramsEl=document.getElementById('foodEditGrams');
     const meal=mealEl?mealEl.value:e.meal,grams=gramsEl?(+gramsEl.value||0):e.grams;
     if(!(grams>0))return;
@@ -1642,7 +1642,7 @@
       cal:t.kcal,p:t.p,f:t.f,c:t.c,caffeineMg:t.caffeine||0,caffeineAt:t.caffeine?Date.now():0,
       copiedEntry:true
     });
-    if(t.caffeine)adjustDayCaffeine(t.caffeine,foodActiveKey());
+    if(t.caffeine)adjustDayCaffeine(t.caffeine,dk);
     if(typeof save==='function')save();
     if(typeof closeM==='function')closeM();
     showFoodUndo('Добавлена ещё одна порция',undo);
@@ -1758,7 +1758,7 @@
       });
       if(total>limit){
         note.className='caffeine-note over';
-        note.innerHTML='<b>Выше выбранного ориентира</b><span>Не нужно ничего компенсировать. Просто учти суммарный кофеин сегодня.</span>';
+        note.innerHTML='<b>Выше выбранного ориентира</b><span>Не нужно ничего компенсировать. Просто учти суммарный кофеин за этот день.</span>';
       }else if(late){
         note.className='caffeine-note evening';
         note.innerHTML='<b>Кофеин добавлен вечером</b><span>Обрати внимание, влияет ли он у тебя на засыпание и качество сна.</span>';
@@ -1894,8 +1894,8 @@
     rememberCurrentProduct(name);
     const caffeine100=selectedProductCaffeine100();
     const caffeineMg=round1(caffeine100*t.grams/100);
-    if(!S.food[key()])S.food[key()]=[];
-    S.food[key()].push({
+    if(!S.food[dk])S.food[dk]=[];
+    S.food[dk].push({
       meal:meal,
       name:name+' · '+Math.round(t.grams)+' г',
       baseName:name,
