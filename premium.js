@@ -351,6 +351,7 @@
   function addTodayMenuMeal(type){
     const info=currentMenuDay();if(!info||!info.day)return;
     const meal=menuMealById(type,info.day[type]);if(!meal)return;
+    const undo=foodUndoSnapshot(key());
     const mealMap={breakfast:'Завтрак',lunch:'Обед',snack:'Перекус',dinner:'Ужин'};
     if(!S.food[key()])S.food[key()]=[];
     if(!menuMealAddedToday(meal)){
@@ -361,6 +362,7 @@
         menuPlanId:meal.id
       });
       if(typeof save==='function')save();
+      showFoodUndo('Добавлено: '+meal.title,undo);
     }
   }
 
@@ -774,6 +776,65 @@
 
   window.clearSelectedProductMeta=clearSelectedProductMeta;
 
+  let foodUndoState=null,foodUndoTimer=null;
+
+  function foodUndoSnapshot(dateKey){
+    const k=dateKey||key();
+    const hasFood=!!(S.food&&Object.prototype.hasOwnProperty.call(S.food,k));
+    const hasCaf=!!(S.caf&&Object.prototype.hasOwnProperty.call(S.caf,k));
+    return {
+      dateKey:k,
+      hasFood:hasFood,
+      food:hasFood?JSON.parse(JSON.stringify(S.food[k]||[])):null,
+      hasCaf:hasCaf,
+      caf:hasCaf?(+S.caf[k]||0):null
+    };
+  }
+
+  function ensureFoodUndoToast(){
+    let el=document.getElementById('foodUndoToast');
+    if(el)return el;
+    el=document.createElement('div');
+    el.id='foodUndoToast';
+    el.className='food-undo-toast';
+    el.innerHTML='<div><span id="foodUndoText">Готово</span><button type="button" onclick="undoLastFoodAction()">Отменить</button></div>';
+    document.body.appendChild(el);
+    return el;
+  }
+
+  function showFoodUndo(message,snapshot){
+    if(!snapshot)return;
+    foodUndoState=snapshot;
+    clearTimeout(foodUndoTimer);
+    const el=ensureFoodUndoToast(),txt=document.getElementById('foodUndoText');
+    if(txt)txt.textContent=message||'Изменение сохранено';
+    el.classList.remove('undone');
+    requestAnimationFrame(function(){el.classList.add('show')});
+    foodUndoTimer=setTimeout(function(){
+      el.classList.remove('show');
+      foodUndoState=null;
+    },6000);
+  }
+
+  function undoLastFoodAction(){
+    const snap=foodUndoState;if(!snap)return;
+    clearTimeout(foodUndoTimer);
+    if(!S.food)S.food={};
+    if(!S.caf)S.caf={};
+    if(snap.hasFood)S.food[snap.dateKey]=JSON.parse(JSON.stringify(snap.food||[]));
+    else delete S.food[snap.dateKey];
+    if(snap.hasCaf)S.caf[snap.dateKey]=snap.caf;
+    else delete S.caf[snap.dateKey];
+    foodUndoState=null;
+    if(typeof save==='function')save();
+    const el=ensureFoodUndoToast(),txt=document.getElementById('foodUndoText');
+    if(txt)txt.textContent='Отменено';
+    el.classList.add('undone','show');
+    foodUndoTimer=setTimeout(function(){el.classList.remove('show')},1200);
+  }
+
+  window.undoLastFoodAction=undoLastFoodAction;
+
   function applyProductToCalculator(p){
     if(!p)return;
     const values={calcName:p.name,calcKcal100:p.kcal100,calcP100:p.p100,calcF100:p.f100,calcC100:p.c100};
@@ -928,6 +989,7 @@
 
   function addAdrenalineRush449(){
     if(!window.S||typeof key!=='function')return;
+    const undo=foodUndoSnapshot(key());
     const p=builtInProducts.find(function(x){return x.id==='base-adrenaline-rush-449'});
     if(!p)return;
     const amount=449,factor=amount/100;
@@ -951,6 +1013,7 @@
     });
     adjustDayCaffeine(caffeine,key());
     if(typeof save==='function')save();
+    showFoodUndo('Adrenaline добавлен · 449 мл',undo);
   }
 
   window.addAdrenalineRush449=addAdrenalineRush449;
@@ -1040,6 +1103,7 @@
 
   function addSmartMeal(id){
     const combo=smartMealLibrary().find(function(x){return x.id===id});if(!combo||!window.S)return;
+    const undo=foodUndoSnapshot(key());
     if(!S.food[key()])S.food[key()]=[];
     combo.items.forEach(function(it){
       const p=baseProduct(it.id);if(!p)return;
@@ -1061,6 +1125,7 @@
       });
     });
     if(typeof save==='function')save();
+    showFoodUndo('Добавлен вариант: '+combo.title,undo);
   }
 
   window.addSmartMeal=addSmartMeal;
@@ -1204,10 +1269,12 @@
     if(!window.S||typeof key!=='function')return;
     const src=((S.food&&S.food[yesterdayKey()])||[]).filter(function(x){return x.meal===meal});
     if(!src.length)return;
+    const undo=foodUndoSnapshot(key());
     if(!S.food[key()])S.food[key()]=[];
     src.forEach(function(x){S.food[key()].push(Object.assign({},x,{copiedFrom:yesterdayKey()}));if(entryCaffeineMg(x))adjustDayCaffeine(entryCaffeineMg(x),key())});
     if(typeof save==='function')save();
     renderFoodTools();
+    showFoodUndo('Повторён '+meal.toLowerCase()+' со вчера',undo);
   }
 
   function copyYesterdayAll(){
@@ -1218,10 +1285,12 @@
       if(card){card.classList.add('nudge');setTimeout(function(){card.classList.remove('nudge')},500)}
       return;
     }
+    const undo=foodUndoSnapshot(key());
     if(!S.food[key()])S.food[key()]=[];
-    src.forEach(function(x){S.food[key()].push(Object.assign({},x,{copiedFrom:yesterdayKey()}))});
+    src.forEach(function(x){S.food[key()].push(Object.assign({},x,{copiedFrom:yesterdayKey()}));if(entryCaffeineMg(x))adjustDayCaffeine(entryCaffeineMg(x),key())});
     if(typeof save==='function')save();
     renderFoodTools();
+    showFoodUndo('Вчерашний день добавлен',undo);
   }
 
   function recipeProductByRef(source,id){
@@ -1390,7 +1459,10 @@
   }
 
   function deleteMealEntry(index){
+    const list=(S.food&&S.food[key()])||[],x=list[index];
+    const undo=foodUndoSnapshot(key());
     if(typeof foodDel==='function')foodDel(index);
+    if(x)showFoodUndo('Удалено: '+String(x.baseName||x.name||'запись').replace(/\s*·.*$/,''),undo);
   }
 
 
@@ -1478,6 +1550,7 @@
 
   function duplicateFoodEntry(index){
     const e=editableFoodEntry(index);if(!e)return;
+    const undo=foodUndoSnapshot(key());
     const mealEl=document.getElementById('foodEditMeal'),gramsEl=document.getElementById('foodEditGrams');
     const meal=mealEl?mealEl.value:e.meal,grams=gramsEl?(+gramsEl.value||0):e.grams;
     if(!(grams>0))return;
@@ -1493,11 +1566,15 @@
     if(t.caffeine)adjustDayCaffeine(t.caffeine,key());
     if(typeof save==='function')save();
     if(typeof closeM==='function')closeM();
+    showFoodUndo('Добавлена ещё одна порция',undo);
   }
 
   function deleteFoodEntryFromEditor(index){
+    const list=(S.food&&S.food[key()])||[],x=list[index];
+    const undo=foodUndoSnapshot(key());
     if(typeof closeM==='function')closeM();
     if(typeof foodDel==='function')foodDel(index);
+    if(x)showFoodUndo('Удалено: '+String(x.baseName||x.name||'запись').replace(/\s*·.*$/,''),undo);
   }
 
   window.openFoodEntryEditor=openFoodEntryEditor;
@@ -1722,6 +1799,7 @@
     const mealEl=document.getElementById('calcMeal');
     const name=(nameEl&&nameEl.value.trim())||'Продукт';
     const meal=(mealEl&&mealEl.value)||'Другое';
+    const undo=foodUndoSnapshot(key());
     rememberCurrentProduct(name);
     const caffeine100=selectedProductCaffeine100();
     const caffeineMg=round1(caffeine100*t.grams/100);
@@ -1745,6 +1823,7 @@
     });
     if(caffeineMg)adjustDayCaffeine(caffeineMg,key());
     if(typeof save==='function')save();
+    showFoodUndo('Добавлено: '+name,undo);
     ['calcName','calcGrams','calcKcal100','calcP100','calcF100','calcC100'].forEach(function(id){
       const el=document.getElementById(id); if(el)el.value='';
     });
@@ -2905,10 +2984,12 @@
   function repeatHistoryFood(k){
     const src=(S.food&&S.food[k])||[];
     if(!src.length)return;
+    const undo=foodUndoSnapshot(key());
     if(!S.food[key()])S.food[key()]=[];
     src.forEach(function(x){S.food[key()].push(Object.assign({},x,{copiedFrom:k}));if(entryCaffeineMg(x))adjustDayCaffeine(entryCaffeineMg(x),key())});
     if(typeof save==='function')save();
     if(typeof closeM==='function')closeM();
+    showFoodUndo('Питание из истории добавлено',undo);
   }
 
   window.changeHistoryMonth=changeHistoryMonth;
@@ -3137,6 +3218,7 @@
   function addWeeklyMenuDay(dayIndex){
     const menu=ensureWeeklyMenu(),day=menu[dayIndex];
     const date=menuDateForDay(dayIndex),dateKey=key(date);
+    const undo=foodUndoSnapshot(dateKey),before=((S.food&&S.food[dateKey])||[]).length;
     const mealMap={breakfast:'Завтрак',lunch:'Обед',snack:'Перекус',dinner:'Ужин'};
     if(!S.food[dateKey])S.food[dateKey]=[];
     ['breakfast','lunch','snack','dinner'].forEach(function(type){
@@ -3148,6 +3230,7 @@
     });
     if(typeof save==='function')save();
     renderWeeklyMenu();
+    if((S.food[dateKey]||[]).length>before)showFoodUndo('Меню дня добавлено в дневник',undo);
   }
 
   function weeklyShoppingList(){
