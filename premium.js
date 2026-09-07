@@ -717,6 +717,8 @@
       if(base){
         if(base.defaultGrams&&!p.defaultGrams)p.defaultGrams=base.defaultGrams;
         if(base.unit)p.unit=base.unit;
+        if(base.category)p.category=base.category;
+        if(base.approx)p.approx=true;
         if(base.mealDefault&&!p.mealDefault)p.mealDefault=base.mealDefault;
         if(base.caffeine100&&!p.caffeine100)p.caffeine100=base.caffeine100;
         if(Array.isArray(base.aliases))p.aliases=base.aliases.slice();
@@ -842,6 +844,7 @@
       calc.dataset.servings='';
       calc.dataset.unit='';
       calc.dataset.approx='';
+      calc.dataset.category='';
     }
     updateCalculatorUnit('г');
   }
@@ -957,6 +960,7 @@
       calc.dataset.servings=Array.isArray(p.servings)?JSON.stringify(p.servings):'';
       calc.dataset.unit=p.unit||'г';
       calc.dataset.approx=p.approx?'1':'';
+      calc.dataset.category=p.category||'';
     }
     updateCalculatorUnit(p.unit||'г');
     renderQuickServings(p);
@@ -1084,6 +1088,7 @@
     const calc=document.getElementById('calorieCalculator');
     p.unit=calc&&calc.dataset.unit?calc.dataset.unit:(p.unit||'г');
     p.approx=!!(calc&&calc.dataset.approx==='1');
+    p.category=calc&&calc.dataset.category?calc.dataset.category:(p.category||'');
     p.defaultGrams=calc&&+calc.dataset.defaultGrams?+calc.dataset.defaultGrams:(p.defaultGrams||0);
     p.mealDefault=calc&&calc.dataset.mealDefault?calc.dataset.mealDefault:(p.mealDefault||'');
     if(calc&&calc.dataset.servings){
