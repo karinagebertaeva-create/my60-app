@@ -3329,19 +3329,89 @@
 
   function weeklyMenuMarkup(){
     return '<div class="weekly-menu" id="weeklyMenu">'+
-      '<div class="weekly-menu-head"><div><div class="label">Питание на 7 дней</div><h3>Меню недели</h3><p>Примерно под твои цели. Любой приём пищи можно заменить одним нажатием.</p></div><button type="button" onclick="resetWeeklyMenu()">Сбросить меню</button></div>'+
+      '<div class="weekly-menu-head"><div><div class="label">Питание на 7 дней</div><h3>Меню недели</h3><p>Нажми «Заменить» и выбери блюдо из вариантов. Если день уже в дневнике, план обновится без дублей.</p></div><button type="button" onclick="resetWeeklyMenu()">Сбросить меню</button></div>'+
       '<div class="weekly-menu-days" id="weeklyMenuDays"></div>'+
       '<div class="weekly-shop" id="weeklyShop"></div>'+
     '</div>';
   }
 
+  function weeklyMealTypeLabel(type){
+    return {breakfast:'Завтрак',lunch:'Обед',snack:'Перекус',dinner:'Ужин'}[type]||'Приём пищи';
+  }
+
+  function plannedMealEntryIndex(dateKey,type){
+    const list=(S.food&&S.food[dateKey])||[];
+    const mealLabel=weeklyMealTypeLabel(type);
+    return list.findIndex(function(x){
+      if(x.menuPlanType===type)return true;
+      return !!x.menuPlanId&&x.meal===mealLabel;
+    });
+  }
+
+  function weeklyMealEntry(type,m){
+    return {
+      meal:weeklyMealTypeLabel(type),
+      name:m.title,
+      cal:m.kcal,p:m.p,f:m.f,c:m.c,
+      menuPlanId:m.id,
+      menuPlanType:type
+    };
+  }
+
+  function syncPlannedMealToDiary(dayIndex,type){
+    const dateKey=key(menuDateForDay(dayIndex));
+    const list=(S.food&&S.food[dateKey])||[];
+    const idx=plannedMealEntryIndex(dateKey,type);
+    if(idx<0)return false;
+    const menu=ensureWeeklyMenu(),m=menuMealById(type,menu[dayIndex][type]);
+    list[idx]=weeklyMealEntry(type,m);
+    return true;
+  }
+
   function swapWeeklyMeal(dayIndex,type){
-    const menu=ensureWeeklyMenu(),list=weeklyMenuLibrary()[type]||[],current=menuMealById(type,menu[dayIndex][type]);
-    const i=list.findIndex(function(x){return x.id===current.id});
-    menu[dayIndex][type]=list[(i+1)%list.length].id;
+    openWeeklyMealChooser(dayIndex,type);
+  }
+
+  function openWeeklyMealChooser(dayIndex,type){
+    const menu=ensureWeeklyMenu(),list=weeklyMenuLibrary()[type]||[];
+    const current=menu[dayIndex]&&menu[dayIndex][type];
+    const sheetEl=document.getElementById('sheet'),modalEl=document.getElementById('modal');
+    if(!sheetEl||!modalEl||!list.length)return;
+    const date=menuDateForDay(dayIndex);
+    sheetEl.innerHTML=
+      '<div class="menu-choice-sheet">'+
+        '<div class="menu-choice-head"><div><div class="label">Меню недели · '+weeklyMealTypeLabel(type)+'</div><h3>Выбери блюдо</h3><p>'+date.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'})+' · выбери то, что действительно хочется есть.</p></div><div class="menu-choice-mark">'+(dayIndex+1)+'</div></div>'+
+        '<div class="menu-choice-list">'+list.map(function(m){
+          const active=m.id===current;
+          return '<button type="button" class="menu-choice-option '+(active?'active':'')+'" onclick="selectWeeklyMeal('+dayIndex+',\''+type+'\',\''+m.id+'\')">'+
+            '<div class="menu-choice-radio">'+(active?'✓':'')+'</div>'+
+            '<div class="menu-choice-copy"><b>'+escapeHtml(m.title)+'</b><span>'+m.kcal+' ккал · Б '+m.p+' г · Ж '+m.f+' г</span><small>'+m.ingredients.slice(0,3).map(function(x){return escapeHtml(x[0])}).join(' · ')+'</small></div>'+
+            '<div class="menu-choice-kcal">'+m.kcal+'<small>ккал</small></div>'+
+          '</button>';
+        }).join('')+'</div>'+
+        '<button type="button" class="menu-choice-close" onclick="closeM()">Оставить как есть</button>'+
+      '</div>';
+    modalEl.classList.add('open');
+  }
+
+  function selectWeeklyMeal(dayIndex,type,id){
+    const menu=ensureWeeklyMenu(),list=weeklyMenuLibrary()[type]||[];
+    const next=list.find(function(x){return x.id===id});
+    if(!next||!menu[dayIndex])return;
+    const previous=menu[dayIndex][type];
+    if(previous===id){if(typeof closeM==='function')closeM();return}
+    menu[dayIndex][type]=id;
     S.shop={};
+    const diaryUpdated=syncPlannedMealToDiary(dayIndex,type);
     if(typeof save==='function')save();
+    if(typeof closeM==='function')closeM();
     renderWeeklyMenu();
+    if(diaryUpdated){
+      const toast=ensureFoodUndoToast(),txt=document.getElementById('foodUndoText');
+      if(txt)txt.textContent='Меню и дневник обновлены';
+      toast.classList.add('show','undone');
+      setTimeout(function(){toast.classList.remove('show','undone')},1400);
+    }
   }
 
   function resetWeeklyMenu(){
@@ -3354,19 +3424,19 @@
   function addWeeklyMenuDay(dayIndex){
     const menu=ensureWeeklyMenu(),day=menu[dayIndex];
     const date=menuDateForDay(dayIndex),dateKey=key(date);
-    const undo=foodUndoSnapshot(dateKey),before=((S.food&&S.food[dateKey])||[]).length;
-    const mealMap={breakfast:'Завтрак',lunch:'Обед',snack:'Перекус',dinner:'Ужин'};
+    const undo=foodUndoSnapshot(dateKey);
     if(!S.food[dateKey])S.food[dateKey]=[];
+    const hadPlanned=['breakfast','lunch','snack','dinner'].some(function(type){return plannedMealEntryIndex(dateKey,type)>=0});
     ['breakfast','lunch','snack','dinner'].forEach(function(type){
       const m=menuMealById(type,day[type]);
-      const exists=S.food[dateKey].some(function(x){return x.menuPlanId===m.id});
-      if(!exists)S.food[dateKey].push({
-        meal:mealMap[type],name:m.title,cal:m.kcal,p:m.p,f:m.f,c:m.c,menuPlanId:m.id
-      });
+      const idx=plannedMealEntryIndex(dateKey,type);
+      const entry=weeklyMealEntry(type,m);
+      if(idx>=0)S.food[dateKey][idx]=entry;
+      else S.food[dateKey].push(entry);
     });
     if(typeof save==='function')save();
     renderWeeklyMenu();
-    if((S.food[dateKey]||[]).length>before)showFoodUndo('Меню дня добавлено в дневник',undo);
+    showFoodUndo(hadPlanned?'Меню дня обновлено':'Меню дня добавлено в дневник',undo);
   }
 
   function weeklyShoppingList(){
@@ -3402,7 +3472,7 @@
           const m=menuMealById(type,day[type]);
           return '<div class="weekly-menu-meal"><div><span>'+labels[type]+'</span><b>'+m.title+'</b><small>'+m.kcal+' ккал · Б '+m.p+' г</small></div><button type="button" onclick="swapWeeklyMeal('+i+',\''+type+'\')">Заменить</button></div>';
         }).join('')+'</div>'+
-        '<button class="weekly-menu-add" type="button" onclick="addWeeklyMenuDay('+i+')">'+((S.food[dk]||[]).some(function(x){return x.menuPlanId})?'Добавлено в дневник ✓':'Добавить этот день в дневник')+'</button>'+
+        '<button class="weekly-menu-add '+((S.food[dk]||[]).some(function(x){return x.menuPlanId})?'synced':'')+'" type="button" onclick="addWeeklyMenuDay('+i+')">'+((S.food[dk]||[]).some(function(x){return x.menuPlanId})?'Обновить день в дневнике':'Добавить этот день в дневник')+'</button>'+
       '</div>';
     }).join('');
 
@@ -3417,6 +3487,8 @@
   }
 
   window.swapWeeklyMeal=swapWeeklyMeal;
+  window.openWeeklyMealChooser=openWeeklyMealChooser;
+  window.selectWeeklyMeal=selectWeeklyMeal;
   window.resetWeeklyMenu=resetWeeklyMenu;
   window.addWeeklyMenuDay=addWeeklyMenuDay;
   window.renderWeeklyMenu=renderWeeklyMenu;
