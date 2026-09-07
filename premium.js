@@ -639,14 +639,46 @@
     {id:'base-shawarma',name:'Шаурма с курицей',kcal100:220,p100:11.0,f100:10.0,c100:22.0},
     {id:'base-pizza-cheese',name:'Пицца сырная',kcal100:266,p100:11.0,f100:10.0,c100:33.0},
     {id:'base-pizza-chicken',name:'Пицца с курицей',kcal100:245,p100:13.0,f100:9.0,c100:29.0},
+    {id:'base-sausage-pastry',name:'Сосиска в тесте',aliases:['сосиска тесто','сосиска в слоёном тесте'],category:'Выпечка и фастфуд',approx:true,kcal100:310,p100:9.0,f100:17.0,c100:31.0,defaultGrams:120,servings:[{label:'1 небольшая · 90 г',grams:90},{label:'1 шт. · 120 г',grams:120},{label:'Крупная · 150 г',grams:150}]},
+    {id:'base-pirozhok-potato-baked',name:'Пирожок с картошкой, печёный',aliases:['пирожок картошка','пирожки с картошкой'],category:'Выпечка и фастфуд',approx:true,kcal100:235,p100:6.0,f100:7.0,c100:37.0,defaultGrams:100,servings:[{label:'1 небольшой · 80 г',grams:80},{label:'1 шт. · 100 г',grams:100},{label:'Крупный · 130 г',grams:130}]},
+    {id:'base-pirozhok-potato-fried',name:'Пирожок с картошкой, жареный',aliases:['жареный пирожок картошка','пирожки жареные'],category:'Выпечка и фастфуд',approx:true,kcal100:285,p100:5.0,f100:13.0,c100:36.0,defaultGrams:110,servings:[{label:'1 небольшой · 90 г',grams:90},{label:'1 шт. · 110 г',grams:110},{label:'Крупный · 140 г',grams:140}]},
+    {id:'base-pirozhok-meat',name:'Пирожок с мясом',aliases:['пирожок мясо','пирожки с мясом'],category:'Выпечка и фастфуд',approx:true,kcal100:260,p100:10.0,f100:11.0,c100:31.0,defaultGrams:110,servings:[{label:'1 небольшой · 90 г',grams:90},{label:'1 шт. · 110 г',grams:110},{label:'Крупный · 140 г',grams:140}]},
+    {id:'base-pirozhok-cabbage',name:'Пирожок с капустой',aliases:['пирожок капуста','пирожки с капустой'],category:'Выпечка и фастфуд',approx:true,kcal100:220,p100:5.0,f100:7.0,c100:35.0,defaultGrams:100,servings:[{label:'1 небольшой · 80 г',grams:80},{label:'1 шт. · 100 г',grams:100},{label:'Крупный · 130 г',grams:130}]},
+    {id:'base-belyash',name:'Беляш с мясом',aliases:['беляш','беляши'],category:'Выпечка и фастфуд',approx:true,kcal100:330,p100:11.0,f100:20.0,c100:28.0,defaultGrams:150,servings:[{label:'1 небольшой · 120 г',grams:120},{label:'1 шт. · 150 г',grams:150},{label:'Крупный · 180 г',grams:180}]},
+    {id:'base-samsa-meat',name:'Самса с мясом',aliases:['самса','самса мясная'],category:'Выпечка и фастфуд',approx:true,kcal100:320,p100:11.0,f100:20.0,c100:27.0,defaultGrams:130,servings:[{label:'1 небольшая · 100 г',grams:100},{label:'1 шт. · 130 г',grams:130},{label:'Крупная · 170 г',grams:170}]},
+    {id:'base-cheburek',name:'Чебурек с мясом',aliases:['чебурек','чебуреки'],category:'Выпечка и фастфуд',approx:true,kcal100:300,p100:10.0,f100:17.0,c100:28.0,defaultGrams:150,servings:[{label:'1 небольшой · 120 г',grams:120},{label:'1 шт. · 150 г',grams:150},{label:'Крупный · 190 г',grams:190}]},
+    {id:'base-khachapuri-cheese',name:'Хачапури с сыром',aliases:['хачапури'],category:'Выпечка и фастфуд',approx:true,kcal100:300,p100:11.0,f100:17.0,c100:27.0,defaultGrams:150,servings:[{label:'½ порции · 100 г',grams:100},{label:'1 порция · 150 г',grams:150},{label:'Большая · 220 г',grams:220}]},
+    {id:'base-donut-glazed',name:'Пончик глазированный',aliases:['пончик','донат','donut'],category:'Выпечка и фастфуд',approx:true,kcal100:390,p100:5.0,f100:20.0,c100:48.0,defaultGrams:70,servings:[{label:'1 небольшой · 55 г',grams:55},{label:'1 шт. · 70 г',grams:70},{label:'Крупный · 90 г',grams:90}]},
+    {id:'base-croissant',name:'Круассан сливочный',aliases:['круассан'],category:'Выпечка и фастфуд',approx:true,kcal100:406,p100:8.0,f100:21.0,c100:45.0,defaultGrams:65,servings:[{label:'Мини · 40 г',grams:40},{label:'1 шт. · 65 г',grams:65},{label:'Крупный · 90 г',grams:90}]},
+    {id:'base-sweet-bun',name:'Булочка сладкая',aliases:['булочка','сдоба','сдобная булочка'],category:'Выпечка и фастфуд',approx:true,kcal100:340,p100:7.0,f100:10.0,c100:56.0,defaultGrams:90,servings:[{label:'1 небольшая · 65 г',grams:65},{label:'1 шт. · 90 г',grams:90},{label:'Крупная · 120 г',grams:120}]},
+    {id:'base-burger',name:'Бургер с говядиной',aliases:['бургер','гамбургер'],category:'Выпечка и фастфуд',approx:true,kcal100:250,p100:13.0,f100:10.0,c100:27.0,defaultGrams:180,servings:[{label:'Небольшой · 140 г',grams:140},{label:'1 бургер · 180 г',grams:180},{label:'Большой · 230 г',grams:230}]},
+    {id:'base-hotdog',name:'Хот-дог',aliases:['хотдог','hot dog'],category:'Выпечка и фастфуд',approx:true,kcal100:290,p100:10.0,f100:16.0,c100:24.0,defaultGrams:160,servings:[{label:'Небольшой · 120 г',grams:120},{label:'1 хот-дог · 160 г',grams:160},{label:'Большой · 200 г',grams:200}]},
+    {id:'base-fries',name:'Картофель фри',aliases:['фри','картошка фри'],category:'Выпечка и фастфуд',approx:true,kcal100:312,p100:3.4,f100:15.0,c100:41.0,defaultGrams:120,servings:[{label:'Маленькая · 80 г',grams:80},{label:'Средняя · 120 г',grams:120},{label:'Большая · 160 г',grams:160}]},
+    {id:'base-nuggets',name:'Куриные наггетсы',aliases:['наггетсы','nuggets'],category:'Выпечка и фастфуд',approx:true,kcal100:296,p100:15.0,f100:20.0,c100:15.0,defaultGrams:120,servings:[{label:'4 шт. · 80 г',grams:80},{label:'6 шт. · 120 г',grams:120},{label:'9 шт. · 180 г',grams:180}]},
+    {id:'base-pizza-pepperoni',name:'Пицца пепперони',aliases:['пепперони','кусок пиццы'],category:'Выпечка и фастфуд',approx:true,kcal100:290,p100:12.0,f100:13.0,c100:30.0,defaultGrams:120,servings:[{label:'1 кусок · 100 г',grams:100},{label:'1 большой кусок · 120 г',grams:120},{label:'2 куска · 240 г',grams:240}]},
+    {id:'base-cola',name:'Coca-Cola, классическая',aliases:['кола','кока кола','coke','coca cola'],category:'Напитки',approx:true,unit:'мл',mealDefault:'Напиток',kcal100:42,p100:0,f100:0,c100:10.6,defaultGrams:330,servings:[{label:'Стакан · 250 мл',grams:250},{label:'Банка · 330 мл',grams:330},{label:'Бутылка · 500 мл',grams:500}]},
+    {id:'base-cola-zero',name:'Coca-Cola Zero',aliases:['кола зеро','кока кола зеро','coke zero','coca cola zero'],category:'Напитки',approx:true,unit:'мл',mealDefault:'Напиток',kcal100:0,p100:0,f100:0,c100:0,defaultGrams:330,servings:[{label:'Стакан · 250 мл',grams:250},{label:'Банка · 330 мл',grams:330},{label:'Бутылка · 500 мл',grams:500}]},
+    {id:'base-pepsi',name:'Pepsi, классическая',aliases:['пепси','pepsi'],category:'Напитки',approx:true,unit:'мл',mealDefault:'Напиток',kcal100:43,p100:0,f100:0,c100:10.7,defaultGrams:330,servings:[{label:'Стакан · 250 мл',grams:250},{label:'Банка · 330 мл',grams:330},{label:'Бутылка · 500 мл',grams:500}]},
+    {id:'base-pepsi-zero',name:'Pepsi Zero',aliases:['пепси зеро','pepsi zero'],category:'Напитки',approx:true,unit:'мл',mealDefault:'Напиток',kcal100:0,p100:0,f100:0,c100:0,defaultGrams:330,servings:[{label:'Стакан · 250 мл',grams:250},{label:'Банка · 330 мл',grams:330},{label:'Бутылка · 500 мл',grams:500}]},
+    {id:'base-fanta',name:'Fanta',aliases:['фанта','fanta'],category:'Напитки',approx:true,unit:'мл',mealDefault:'Напиток',kcal100:45,p100:0,f100:0,c100:11.2,defaultGrams:330,servings:[{label:'Стакан · 250 мл',grams:250},{label:'Банка · 330 мл',grams:330},{label:'Бутылка · 500 мл',grams:500}]},
+    {id:'base-sprite',name:'Sprite',aliases:['спрайт','sprite'],category:'Напитки',approx:true,unit:'мл',mealDefault:'Напиток',kcal100:39,p100:0,f100:0,c100:9.7,defaultGrams:330,servings:[{label:'Стакан · 250 мл',grams:250},{label:'Банка · 330 мл',grams:330},{label:'Бутылка · 500 мл',grams:500}]},
+    {id:'base-iced-tea',name:'Холодный чай сладкий',aliases:['айс ти','ice tea','lipton','холодный чай'],category:'Напитки',approx:true,unit:'мл',mealDefault:'Напиток',kcal100:27,p100:0,f100:0,c100:6.5,defaultGrams:500,servings:[{label:'Стакан · 250 мл',grams:250},{label:'Банка · 330 мл',grams:330},{label:'Бутылка · 500 мл',grams:500}]},
+    {id:'base-orange-juice',name:'Сок апельсиновый',aliases:['апельсиновый сок','сок'],category:'Напитки',approx:true,unit:'мл',mealDefault:'Напиток',kcal100:45,p100:0.7,f100:0.2,c100:10.4,defaultGrams:250,servings:[{label:'Стакан · 200 мл',grams:200},{label:'Стакан · 250 мл',grams:250},{label:'Большой · 330 мл',grams:330}]},
+    {id:'base-apple-juice',name:'Сок яблочный',aliases:['яблочный сок','сок'],category:'Напитки',approx:true,unit:'мл',mealDefault:'Напиток',kcal100:46,p100:0.1,f100:0.1,c100:11.3,defaultGrams:250,servings:[{label:'Стакан · 200 мл',grams:200},{label:'Стакан · 250 мл',grams:250},{label:'Большой · 330 мл',grams:330}]},
+    {id:'base-kvass',name:'Квас',aliases:['квас хлебный'],category:'Напитки',approx:true,unit:'мл',mealDefault:'Напиток',kcal100:27,p100:0.2,f100:0,c100:5.8,defaultGrams:500,servings:[{label:'Стакан · 250 мл',grams:250},{label:'Банка · 330 мл',grams:330},{label:'Бутылка · 500 мл',grams:500}]},
+    {id:'base-compote',name:'Компот сладкий',aliases:['компот'],category:'Напитки',approx:true,unit:'мл',mealDefault:'Напиток',kcal100:50,p100:0.2,f100:0,c100:12.0,defaultGrams:250,servings:[{label:'Стакан · 200 мл',grams:200},{label:'Стакан · 250 мл',grams:250},{label:'Большой · 330 мл',grams:330}]},
+    {id:'base-coffee-milk-sugar',name:'Кофе с молоком и сахаром',aliases:['кофе сахар','кофе с сахаром'],category:'Напитки',approx:true,unit:'мл',mealDefault:'Напиток',kcal100:45,p100:1.2,f100:1.3,c100:7.2,defaultGrams:250,servings:[{label:'Чашка · 200 мл',grams:200},{label:'Кружка · 250 мл',grams:250},{label:'Большой · 350 мл',grams:350}]},
+    {id:'base-red-bull',name:'Red Bull, классический',aliases:['ред булл','red bull','энергетик'],category:'Напитки',approx:true,unit:'мл',mealDefault:'Напиток',kcal100:45,p100:0,f100:0,c100:11.0,caffeine100:32,defaultGrams:250,servings:[{label:'Банка · 250 мл',grams:250},{label:'Банка · 355 мл',grams:355},{label:'Банка · 473 мл',grams:473}]},
+    {id:'base-burn',name:'Burn, классический',aliases:['берн','burn','энергетик'],category:'Напитки',approx:true,unit:'мл',mealDefault:'Напиток',kcal100:49,p100:0,f100:0,c100:11.6,caffeine100:32,defaultGrams:449,servings:[{label:'Банка · 250 мл',grams:250},{label:'Банка · 449 мл',grams:449},{label:'Банка · 500 мл',grams:500}]},
+    {id:'base-energy-zero',name:'Энергетик без сахара',aliases:['энергетик зеро','энергетик zero','без сахара энергетик'],category:'Напитки',approx:true,unit:'мл',mealDefault:'Напиток',kcal100:3,p100:0,f100:0,c100:0.5,caffeine100:32,defaultGrams:449,servings:[{label:'Банка · 250 мл',grams:250},{label:'Банка · 449 мл',grams:449},{label:'Банка · 500 мл',grams:500}]},
     {id:'base-mayo',name:'Майонез',kcal100:680,p100:1.0,f100:75.0,c100:1.0},
     {id:'base-ketchup',name:'Кетчуп',kcal100:112,p100:1.3,f100:0.2,c100:25.8},
     {id:'base-olive-oil',name:'Оливковое масло',kcal100:884,p100:0,f100:100,c100:0},
     {id:'base-sunflower-oil',name:'Подсолнечное масло',kcal100:884,p100:0,f100:100,c100:0},
-    {id:'base-coffee-milk',name:'Кофе с молоком без сахара',kcal100:20,p100:1.0,f100:1.0,c100:2.0},
-    {id:'base-cappuccino',name:'Капучино без сахара',kcal100:45,p100:2.5,f100:2.3,c100:3.5},
-    {id:'base-latte',name:'Латте без сахара',kcal100:55,p100:3.0,f100:2.8,c100:4.5},
-    {id:'base-adrenaline-rush-449',name:'Adrenaline Rush, классический 449 мл',kcal100:54,p100:0.5,f100:0,c100:12.5,caffeine100:30,defaultGrams:449,mealDefault:'Напиток'}
+    {id:'base-coffee-milk',name:'Кофе с молоком без сахара',aliases:['кофе с молоком'],unit:'мл',mealDefault:'Напиток',kcal100:20,p100:1.0,f100:1.0,c100:2.0,defaultGrams:250,servings:[{label:'Чашка · 200 мл',grams:200},{label:'Кружка · 250 мл',grams:250},{label:'Большой · 350 мл',grams:350}]},
+    {id:'base-cappuccino',name:'Капучино без сахара',aliases:['капучино'],unit:'мл',mealDefault:'Напиток',kcal100:45,p100:2.5,f100:2.3,c100:3.5,defaultGrams:250,servings:[{label:'Маленький · 200 мл',grams:200},{label:'Средний · 250 мл',grams:250},{label:'Большой · 350 мл',grams:350}]},
+    {id:'base-latte',name:'Латте без сахара',aliases:['латте'],unit:'мл',mealDefault:'Напиток',kcal100:55,p100:3.0,f100:2.8,c100:4.5,defaultGrams:300,servings:[{label:'Маленький · 250 мл',grams:250},{label:'Средний · 300 мл',grams:300},{label:'Большой · 400 мл',grams:400}]},
+    {id:'base-adrenaline-rush-449',name:'Adrenaline Rush, классический 449 мл',aliases:['адреналин','adrenaline','энергетик адреналин'],unit:'мл',kcal100:54,p100:0.5,f100:0,c100:12.5,caffeine100:30,defaultGrams:449,mealDefault:'Напиток',servings:[{label:'Банка · 250 мл',grams:250},{label:'Банка · 449 мл',grams:449},{label:'Банка · 500 мл',grams:500}]}
   ];
 
   function ensureProductLibrary(){
@@ -664,6 +696,10 @@
       const base=builtInProducts.find(function(x){return normalizeProductName(x.name)===normalizeProductName(p.name)});
       if(base){
         if(base.defaultGrams&&!p.defaultGrams)p.defaultGrams=base.defaultGrams;
+        if(base.unit)p.unit=base.unit;
+        if(base.mealDefault&&!p.mealDefault)p.mealDefault=base.mealDefault;
+        if(base.caffeine100&&!p.caffeine100)p.caffeine100=base.caffeine100;
+        if(Array.isArray(base.aliases))p.aliases=base.aliases.slice();
         if(Array.isArray(base.servings)&&base.servings.length&&!Array.isArray(p.servings))p.servings=base.servings.map(function(s){return {label:s.label,grams:s.grams}});
       }
     });
@@ -687,7 +723,7 @@
   function calculatorMarkup(){
     return '<div class="card calorie-card" id="calorieCalculator">'+
       '<div class="calorie-head"><div><div class="label">Быстро добавить</div><div class="big calorie-title">Найди продукт</div><div class="muted">Выбери из базы MY 60 или из своих сохранённых — КБЖУ подставится автоматически.</div></div><div class="calorie-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></svg></div></div>'+
-      '<div class="smart-search-block product-search-wrap"><div class="search-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></svg></div><input id="calcName" autocomplete="off" placeholder="Творог, картошка, гуляш…" onfocus="productSearch(this.value)" oninput="clearSelectedProductMeta();productSearch(this.value)"><div class="product-suggestions" id="productSuggestions"></div></div>'+
+      '<div class="smart-search-block product-search-wrap"><div class="search-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></svg></div><input id="calcName" autocomplete="off" placeholder="Творог, пирожок, кола…" onfocus="productSearch(this.value)" oninput="clearSelectedProductMeta();productSearch(this.value)"><div class="product-suggestions" id="productSuggestions"></div></div>'+
       '<div class="quick-serving-wrap" id="quickServingWrap" hidden><div class="quick-serving-label">Быстрая порция</div><div class="quick-serving-row" id="quickServingRow"></div></div>'+
       '<div class="quick-food-row">'+
         '<button type="button" onclick="quickFood(\'base-cottage-5\')">Творог</button>'+
@@ -702,10 +738,10 @@
       productLibraryMarkup()+
       '<div class="calc-fields">'+
         '<div><label>Приём пищи</label><select id="calcMeal"><option>Завтрак</option><option>Обед</option><option>Перекус</option><option>Ужин</option><option>Напиток</option><option>Другое</option></select></div>'+
-        '<div><label>Вес порции, г</label><input id="calcGrams" type="number" inputmode="decimal" min="0" step="1" placeholder="150" oninput="calorieCalc()"></div>'+
-        '<div class="calc-wide"><label>Ккал / 100 г</label><input id="calcKcal100" type="number" inputmode="decimal" min="0" step="1" placeholder="120" oninput="calorieCalc()"></div>'+
+        '<div><label id="calcAmountLabel">Вес порции, г</label><input id="calcGrams" type="number" inputmode="decimal" min="0" step="1" placeholder="150" oninput="calorieCalc()"></div>'+
+        '<div class="calc-wide"><label id="calcPer100Label">Ккал / 100 г</label><input id="calcKcal100" type="number" inputmode="decimal" min="0" step="1" placeholder="120" oninput="calorieCalc()"></div>'+
       '</div>'+
-      '<div class="calc-macros-title"><span>КБЖУ на 100 г</span><span class="muted">можно поправить вручную</span></div>'+
+      '<div class="calc-macros-title"><span id="calcMacrosPer100Label">КБЖУ на 100 г</span><span class="muted">можно поправить вручную</span></div>'+
       '<div class="calc-macros">'+
         '<label><span>Белки</span><input id="calcP100" type="number" inputmode="decimal" min="0" step=".1" placeholder="0" oninput="calorieCalc()"></label>'+
         '<label><span>Жиры</span><input id="calcF100" type="number" inputmode="decimal" min="0" step=".1" placeholder="0" oninput="calorieCalc()"></label>'+
@@ -778,7 +814,10 @@
       calc.dataset.defaultGrams='';
       calc.dataset.mealDefault='';
       calc.dataset.servings='';
+      calc.dataset.unit='';
+      calc.dataset.approx='';
     }
+    updateCalculatorUnit('г');
   }
 
   window.clearSelectedProductMeta=clearSelectedProductMeta;
@@ -864,6 +903,18 @@
 
   window.setQuickServing=setQuickServing;
 
+  function updateCalculatorUnit(unit){
+    const u=unit==='мл'?'мл':'г';
+    const amountLabel=document.getElementById('calcAmountLabel');
+    const per100Label=document.getElementById('calcPer100Label');
+    const macrosLabel=document.getElementById('calcMacrosPer100Label');
+    const amount=document.getElementById('calcGrams');
+    if(amountLabel)amountLabel.textContent=u==='мл'?'Объём порции, мл':'Вес порции, г';
+    if(per100Label)per100Label.textContent='Ккал / 100 '+u;
+    if(macrosLabel)macrosLabel.textContent='КБЖУ на 100 '+u;
+    if(amount)amount.placeholder=u==='мл'?'330':'150';
+  }
+
   function applyProductToCalculator(p){
     if(!p)return;
     const values={calcName:p.name,calcKcal100:p.kcal100,calcP100:p.p100,calcF100:p.f100,calcC100:p.c100};
@@ -878,7 +929,10 @@
       calc.dataset.defaultGrams=p.defaultGrams?String(p.defaultGrams):'';
       calc.dataset.mealDefault=p.mealDefault||'';
       calc.dataset.servings=Array.isArray(p.servings)?JSON.stringify(p.servings):'';
+      calc.dataset.unit=p.unit||'г';
+      calc.dataset.approx=p.approx?'1':'';
     }
+    updateCalculatorUnit(p.unit||'г');
     renderQuickServings(p);
     hideProductSuggestions();
     const meal=document.getElementById('calcMeal');
@@ -906,7 +960,7 @@
     const q=normalizeProductName(query);
     let items=allSearchProducts();
     if(q){
-      items=items.filter(function(p){return normalizeProductName(p.name).includes(q)});
+      items=items.filter(function(p){return normalizeProductName(p.name+' '+(Array.isArray(p.aliases)?p.aliases.join(' '):'')).includes(q)});
       items.sort(function(a,b){
         const an=normalizeProductName(a.name),bn=normalizeProductName(b.name);
         const as=an.startsWith(q)?0:1,bs=bn.startsWith(q)?0:1;
@@ -915,7 +969,7 @@
         return an.localeCompare(bn,'ru');
       });
     }else{
-      const popular=['Яйцо куриное, варёное','Творог 5%','Куриная грудка, варёная','Картофель варёный','Картошка жареная','Картофельное пюре с молоком и маслом','Гуляш из говядины','Гречка варёная','Спагетти с подливой, домашние','Adrenaline Rush, классический 449 мл'];
+      const popular=['Яйцо куриное, варёное','Творог 5%','Куриная грудка, варёная','Картофельное пюре с молоком и маслом','Гуляш из говядины','Спагетти с подливой, домашние','Сосиска в тесте','Пирожок с картошкой, печёный','Coca-Cola, классическая','Coca-Cola Zero','Adrenaline Rush, классический 449 мл'];
       items=items.filter(function(p){return p.source==='saved'||popular.indexOf(p.name)>=0});
       items.sort(function(a,b){
         if(a.source!==b.source)return a.source==='saved'?-1:1;
@@ -931,7 +985,7 @@
     box.innerHTML=items.map(function(p){
       const tag=p.source==='saved'?'Мой':'База';
       return '<button type="button" class="product-suggestion" onmousedown="event.preventDefault()" onclick="chooseProductSuggestion(\''+p.source+'\',\''+escapeHtml(p.id)+'\')">'+
-        '<span class="suggestion-main"><b>'+escapeHtml(p.name)+'</b><small>'+tag+' · '+Math.round(+p.kcal100||0)+' ккал / 100 г</small></span>'+
+        '<span class="suggestion-main"><b>'+escapeHtml(p.name)+'</b><small>'+tag+' · '+(p.approx?'≈ ':'')+Math.round(+p.kcal100||0)+' ккал / 100 '+(p.unit==='мл'?'мл':'г')+'</small></span>'+
         '<span class="suggestion-macros">Б '+round1(+p.p100||0)+' · Ж '+round1(+p.f100||0)+' · У '+round1(+p.c100||0)+'</span>'+
       '</button>';
     }).join('');
@@ -986,6 +1040,8 @@
     p.c100=num('calcC100');
     p.caffeine100=selectedProductCaffeine100()||0;
     const calc=document.getElementById('calorieCalculator');
+    p.unit=calc&&calc.dataset.unit?calc.dataset.unit:(p.unit||'г');
+    p.approx=!!(calc&&calc.dataset.approx==='1');
     p.defaultGrams=calc&&+calc.dataset.defaultGrams?+calc.dataset.defaultGrams:(p.defaultGrams||0);
     p.mealDefault=calc&&calc.dataset.mealDefault?calc.dataset.mealDefault:(p.mealDefault||'');
     if(calc&&calc.dataset.servings){
@@ -1936,12 +1992,15 @@
     rememberCurrentProduct(name);
     const caffeine100=selectedProductCaffeine100();
     const caffeineMg=round1(caffeine100*t.grams/100);
+    const calc=document.getElementById('calorieCalculator');
+    const unit=calc&&calc.dataset.unit==='мл'?'мл':'г';
     if(!S.food[dk])S.food[dk]=[];
     S.food[dk].push({
       meal:meal,
-      name:name+' · '+Math.round(t.grams)+' г',
+      name:name+' · '+Math.round(t.grams)+' '+unit,
       baseName:name,
       grams:t.grams,
+      unit:unit,
       kcal100:num('calcKcal100'),
       p100:num('calcP100'),
       f100:num('calcF100'),
