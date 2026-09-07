@@ -654,6 +654,11 @@
       if(!p.id)p.id='p'+i+'-'+String(p.name||'').toLowerCase().replace(/[^a-zа-яё0-9]+/gi,'-');
       if(typeof p.favorite!=='boolean')p.favorite=false;
       if(!p.lastUsed)p.lastUsed=0;
+      if(normalizeProductName(p.name)==='adrenaline rush классический 449 мл'){
+        p.defaultGrams=449;
+        p.mealDefault='Напиток';
+        p.caffeine100=30;
+      }
     });
     return S.productLibrary;
   }
@@ -762,6 +767,8 @@
     if(calc){
       calc.dataset.caffeine100='';
       calc.dataset.productId='';
+      calc.dataset.defaultGrams='';
+      calc.dataset.mealDefault='';
     }
   }
 
@@ -778,6 +785,8 @@
     if(calc){
       calc.dataset.caffeine100=p.caffeine100?String(p.caffeine100):'';
       calc.dataset.productId=p.id||'';
+      calc.dataset.defaultGrams=p.defaultGrams?String(p.defaultGrams):'';
+      calc.dataset.mealDefault=p.mealDefault||'';
     }
     hideProductSuggestions();
     const meal=document.getElementById('calcMeal');
@@ -877,6 +886,9 @@
     p.f100=num('calcF100');
     p.c100=num('calcC100');
     p.caffeine100=selectedProductCaffeine100()||0;
+    const calc=document.getElementById('calorieCalculator');
+    p.defaultGrams=calc&&+calc.dataset.defaultGrams?+calc.dataset.defaultGrams:(p.defaultGrams||0);
+    p.mealDefault=calc&&calc.dataset.mealDefault?calc.dataset.mealDefault:(p.mealDefault||'');
     p.lastUsed=Date.now();
     if(library.length>100){
       const removable=library.filter(function(x){return !x.favorite}).sort(function(a,b){return (a.lastUsed||0)-(b.lastUsed||0)});
@@ -908,7 +920,37 @@
     '</div>';
   }
 
+  function addAdrenalineRush449(){
+    if(!window.S||typeof key!=='function')return;
+    const p=builtInProducts.find(function(x){return x.id==='base-adrenaline-rush-449'});
+    if(!p)return;
+    const amount=449,factor=amount/100;
+    const caffeine=round1((+p.caffeine100||0)*factor);
+    if(!S.food[key()])S.food[key()]=[];
+    S.food[key()].push({
+      meal:'Напиток',
+      name:'Adrenaline Rush · 449 мл',
+      baseName:p.name,
+      grams:amount,
+      unit:'мл',
+      kcal100:p.kcal100,p100:p.p100,f100:p.f100,c100:p.c100,
+      caffeine100:p.caffeine100,
+      caffeineMg:caffeine,
+      caffeineAt:Date.now(),
+      cal:Math.round((+p.kcal100||0)*factor),
+      p:round1((+p.p100||0)*factor),
+      f:round1((+p.f100||0)*factor),
+      c:round1((+p.c100||0)*factor),
+      productId:p.id
+    });
+    adjustDayCaffeine(caffeine,key());
+    if(typeof save==='function')save();
+  }
+
+  window.addAdrenalineRush449=addAdrenalineRush449;
+
   function quickFood(id){
+    if(id==='base-adrenaline-rush-449'){addAdrenalineRush449();return}
     const p=builtInProducts.find(function(x){return x.id===id});
     if(!p)return;
     applyProductToCalculator(p);
