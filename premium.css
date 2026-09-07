@@ -3712,3 +3712,208 @@ canvas{margin-top:14px;height:220px;border:0;border-radius:20px;background:linea
 .food-edit-preview .food-edit-caffeine b{
   color:#59635d
 }
+
+/* Caffeine dashboard v41 */
+.caffeine-legacy-hidden{display:none!important}
+.caffeine-tracker{
+  margin:0 0 11px;
+  padding:17px;
+  border-radius:25px;
+  border:1px solid rgba(17,22,19,.055);
+  background:
+    radial-gradient(circle at 98% 0%,rgba(184,154,104,.11),transparent 13rem),
+    linear-gradient(145deg,#fff,#f8f5ef);
+  box-shadow:0 10px 28px rgba(22,29,25,.05)
+}
+.caffeine-tracker-head{
+  display:flex;
+  justify-content:space-between;
+  gap:14px;
+  align-items:flex-start
+}
+.caffeine-tracker-head>div:first-child{min-width:0}
+.caffeine-tracker-head h3{
+  margin:4px 0 3px;
+  font-size:24px;
+  letter-spacing:-.045em
+}
+.caffeine-tracker-head h3 span{font-size:inherit}
+.caffeine-tracker-head p{
+  margin:0;
+  font-size:9px;
+  line-height:1.45;
+  color:#8e9490
+}
+.caffeine-ring{
+  --caf-p:0%;
+  position:relative;
+  width:66px;
+  height:66px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  flex:0 0 auto;
+  background:conic-gradient(#b89a68 var(--caf-p),#e8e7e1 0)
+}
+.caffeine-ring:before{
+  content:"";
+  position:absolute;
+  inset:6px;
+  border-radius:50%;
+  background:#fff
+}
+.caffeine-ring>div{
+  position:relative;
+  z-index:1;
+  text-align:center
+}
+.caffeine-ring b{
+  display:block;
+  font-size:12px
+}
+.caffeine-ring span{
+  display:block;
+  margin-top:1px;
+  font-size:6px;
+  color:#999f9b
+}
+.caffeine-track{
+  height:6px;
+  margin-top:13px;
+  overflow:hidden;
+  border-radius:99px;
+  background:#ebeae5
+}
+.caffeine-track span{
+  display:block;
+  width:0;
+  height:100%;
+  border-radius:99px;
+  background:linear-gradient(90deg,#b89a68,#bd6e78);
+  transition:width .25s ease
+}
+.caffeine-breakdown{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  margin-top:11px
+}
+.caffeine-breakdown>div{
+  display:flex;
+  gap:9px;
+  align-items:center;
+  min-width:0;
+  padding:9px 10px;
+  border-radius:14px;
+  background:#f5f4ef;
+  border:1px solid #e8e7e2
+}
+.caffeine-breakdown>div>i{
+  width:30px;
+  height:30px;
+  border-radius:10px;
+  display:grid;
+  place-items:center;
+  flex:0 0 auto;
+  background:#ede8dd;
+  color:#9a804f;
+  font-style:normal;
+  font-size:10px
+}
+.caffeine-breakdown>div>div{
+  min-width:0
+}
+.caffeine-breakdown b{
+  display:block;
+  font-size:9px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis
+}
+.caffeine-breakdown small{
+  display:block;
+  margin-top:3px;
+  font-size:7px;
+  color:#959b97
+}
+.caffeine-empty{
+  background:#f8f7f3!important
+}
+.caffeine-note{
+  margin-top:9px;
+  padding:10px 11px;
+  border-radius:14px
+}
+.caffeine-note b{
+  display:block;
+  font-size:9px
+}
+.caffeine-note span{
+  display:block;
+  margin-top:3px;
+  font-size:8px;
+  line-height:1.4
+}
+.caffeine-note.normal{
+  background:#eef3ee;
+  color:#69766d
+}
+.caffeine-note.evening{
+  background:#f3eee7;
+  color:#806f61
+}
+.caffeine-note.over{
+  background:#f5eaea;
+  color:#8e646a
+}
+.caffeine-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+  margin-top:10px
+}
+.caffeine-actions button{
+  min-height:42px;
+  border:0;
+  border-radius:13px;
+  font-size:8px;
+  font-weight:850
+}
+.caffeine-actions button:first-child{
+  background:#1a211d;
+  color:#fff
+}
+.caffeine-actions button:last-child{
+  background:#f0f0ec;
+  color:#6e7670
+}
+
+/* Six personal goals should not collapse into tiny columns */
+.goals-overview{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important
+}
+
+@media(max-width:420px){
+  .caffeine-tracker{
+    padding:15px;
+    border-radius:22px
+  }
+  .caffeine-ring{
+    width:60px;
+    height:60px
+  }
+  .caffeine-actions{
+    grid-template-columns:1fr
+  }
+  .goals-overview{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important
+  }
+}
+@media(max-width:340px){
+  .caffeine-tracker-head{
+    display:block
+  }
+  .caffeine-ring{
+    margin-top:10px
+  }
+}
