@@ -629,6 +629,14 @@
     {id:'base-cabbage-rolls',name:'Голубцы с мясом и рисом',kcal100:140,p100:7.0,f100:8.0,c100:10.0},
     {id:'base-pasta-bolognese',name:'Паста болоньезе',kcal100:170,p100:8.0,f100:6.0,c100:21.0},
     {id:'base-spaghetti-gravy',name:'Спагетти с подливой, домашние',kcal100:160,p100:6.5,f100:4.5,c100:24.0,defaultGrams:250,servings:[{label:'½ тарелки · 150 г',grams:150},{label:'1 тарелка · 250 г',grams:250},{label:'Большая · 350 г',grams:350}]},
+    {id:'base-horns-meat',name:'Рожки с мясом, домашние',aliases:['рожки с мясом','макароны рожки с мясом','рожки фарш'],category:'Домашние блюда',approx:true,kcal100:185,p100:9.0,f100:7.0,c100:22.0,defaultGrams:250,servings:[{label:'½ тарелки · 150 г',grams:150},{label:'1 тарелка · 250 г',grams:250},{label:'Большая · 350 г',grams:350}]},
+    {id:'base-pasta-navy',name:'Макароны по-флотски',aliases:['макароны по флотски','по-флотски','макароны с фаршем'],category:'Домашние блюда',approx:true,kcal100:195,p100:10.0,f100:8.0,c100:22.0,defaultGrams:250,servings:[{label:'½ тарелки · 150 г',grams:150},{label:'1 тарелка · 250 г',grams:250},{label:'Большая · 350 г',grams:350}]},
+    {id:'base-puree-cutlet',name:'Пюре с котлетой',aliases:['картофельное пюре с котлетой','пюре котлета'],category:'Домашние блюда',approx:true,kcal100:165,p100:7.0,f100:8.0,c100:16.0,defaultGrams:300,servings:[{label:'Небольшая · 220 г',grams:220},{label:'1 тарелка · 300 г',grams:300},{label:'Большая · 380 г',grams:380}]},
+    {id:'base-rice-chicken',name:'Рис с курицей',aliases:['рис курица','курица с рисом'],category:'Домашние блюда',approx:true,kcal100:155,p100:10.0,f100:4.5,c100:20.0,defaultGrams:280,servings:[{label:'½ тарелки · 170 г',grams:170},{label:'1 тарелка · 280 г',grams:280},{label:'Большая · 360 г',grams:360}]},
+    {id:'base-potato-meat-stew',name:'Картошка с мясом, тушёная',aliases:['картошка с мясом','картофель с мясом','тушеная картошка с мясом'],category:'Домашние блюда',approx:true,kcal100:145,p100:7.5,f100:7.0,c100:13.0,defaultGrams:300,servings:[{label:'Небольшая · 200 г',grams:200},{label:'1 тарелка · 300 г',grams:300},{label:'Большая · 400 г',grams:400}]},
+    {id:'base-buckwheat-meat',name:'Гречка с мясом',aliases:['гречка мясо','мясо с гречкой'],category:'Домашние блюда',approx:true,kcal100:155,p100:9.0,f100:6.0,c100:17.0,defaultGrams:270,servings:[{label:'½ тарелки · 160 г',grams:160},{label:'1 тарелка · 270 г',grams:270},{label:'Большая · 350 г',grams:350}]},
+    {id:'base-meatballs-gravy',name:'Котлеты с подливой',aliases:['котлета с подливой','котлеты подлива'],category:'Домашние блюда',approx:true,kcal100:190,p100:12.0,f100:13.0,c100:6.0,defaultGrams:180,servings:[{label:'1 котлета + соус · 120 г',grams:120},{label:'Порция · 180 г',grams:180},{label:'Большая · 240 г',grams:240}]},
+    {id:'base-chicken-noodles',name:'Лапша с курицей, домашняя',aliases:['лапша курица','макароны с курицей'],category:'Домашние блюда',approx:true,kcal100:160,p100:10.0,f100:5.0,c100:20.0,defaultGrams:250,servings:[{label:'½ тарелки · 150 г',grams:150},{label:'1 тарелка · 250 г',grams:250},{label:'Большая · 350 г',grams:350}]},
     {id:'base-beef-stroganoff',name:'Бефстроганов из говядины',kcal100:180,p100:13.0,f100:12.0,c100:5.0},
     {id:'base-chicken-cream',name:'Курица в сливочном соусе',kcal100:175,p100:16.0,f100:11.0,c100:3.0},
     {id:'base-casserole-cottage',name:'Запеканка творожная',kcal100:180,p100:13.0,f100:7.0,c100:17.0},
@@ -748,6 +756,7 @@
       '<div class="smart-search-block product-search-wrap"><div class="search-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></svg></div><input id="calcName" autocomplete="off" placeholder="Творог, пирожок, кола…" onfocus="productSearch(this.value)" oninput="clearSelectedProductMeta();productSearch(this.value)"><div class="product-suggestions" id="productSuggestions"></div></div>'+
       '<div class="product-category-row" id="productCategoryRow">'+
         '<button type="button" class="active" data-category="" onclick="setProductCategory(\'\',this)">Все</button>'+
+        '<button type="button" data-category="Домашние блюда" onclick="setProductCategory(\'Домашние блюда\',this)">Домашние блюда</button>'+
         '<button type="button" data-category="Выпечка и фастфуд" onclick="setProductCategory(\'Выпечка и фастфуд\',this)">Выпечка и фастфуд</button>'+
         '<button type="button" data-category="Сладкое и снеки" onclick="setProductCategory(\'Сладкое и снеки\',this)">Сладкое и снеки</button>'+
         '<button type="button" data-category="Напитки" onclick="setProductCategory(\'Напитки\',this)">Напитки</button>'+
@@ -1015,7 +1024,7 @@
     }else if(activeProductCategory){
       items.sort(function(a,b){return normalizeProductName(a.name).localeCompare(normalizeProductName(b.name),'ru')});
     }else{
-      const popular=['Яйцо куриное, варёное','Творог 5%','Куриная грудка, варёная','Картофельное пюре с молоком и маслом','Гуляш из говядины','Спагетти с подливой, домашние','Сосиска в тесте','Пирожок с картошкой, печёный','Coca-Cola, классическая','Coca-Cola Zero','Adrenaline Rush, классический 449 мл','Snickers','Чипсы картофельные'];
+      const popular=['Яйцо куриное, варёное','Творог 5%','Куриная грудка, варёная','Картофельное пюре с молоком и маслом','Гуляш из говядины','Спагетти с подливой, домашние','Рожки с мясом, домашние','Сосиска в тесте','Пирожок с картошкой, печёный','Coca-Cola, классическая','Coca-Cola Zero','Adrenaline Rush, классический 449 мл','Snickers','Чипсы картофельные'];
       items=items.filter(function(p){return p.source==='saved'||popular.indexOf(p.name)>=0});
       items.sort(function(a,b){
         if(a.source!==b.source)return a.source==='saved'?-1:1;
