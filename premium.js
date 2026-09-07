@@ -3406,17 +3406,17 @@
     if(typeof save==='function')save();
     if(typeof closeM==='function')closeM();
     renderWeeklyMenu();
-    if(diaryUpdated){
-      const toast=ensureFoodUndoToast(),txt=document.getElementById('foodUndoText');
-      if(txt)txt.textContent='Меню и дневник обновлены';
-      toast.classList.add('show','undone');
-      setTimeout(function(){toast.classList.remove('show','undone')},1400);
-    }
   }
 
   function resetWeeklyMenu(){
     S.weeklyMenu=defaultWeeklyMenu();
     S.shop={};
+    const menu=ensureWeeklyMenu();
+    menu.forEach(function(day,dayIndex){
+      ['breakfast','lunch','snack','dinner'].forEach(function(type){
+        syncPlannedMealToDiary(dayIndex,type);
+      });
+    });
     if(typeof save==='function')save();
     renderWeeklyMenu();
   }
