@@ -1965,7 +1965,9 @@
     if(pr)pr.textContent=p;
     if(fr)fr.textContent=f;
     if(cr)cr.textContent=c;
-    if(add)add.disabled=!(grams>0 && num('calcKcal100')>0);
+    const nameEl=document.getElementById('calcName');
+    const hasName=!!(nameEl&&String(nameEl.value||'').trim());
+    if(add)add.disabled=!(grams>0 && hasName);
     return {grams:grams,kcal:kcal,p:p,f:f,c:c};
   }
 
@@ -1983,8 +1985,8 @@
   function addCalculatedFood(){
     if(!window.S || typeof key!=='function')return;
     const t=calorieCalc();
-    if(!(t.grams>0 && t.kcal>0))return;
     const nameEl=document.getElementById('calcName');
+    if(!(t.grams>0 && nameEl&&String(nameEl.value||'').trim()))return;
     const mealEl=document.getElementById('calcMeal');
     const name=(nameEl&&nameEl.value.trim())||'Продукт';
     const meal=(mealEl&&mealEl.value)||'Другое';
