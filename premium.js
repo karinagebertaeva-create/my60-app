@@ -1439,7 +1439,7 @@
       meal:meal,baseName:e.baseName,grams:grams,
       kcal100:e.kcal100,p100:e.p100,f100:e.f100,c100:e.c100,caffeine100:e.caffeine100||0,
       name:e.baseName+' · '+Math.round(grams)+' г',
-      cal:t.kcal,p:t.p,f:t.f,c:t.c,caffeineMg:t.caffeine||0,
+      cal:t.kcal,p:t.p,f:t.f,c:t.c,caffeineMg:t.caffeine||0,caffeineAt:t.caffeine?Date.now():0,
       copiedEntry:true
     });
     if(t.caffeine)adjustDayCaffeine(t.caffeine,key());
@@ -1490,6 +1490,80 @@
   window.openMealAdd=openMealAdd;
   window.deleteMealEntry=deleteMealEntry;
 
+  function caffeineTrackerMarkup(){
+    return '<div class="caffeine-tracker" id="caffeineTracker">'+
+      '<div class="caffeine-tracker-head"><div><div class="label">Кофеин сегодня</div><h3><span id="caffeineTodayMg">0</span> мг</h3><p id="caffeineTrackerSub">Собираю напитки и ручные записи.</p></div><div class="caffeine-ring" id="caffeineRing"><div><b id="caffeinePct">0%</b><span>лимита</span></div></div></div>'+
+      '<div class="caffeine-track"><span id="caffeineTrackBar"></span></div>'+
+      '<div class="caffeine-breakdown" id="caffeineBreakdown"></div>'+
+      '<div class="caffeine-note" id="caffeineNote"></div>'+
+      '<div class="caffeine-actions"><button type="button" onclick="quickFood(\'base-adrenaline-rush-449\')">+ Adrenaline</button><button type="button" onclick="openEntryForm(\'caffeine\')">+ Кофеин вручную</button></div>'+
+    '</div>';
+  }
+
+  function caffeineLinkedEntries(k){
+    return ((S.food&&S.food[k])||[]).filter(function(x){return entryCaffeineMg(x)>0});
+  }
+
+  function caffeineManualMg(k){
+    const total=+(S.caf&&S.caf[k]||0);
+    const linked=caffeineLinkedEntries(k).reduce(function(a,x){return a+entryCaffeineMg(x)},0);
+    return Math.max(0,total-linked);
+  }
+
+  function caffeineEntryTimeLabel(x){
+    if(!(x&&+x.caffeineAt))return '';
+    const d=new Date(+x.caffeineAt);
+    if(isNaN(d.getTime()))return '';
+    return d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+  }
+
+  function updateCaffeineTracker(){
+    const root=document.getElementById('caffeineTracker');
+    if(!root||!window.S)return;
+    const g=appGoals(),total=Math.max(0,+(S.caf&&S.caf[key()]||0)),limit=g.caffeine||400;
+    const pct=Math.max(0,Math.min(100,total/limit*100));
+    const today=document.getElementById('caffeineTodayMg'),ring=document.getElementById('caffeineRing'),pctEl=document.getElementById('caffeinePct'),bar=document.getElementById('caffeineTrackBar');
+    if(today)today.textContent=Math.round(total);
+    if(ring)ring.style.setProperty('--caf-p',pct+'%');
+    if(pctEl)pctEl.textContent=Math.round(pct)+'%';
+    if(bar)bar.style.width=pct+'%';
+
+    const linked=caffeineLinkedEntries(key()),manual=caffeineManualMg(key());
+    const breakdown=document.getElementById('caffeineBreakdown');
+    if(breakdown){
+      const rows=linked.map(function(x){
+        const tm=caffeineEntryTimeLabel(x);
+        return '<div><i>⚡</i><div><b>'+escapeHtml(x.baseName||x.name||'Напиток')+'</b><small>'+Math.round(entryCaffeineMg(x))+' мг'+(tm?' · '+tm:'')+'</small></div></div>';
+      });
+      if(manual>0)rows.push('<div><i>＋</i><div><b>Добавлено вручную</b><small>'+Math.round(manual)+' мг</small></div></div>');
+      breakdown.innerHTML=rows.length?rows.join(''):'<div class="caffeine-empty"><i>○</i><div><b>Пока ничего</b><small>Кофеин появится здесь вместе с напитками из дневника.</small></div></div>';
+    }
+
+    const sub=document.getElementById('caffeineTrackerSub');
+    if(sub)sub.textContent='Твой ориентир · '+Math.round(limit)+' мг';
+
+    const note=document.getElementById('caffeineNote');
+    if(note){
+      const late=linked.some(function(x){
+        if(!(x&&+x.caffeineAt))return false;
+        return new Date(+x.caffeineAt).getHours()>=18;
+      });
+      if(total>limit){
+        note.className='caffeine-note over';
+        note.innerHTML='<b>Выше выбранного ориентира</b><span>Не нужно ничего компенсировать. Просто учти суммарный кофеин сегодня.</span>';
+      }else if(late){
+        note.className='caffeine-note evening';
+        note.innerHTML='<b>Кофеин добавлен вечером</b><span>Обрати внимание, влияет ли он у тебя на засыпание и качество сна.</span>';
+      }else if(total>0){
+        note.className='caffeine-note normal';
+        note.innerHTML='<b>Осталось '+Math.max(0,Math.round(limit-total))+' мг до твоего ориентира</b><span>Это информационный счётчик, а не обязательная цель «добрать» кофеин.</span>';
+      }else{
+        note.className='caffeine-note normal';
+        note.innerHTML='<b>Кофеин не нужно «добивать» до лимита</b><span>Здесь просто отображается то, что ты действительно добавила.</span>';
+      }
+    }
+  }
+
   function decorateFood(){
     const sec=document.getElementById('food');
     if(!sec)return;
@@ -1517,6 +1591,12 @@
       else sec.insertAdjacentHTML('beforeend',mealDiaryMarkup());
       premiumDiary=document.getElementById('mealDiary');
     }
+    let caffeineTracker=document.getElementById('caffeineTracker');
+    if(!caffeineTracker){
+      if(premiumDiary)premiumDiary.insertAdjacentHTML('afterend',caffeineTrackerMarkup());
+      else sec.insertAdjacentHTML('beforeend',caffeineTrackerMarkup());
+      caffeineTracker=document.getElementById('caffeineTracker');
+    }
     let tools=document.getElementById('foodToolsCard');
     if(!tools){
       if(premiumDiary)premiumDiary.insertAdjacentHTML('afterend',foodToolsMarkup());
@@ -1538,12 +1618,13 @@
     }
     const caffeine=document.getElementById('caf');
     const caffeineCard=caffeine&&caffeine.closest('.card');
-    if(caffeineCard)caffeineCard.classList.add('caffeine-card');
+    if(caffeineCard)caffeineCard.classList.add('caffeine-card','caffeine-legacy-hidden');
     renderMealDiary();
     renderFoodTools();
     renderProductLibrary();
     updateCalorieDaily();
     updateNutritionDashboard();
+    updateCaffeineTracker();
     calorieCalc();
   }
 
@@ -1608,6 +1689,7 @@
       c100:num('calcC100'),
       caffeine100:caffeine100||0,
       caffeineMg:caffeineMg||0,
+      caffeineAt:caffeineMg?Date.now():0,
       cal:t.kcal,
       p:t.p,
       f:t.f,
@@ -2786,11 +2868,12 @@
   window.repeatHistoryFood=repeatHistoryFood;
 
   function ensureProfileGoals(){
-    if(!window.S||!S.profile)return {calories:1500,protein:105,steps:7000,water:1800,goal:60};
+    if(!window.S||!S.profile)return {calories:1500,protein:105,steps:7000,water:1800,caffeine:400,goal:60};
     if(!(+S.profile.calories>0))S.profile.calories=1500;
     if(!(+S.profile.protein>0))S.profile.protein=105;
     if(!(+S.profile.steps>0))S.profile.steps=7000;
     if(!(+S.profile.water>0))S.profile.water=1800;
+    if(!(+S.profile.caffeine>0))S.profile.caffeine=400;
     return S.profile;
   }
 
@@ -2801,6 +2884,7 @@
       protein:+p.protein||105,
       steps:+p.steps||7000,
       water:+p.water||1800,
+      caffeine:+p.caffeine||400,
       goal:+p.goal||60
     };
   }
@@ -2814,6 +2898,7 @@
         '<div><span>Белок</span><b id="goalSettingProtein">—</b><small>г / день</small></div>'+
         '<div><span>Шаги</span><b id="goalSettingSteps">—</b><small>в день</small></div>'+
         '<div><span>Вода</span><b id="goalSettingWater">—</b><small>мл / день</small></div>'+
+        '<div><span>Кофеин</span><b id="goalSettingCaffeine">—</b><small>мг / день</small></div>'+
       '</div>'+
       '<div class="goals-note">Меняй цели осознанно. MY 60 не будет автоматически снижать калории из-за нескольких дней без изменения веса.</div>'+
     '</div>';
@@ -2827,7 +2912,8 @@
       goalSettingCalories:Math.round(g.calories),
       goalSettingProtein:Math.round(g.protein)+' г',
       goalSettingSteps:Math.round(g.steps).toLocaleString('ru-RU'),
-      goalSettingWater:Math.round(g.water)+' мл'
+      goalSettingWater:Math.round(g.water)+' мл',
+      goalSettingCaffeine:Math.round(g.caffeine)+' мг'
     };
     Object.keys(map).forEach(function(id){const el=document.getElementById(id);if(el)el.textContent=map[id]});
   }
@@ -2843,7 +2929,8 @@
           '<label><span>Калории</span><div><input id="settingsCalories" type="number" inputmode="numeric" step="10" min="1000" max="4000" value="'+Math.round(g.calories)+'"><i>ккал</i></div></label>'+
           '<label><span>Белок</span><div><input id="settingsProtein" type="number" inputmode="numeric" step="5" min="40" max="250" value="'+Math.round(g.protein)+'"><i>г</i></div></label>'+
           '<label><span>Шаги</span><div><input id="settingsSteps" type="number" inputmode="numeric" step="500" min="1000" max="30000" value="'+Math.round(g.steps)+'"><i>шагов</i></div></label>'+
-          '<label class="wide"><span>Вода</span><div><input id="settingsWater" type="number" inputmode="numeric" step="100" min="500" max="5000" value="'+Math.round(g.water)+'"><i>мл</i></div></label>'+
+          '<label><span>Вода</span><div><input id="settingsWater" type="number" inputmode="numeric" step="100" min="500" max="5000" value="'+Math.round(g.water)+'"><i>мл</i></div></label>'+
+          '<label><span>Кофеин</span><div><input id="settingsCaffeine" type="number" inputmode="numeric" step="25" min="50" max="1000" value="'+Math.round(g.caffeine)+'"><i>мг</i></div></label>'+
         '</div>'+
         '<div class="goals-safety">Это пользовательские цели трекера, а не автоматическое медицинское назначение. Если меняешь калории существенно, лучше делать это осознанно, а не из-за краткосрочного скачка веса.</div>'+
         '<button class="btn goals-save" type="button" onclick="saveGoalsSettings()">Сохранить цели</button>'+
@@ -2854,13 +2941,14 @@
   function saveGoalsSettings(){
     if(!S.profile)return;
     const get=function(id){const el=document.getElementById(id);return el?(+el.value||0):0};
-    const goal=get('settingsGoalWeight'),cal=get('settingsCalories'),protein=get('settingsProtein'),steps=get('settingsSteps'),water=get('settingsWater');
-    if(!(goal>=35&&goal<=200&&cal>=1000&&cal<=4000&&protein>=40&&protein<=250&&steps>=1000&&steps<=30000&&water>=500&&water<=5000))return;
+    const goal=get('settingsGoalWeight'),cal=get('settingsCalories'),protein=get('settingsProtein'),steps=get('settingsSteps'),water=get('settingsWater'),caffeine=get('settingsCaffeine');
+    if(!(goal>=35&&goal<=200&&cal>=1000&&cal<=4000&&protein>=40&&protein<=250&&steps>=1000&&steps<=30000&&water>=500&&water<=5000&&caffeine>=50&&caffeine<=1000))return;
     S.profile.goal=goal;
     S.profile.calories=Math.round(cal);
     S.profile.protein=Math.round(protein);
     S.profile.steps=Math.round(steps);
     S.profile.water=Math.round(water);
+    S.profile.caffeine=Math.round(caffeine);
     GOAL=goal;
     if(typeof applyProfile==='function')applyProfile();
     if(typeof save==='function')save();
