@@ -3984,3 +3984,70 @@ canvas{margin-top:14px;height:220px;border:0;border-radius:20px;background:linea
     border-radius:16px
   }
 }
+
+/* Historical premium food mode v46 */
+.food-date-context{
+  margin:0 0 11px;
+  padding:13px 14px;
+  border-radius:18px;
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:12px;
+  align-items:center;
+  border:1px solid rgba(189,110,120,.16);
+  background:linear-gradient(145deg,#f7ecec,#f4f1eb)
+}
+.food-date-context[hidden]{display:none!important}
+.food-date-context>div{min-width:0}
+.food-date-context span{
+  display:block;
+  font-size:7px;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  font-weight:900;
+  color:#a17077
+}
+.food-date-context b{
+  display:block;
+  margin-top:4px;
+  font-size:12px;
+  text-transform:capitalize;
+  line-height:1.25
+}
+.food-date-context small{
+  display:block;
+  margin-top:3px;
+  font-size:7px;
+  line-height:1.4;
+  color:#8f9490
+}
+.food-date-context button{
+  min-height:38px;
+  padding:0 11px;
+  border:0;
+  border-radius:12px;
+  background:#1a211d;
+  color:#fff;
+  font-size:8px;
+  font-weight:850
+}
+#food.food-history-mode .smart-meal-section,
+#food.food-history-mode #foodToolsCard{
+  display:none!important
+}
+#food.food-history-mode .nutrition-dashboard,
+#food.food-history-mode .meal-diary,
+#food.food-history-mode .caffeine-tracker,
+#food.food-history-mode #calorieCalculator{
+  outline:1px solid rgba(189,110,120,.045)
+}
+@media(max-width:420px){
+  .food-date-context{
+    grid-template-columns:1fr;
+    padding:13px;
+    border-radius:17px
+  }
+  .food-date-context button{
+    width:100%
+  }
+}
