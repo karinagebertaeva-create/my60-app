@@ -989,13 +989,13 @@
 
   function addAdrenalineRush449(){
     if(!window.S||typeof key!=='function')return;
-    const undo=foodUndoSnapshot(key());
+    const dk=foodActiveKey(),undo=foodUndoSnapshot(dk);
     const p=builtInProducts.find(function(x){return x.id==='base-adrenaline-rush-449'});
     if(!p)return;
     const amount=449,factor=amount/100;
     const caffeine=round1((+p.caffeine100||0)*factor);
-    if(!S.food[key()])S.food[key()]=[];
-    S.food[key()].push({
+    if(!S.food[dk])S.food[dk]=[];
+    S.food[dk].push({
       meal:'Напиток',
       name:'Adrenaline Rush · 449 мл',
       baseName:p.name,
@@ -1004,14 +1004,14 @@
       kcal100:p.kcal100,p100:p.p100,f100:p.f100,c100:p.c100,
       caffeine100:p.caffeine100,
       caffeineMg:caffeine,
-      caffeineAt:Date.now(),
+      caffeineAt:dk===key()?Date.now():0,
       cal:Math.round((+p.kcal100||0)*factor),
       p:round1((+p.p100||0)*factor),
       f:round1((+p.f100||0)*factor),
       c:round1((+p.c100||0)*factor),
       productId:p.id
     });
-    adjustDayCaffeine(caffeine,key());
+    adjustDayCaffeine(caffeine,dk);
     if(typeof save==='function')save();
     showFoodUndo('Adrenaline добавлен · 449 мл',undo);
   }
@@ -1103,12 +1103,12 @@
 
   function addSmartMeal(id){
     const combo=smartMealLibrary().find(function(x){return x.id===id});if(!combo||!window.S)return;
-    const undo=foodUndoSnapshot(key());
-    if(!S.food[key()])S.food[key()]=[];
+    const dk=foodActiveKey(),undo=foodUndoSnapshot(dk);
+    if(!S.food[dk])S.food[dk]=[];
     combo.items.forEach(function(it){
       const p=baseProduct(it.id);if(!p)return;
       const factor=(+it.grams||0)/100;
-      S.food[key()].push({
+      S.food[dk].push({
         meal:combo.meal,
         name:p.name+' · '+Math.round(it.grams)+' г',
         baseName:p.name,
@@ -1133,7 +1133,7 @@
 
   function updateNutritionDashboard(){
     if(!window.S||typeof key!=='function')return;
-    const list=(S.food&&S.food[key()])||[];
+    const list=(S.food&&S.food[foodActiveKey()])||[];
     const sum=list.reduce(function(a,x){a.cal+=+x.cal||0;a.p+=+x.p||0;a.f+=+x.f||0;a.c+=+x.c||0;return a},{cal:0,p:0,f:0,c:0});
     const appG=appGoals(),goals={cal:appG.calories,p:appG.protein,f:55,c:155};
     const left=Math.round(goals.cal-sum.cal);
@@ -1436,6 +1436,81 @@
   window.useRecipe=useRecipe;
   window.deleteRecipe=deleteRecipe;
 
+  let premiumFoodDateKey=null;
+
+  function foodActiveKey(){
+    return premiumFoodDateKey||key();
+  }
+
+  function foodDateLabel(k){
+    return new Date(k+'T00:00:00').toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});
+  }
+
+  function foodDateBannerMarkup(){
+    return '<div class="food-date-context" id="foodDateContext" hidden>'+
+      '<div><span>История питания</span><b id="foodDateContextTitle">—</b><small>Все добавления и изменения сохраняются именно в этот день.</small></div>'+
+      '<button type="button" onclick="returnFoodToToday()">Вернуться к сегодня</button>'+
+    '</div>';
+  }
+
+  function refreshFoodDateContext(){
+    const sec=document.getElementById('food');if(!sec)return;
+    const historical=!!(premiumFoodDateKey&&premiumFoodDateKey!==key());
+    sec.classList.toggle('food-history-mode',historical);
+    const banner=document.getElementById('foodDateContext');
+    if(banner){
+      banner.hidden=!historical;
+      const title=document.getElementById('foodDateContextTitle');
+      if(title&&historical)title.textContent=foodDateLabel(premiumFoodDateKey);
+    }
+    const diary=document.getElementById('mealDiary');
+    if(diary){
+      const label=diary.querySelector('.meal-diary-head .label');
+      const title=diary.querySelector('.meal-diary-head h3');
+      const desc=diary.querySelector('.meal-diary-head p');
+      if(label)label.textContent=historical?'Выбранная дата':'Сегодня';
+      if(title)title.textContent=historical?foodDateLabel(premiumFoodDateKey):'Дневник питания';
+      if(desc)desc.textContent=historical?'Ты редактируешь прошлый день. Ничего не попадёт в сегодняшний дневник.':'Каждый приём пищи отдельно — сразу видно калории и белок.';
+    }
+    const heroLabel=sec.querySelector('.nutrition-hero-copy .label');
+    if(heroLabel)heroLabel.textContent=historical?'Выбранный день':'Сегодня';
+    const cafLabel=sec.querySelector('#caffeineTracker .label');
+    if(cafLabel)cafLabel.textContent=historical?'Кофеин за этот день':'Кофеин сегодня';
+  }
+
+  function openHistoryFood(k){
+    if(!k)return;
+    if(typeof closeM==='function')closeM();
+    premiumFoodDateKey=k;
+    if(typeof tab==='function')tab('food',navButtonFor('food'));
+    decorateFood();
+    refreshFoodDateContext();
+    renderMealDiary();
+    updateCalorieDaily();
+    updateNutritionDashboard();
+    updateCaffeineTracker();
+    setTimeout(function(){
+      const calc=document.getElementById('calorieCalculator');
+      if(calc)calc.scrollIntoView({behavior:'smooth',block:'start'});
+      const input=document.getElementById('calcName');
+      if(input)input.focus();
+    },220);
+  }
+
+  function returnFoodToToday(){
+    premiumFoodDateKey=null;
+    refreshFoodDateContext();
+    renderMealDiary();
+    updateCalorieDaily();
+    updateNutritionDashboard();
+    updateCaffeineTracker();
+    const sec=document.getElementById('food');
+    if(sec)sec.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+
+  window.openHistoryFood=openHistoryFood;
+  window.returnFoodToToday=returnFoodToToday;
+
   function mealDiaryMarkup(){
     return '<div class="meal-diary" id="mealDiary">'+
       '<div class="meal-diary-head"><div><div class="label">Сегодня</div><h3>Дневник питания</h3><p>Каждый приём пищи отдельно — сразу видно калории и белок.</p></div><button type="button" onclick="openMealAdd(\'Завтрак\')">+ Добавить</button></div>'+
@@ -1459,15 +1534,19 @@
   }
 
   function deleteMealEntry(index){
-    const list=(S.food&&S.food[key()])||[],x=list[index];
-    const undo=foodUndoSnapshot(key());
-    if(typeof foodDel==='function')foodDel(index);
+    const dk=foodActiveKey(),list=(S.food&&S.food[dk])||[],x=list[index];
+    const undo=foodUndoSnapshot(dk);
+    if(x){
+      if(entryCaffeineMg(x))adjustDayCaffeine(-entryCaffeineMg(x),dk);
+      S.food[dk].splice(index,1);
+      if(typeof save==='function')save();
+    }
     if(x)showFoodUndo('Удалено: '+String(x.baseName||x.name||'запись').replace(/\s*·.*$/,''),undo);
   }
 
 
   function editableFoodEntry(index){
-    const list=(S.food&&S.food[key()])||[],x=list[index];
+    const list=(S.food&&S.food[foodActiveKey()])||[],x=list[index];
     if(!x)return null;
     let grams=+x.grams||0;
     if(!grams){
@@ -1543,7 +1622,7 @@
     x.cal=t.kcal;x.p=t.p;x.f=t.f;x.c=t.c;
     const newCaffeine=t.caffeine||0;
     x.caffeineMg=newCaffeine;
-    if(newCaffeine!==oldCaffeine)adjustDayCaffeine(newCaffeine-oldCaffeine,key());
+    if(newCaffeine!==oldCaffeine)adjustDayCaffeine(newCaffeine-oldCaffeine,foodActiveKey());
     if(typeof save==='function')save();
     if(typeof closeM==='function')closeM();
   }
@@ -1555,26 +1634,30 @@
     const meal=mealEl?mealEl.value:e.meal,grams=gramsEl?(+gramsEl.value||0):e.grams;
     if(!(grams>0))return;
     const t=foodEditorTotals();
-    if(!S.food[key()])S.food[key()]=[];
-    S.food[key()].push({
+    if(!S.food[dk])S.food[dk]=[];
+    S.food[dk].push({
       meal:meal,baseName:e.baseName,grams:grams,
       kcal100:e.kcal100,p100:e.p100,f100:e.f100,c100:e.c100,caffeine100:e.caffeine100||0,
       name:e.baseName+' · '+Math.round(grams)+' г',
       cal:t.kcal,p:t.p,f:t.f,c:t.c,caffeineMg:t.caffeine||0,caffeineAt:t.caffeine?Date.now():0,
       copiedEntry:true
     });
-    if(t.caffeine)adjustDayCaffeine(t.caffeine,key());
+    if(t.caffeine)adjustDayCaffeine(t.caffeine,foodActiveKey());
     if(typeof save==='function')save();
     if(typeof closeM==='function')closeM();
     showFoodUndo('Добавлена ещё одна порция',undo);
   }
 
   function deleteFoodEntryFromEditor(index){
-    const list=(S.food&&S.food[key()])||[],x=list[index];
-    const undo=foodUndoSnapshot(key());
+    const dk=foodActiveKey(),list=(S.food&&S.food[dk])||[],x=list[index];
+    const undo=foodUndoSnapshot(dk);
     if(typeof closeM==='function')closeM();
-    if(typeof foodDel==='function')foodDel(index);
-    if(x)showFoodUndo('Удалено: '+String(x.baseName||x.name||'запись').replace(/\s*·.*$/,''),undo);
+    if(x){
+      if(entryCaffeineMg(x))adjustDayCaffeine(-entryCaffeineMg(x),dk);
+      S.food[dk].splice(index,1);
+      if(typeof save==='function')save();
+      showFoodUndo('Удалено: '+String(x.baseName||x.name||'запись').replace(/\s*·.*$/,''),undo);
+    }
   }
 
   window.openFoodEntryEditor=openFoodEntryEditor;
@@ -1585,7 +1668,7 @@
 
   function renderMealDiary(){
     const root=document.getElementById('mealDiaryList');if(!root||!window.S)return;
-    const entries=((S.food&&S.food[key()])||[]).map(function(x,i){return {item:x,index:i}});
+    const entries=((S.food&&S.food[foodActiveKey()])||[]).map(function(x,i){return {item:x,index:i}});
     const meals=['Завтрак','Обед','Перекус','Ужин','Другое','Напиток'];
     const visible=meals.filter(function(meal){
       return ['Завтрак','Обед','Перекус','Ужин'].indexOf(meal)>=0||entries.some(function(e){return e.item.meal===meal});
@@ -1645,7 +1728,7 @@
   function updateCaffeineTracker(){
     const root=document.getElementById('caffeineTracker');
     if(!root||!window.S)return;
-    const g=appGoals(),total=Math.max(0,+(S.caf&&S.caf[key()]||0)),limit=g.caffeine||400;
+    const activeKey=foodActiveKey(),g=appGoals(),total=Math.max(0,+(S.caf&&S.caf[activeKey]||0)),limit=g.caffeine||400;
     const pct=Math.max(0,Math.min(100,total/limit*100));
     const today=document.getElementById('caffeineTodayMg'),ring=document.getElementById('caffeineRing'),pctEl=document.getElementById('caffeinePct'),bar=document.getElementById('caffeineTrackBar');
     if(today)today.textContent=Math.round(total);
@@ -1653,7 +1736,7 @@
     if(pctEl)pctEl.textContent=Math.round(pct)+'%';
     if(bar)bar.style.width=pct+'%';
 
-    const linked=caffeineLinkedEntries(key()),manual=caffeineManualMg(key());
+    const linked=caffeineLinkedEntries(activeKey),manual=caffeineManualMg(activeKey);
     const breakdown=document.getElementById('caffeineBreakdown');
     if(breakdown){
       const rows=linked.map(function(x){
@@ -1669,7 +1752,7 @@
 
     const note=document.getElementById('caffeineNote');
     if(note){
-      const late=linked.some(function(x){
+      const late=activeKey===key()&&linked.some(function(x){
         if(!(x&&+x.caffeineAt))return false;
         return new Date(+x.caffeineAt).getHours()>=18;
       });
@@ -1694,6 +1777,13 @@
     if(!sec)return;
     const legacy=sec.querySelector(':scope > .card');
     if(legacy)legacy.classList.add('food-legacy-summary');
+    let dateContext=document.getElementById('foodDateContext');
+    if(!dateContext){
+      const title=sec.querySelector('.premium-section-title');
+      if(title)title.insertAdjacentHTML('afterend',foodDateBannerMarkup());
+      else sec.insertAdjacentHTML('afterbegin',foodDateBannerMarkup());
+      dateContext=document.getElementById('foodDateContext');
+    }
     let dash=document.getElementById('nutritionDashboard');
     if(!dash){
       const title=sec.querySelector('.premium-section-title');
@@ -1750,6 +1840,7 @@
     updateCalorieDaily();
     updateNutritionDashboard();
     updateCaffeineTracker();
+    refreshFoodDateContext();
     calorieCalc();
   }
 
@@ -1782,7 +1873,7 @@
 
   function updateCalorieDaily(){
     if(!window.S || typeof key!=='function')return;
-    const list=(S.food&&S.food[key()])||[];
+    const list=(S.food&&S.food[foodActiveKey()])||[];
     const used=Math.round(list.reduce(function(sum,x){return sum+(+x.cal||0)},0));
     const goal=(S.profile&&+S.profile.calories)||1500;
     const usedEl=document.getElementById('calcDailyUsed');
@@ -1799,7 +1890,7 @@
     const mealEl=document.getElementById('calcMeal');
     const name=(nameEl&&nameEl.value.trim())||'Продукт';
     const meal=(mealEl&&mealEl.value)||'Другое';
-    const undo=foodUndoSnapshot(key());
+    const dk=foodActiveKey(),undo=foodUndoSnapshot(dk);
     rememberCurrentProduct(name);
     const caffeine100=selectedProductCaffeine100();
     const caffeineMg=round1(caffeine100*t.grams/100);
@@ -1815,13 +1906,13 @@
       c100:num('calcC100'),
       caffeine100:caffeine100||0,
       caffeineMg:caffeineMg||0,
-      caffeineAt:caffeineMg?Date.now():0,
+      caffeineAt:caffeineMg&&dk===key()?Date.now():0,
       cal:t.kcal,
       p:t.p,
       f:t.f,
       c:t.c
     });
-    if(caffeineMg)adjustDayCaffeine(caffeineMg,key());
+    if(caffeineMg)adjustDayCaffeine(caffeineMg,dk);
     if(typeof save==='function')save();
     showFoodUndo('Добавлено: '+name,undo);
     ['calcName','calcGrams','calcKcal100','calcP100','calcF100','calcC100'].forEach(function(id){
@@ -2976,6 +3067,7 @@
   }
 
   function openHistoryEntry(type,k){
+    if(type==='food'){openHistoryFood(k);return}
     if(typeof openEntryForm!=='function')return;
     openEntryForm(type,k);
   }
