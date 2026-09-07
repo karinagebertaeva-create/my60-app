@@ -626,6 +626,7 @@
     {id:'base-stuffed-pepper',name:'Перец фаршированный мясом и рисом',kcal100:145,p100:7.5,f100:8.0,c100:10.0},
     {id:'base-cabbage-rolls',name:'Голубцы с мясом и рисом',kcal100:140,p100:7.0,f100:8.0,c100:10.0},
     {id:'base-pasta-bolognese',name:'Паста болоньезе',kcal100:170,p100:8.0,f100:6.0,c100:21.0},
+    {id:'base-spaghetti-gravy',name:'Спагетти с подливой, домашние',kcal100:160,p100:6.5,f100:4.5,c100:24.0,defaultGrams:250},
     {id:'base-beef-stroganoff',name:'Бефстроганов из говядины',kcal100:180,p100:13.0,f100:12.0,c100:5.0},
     {id:'base-chicken-cream',name:'Курица в сливочном соусе',kcal100:175,p100:16.0,f100:11.0,c100:3.0},
     {id:'base-casserole-cottage',name:'Запеканка творожная',kcal100:180,p100:13.0,f100:7.0,c100:17.0},
@@ -642,7 +643,8 @@
     {id:'base-sunflower-oil',name:'Подсолнечное масло',kcal100:884,p100:0,f100:100,c100:0},
     {id:'base-coffee-milk',name:'Кофе с молоком без сахара',kcal100:20,p100:1.0,f100:1.0,c100:2.0},
     {id:'base-cappuccino',name:'Капучино без сахара',kcal100:45,p100:2.5,f100:2.3,c100:3.5},
-    {id:'base-latte',name:'Латте без сахара',kcal100:55,p100:3.0,f100:2.8,c100:4.5}
+    {id:'base-latte',name:'Латте без сахара',kcal100:55,p100:3.0,f100:2.8,c100:4.5},
+    {id:'base-adrenaline-rush-449',name:'Adrenaline Rush, классический 449 мл',kcal100:54,p100:0.5,f100:0,c100:12.5,defaultGrams:449,mealDefault:'Напиток'}
   ];
 
   function ensureProductLibrary(){
@@ -664,7 +666,7 @@
 
   function productLibraryMarkup(){
     return '<div class="product-library" id="productLibrary">'+
-      '<div class="library-top"><div><div class="label">Мои продукты</div><div class="library-title">Быстрый выбор</div><div class="library-base-note">В поиске также 118 продуктов и блюд MY 60</div></div><span class="library-count" id="libraryCount">0</span></div>'+
+      '<div class="library-top"><div><div class="label">Мои продукты</div><div class="library-title">Быстрый выбор</div><div class="library-base-note">В поиске также '+builtInProducts.length+' продуктов и блюд MY 60</div></div><span class="library-count" id="libraryCount">0</span></div>'+
       '<div id="favoriteProducts"></div>'+
       '<div id="recentProducts"></div>'+
     '</div>';
@@ -681,10 +683,12 @@
         '<button type="button" onclick="quickFood(\'base-buckwheat\')">Гречка</button>'+
         '<button type="button" onclick="quickFood(\'base-potato-puree\')">Пюре</button>'+
         '<button type="button" onclick="quickFood(\'base-goulash\')">Гуляш</button>'+
+        '<button type="button" onclick="quickFood(\'base-spaghetti-gravy\')">Спагетти</button>'+
+        '<button type="button" onclick="quickFood(\'base-adrenaline-rush-449\')">Adrenaline</button>'+
       '</div>'+
       productLibraryMarkup()+
       '<div class="calc-fields">'+
-        '<div><label>Приём пищи</label><select id="calcMeal"><option>Завтрак</option><option>Обед</option><option>Перекус</option><option>Ужин</option><option>Другое</option></select></div>'+
+        '<div><label>Приём пищи</label><select id="calcMeal"><option>Завтрак</option><option>Обед</option><option>Перекус</option><option>Ужин</option><option>Напиток</option><option>Другое</option></select></div>'+
         '<div><label>Вес порции, г</label><input id="calcGrams" type="number" inputmode="decimal" min="0" step="1" placeholder="150" oninput="calorieCalc()"></div>'+
         '<div class="calc-wide"><label>Ккал / 100 г</label><input id="calcKcal100" type="number" inputmode="decimal" min="0" step="1" placeholder="120" oninput="calorieCalc()"></div>'+
       '</div>'+
@@ -745,8 +749,13 @@
       if(el)el.value=values[k]==null?'':values[k];
     });
     hideProductSuggestions();
+    const meal=document.getElementById('calcMeal');
+    if(meal&&p.mealDefault)meal.value=p.mealDefault;
     const grams=document.getElementById('calcGrams');
-    if(grams){grams.value='';setTimeout(function(){grams.focus()},40)}
+    if(grams){
+      grams.value=p.defaultGrams?String(p.defaultGrams):'';
+      if(!p.defaultGrams)setTimeout(function(){grams.focus()},40);
+    }
     calorieCalc();
   }
 
@@ -773,7 +782,7 @@
         return an.localeCompare(bn,'ru');
       });
     }else{
-      const popular=['Яйцо куриное, варёное','Творог 5%','Куриная грудка, варёная','Картофель варёный','Картошка жареная','Картофельное пюре с молоком и маслом','Гуляш из говядины','Гречка варёная'];
+      const popular=['Яйцо куриное, варёное','Творог 5%','Куриная грудка, варёная','Картофель варёный','Картошка жареная','Картофельное пюре с молоком и маслом','Гуляш из говядины','Гречка варёная','Спагетти с подливой, домашние','Adrenaline Rush, классический 449 мл'];
       items=items.filter(function(p){return p.source==='saved'||popular.indexOf(p.name)>=0});
       items.sort(function(a,b){
         if(a.source!==b.source)return a.source==='saved'?-1:1;
