@@ -317,9 +317,9 @@ function stepsSave(){var k=entryKey();S.steps[k]=+fs.value||0;save();closeM()}
 function waterSave(){addWater(+fwat.value||0,entryKey());closeM()}
 function addWater(v,targetKey){var k=targetKey||key();S.water[k]=(S.water[k]||0)+v;save()}
 function cafSave(){var k=entryKey();S.caf[k]=(S.caf[k]||0)+(+fcaf.value||0);save();closeM()}
-function energy(){S.caf[key()]=(S.caf[key()]||0)+150;if(!S.food[key()])S.food[key()]=[];S.food[key()].push({meal:"Напиток",name:"Энергетик Zero",cal:10,p:0,f:0,c:0});save()}
+function energy(){S.caf[key()]=(S.caf[key()]||0)+150;if(!S.food[key()])S.food[key()]=[];S.food[key()].push({meal:"Напиток",name:"Энергетик Zero",cal:10,p:0,f:0,c:0,caffeineMg:150});save()}
 function foodSave(){var k=entryKey();if(!S.food[k])S.food[k]=[];S.food[k].push({meal:fm.value,name:fn.value||"Еда",cal:+fcal.value||0,p:+fp.value||0,f:+ff.value||0,c:+fc.value||0});save();closeM()}
-function foodDel(i){S.food[key()].splice(i,1);save()}
+function foodDel(i){var k=key(),x=(S.food[k]||[])[i];if(x&&+x.caffeineMg){S.caf[k]=Math.max(0,(+S.caf[k]||0)-(+x.caffeineMg||0))}S.food[k].splice(i,1);save()}
 function wellSave(){var g=function(id){return document.getElementById(id)},slEl=g("sl"),huEl=g("hu"),enEl=g("en"),stEl=g("st"),swEl=g("sw"),wnEl=g("wn"),k=entryKey();S.well[k]={sleep:slEl?(+slEl.value||0):0,hunger:huEl?+huEl.value:5,energy:enEl?+enEl.value:5,stress:stEl?+stEl.value:5,sweet:swEl?+swEl.value:5,note:wnEl?wnEl.value:""};save();closeM()}
 function measureSave(){var k=entryKey();S.measures[k]={waist:+mw.value||null,belly:+mb.value||null,hips:+mh.value||null,chest:+mc.value||null,thigh:+mt.value||null};save();closeM()}
 function photoSave(){var f=pf.files[0],targetDate=entryKey();if(!f)return;var r=new FileReader();r.onload=function(e){var im=new Image();im.onload=function(){var cv=document.createElement("canvas"),scale=Math.min(1,700/Math.max(im.width,im.height));cv.width=im.width*scale;cv.height=im.height*scale;cv.getContext("2d").drawImage(im,0,0,cv.width,cv.height);S.photos.push({date:targetDate,type:pt.value,data:cv.toDataURL("image/jpeg",.65)});save();closeM()};im.src=e.target.result};r.readAsDataURL(f)}
