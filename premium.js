@@ -644,7 +644,7 @@
     {id:'base-coffee-milk',name:'Кофе с молоком без сахара',kcal100:20,p100:1.0,f100:1.0,c100:2.0},
     {id:'base-cappuccino',name:'Капучино без сахара',kcal100:45,p100:2.5,f100:2.3,c100:3.5},
     {id:'base-latte',name:'Латте без сахара',kcal100:55,p100:3.0,f100:2.8,c100:4.5},
-    {id:'base-adrenaline-rush-449',name:'Adrenaline Rush, классический 449 мл',kcal100:54,p100:0.5,f100:0,c100:12.5,defaultGrams:449,mealDefault:'Напиток'}
+    {id:'base-adrenaline-rush-449',name:'Adrenaline Rush, классический 449 мл',kcal100:54,p100:0.5,f100:0,c100:12.5,caffeine100:30,defaultGrams:449,mealDefault:'Напиток'}
   ];
 
   function ensureProductLibrary(){
@@ -675,7 +675,7 @@
   function calculatorMarkup(){
     return '<div class="card calorie-card" id="calorieCalculator">'+
       '<div class="calorie-head"><div><div class="label">Быстро добавить</div><div class="big calorie-title">Найди продукт</div><div class="muted">Выбери из базы MY 60 или из своих сохранённых — КБЖУ подставится автоматически.</div></div><div class="calorie-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></svg></div></div>'+
-      '<div class="smart-search-block product-search-wrap"><div class="search-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></svg></div><input id="calcName" autocomplete="off" placeholder="Творог, картошка, гуляш…" onfocus="productSearch(this.value)" oninput="productSearch(this.value)"><div class="product-suggestions" id="productSuggestions"></div></div>'+
+      '<div class="smart-search-block product-search-wrap"><div class="search-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></svg></div><input id="calcName" autocomplete="off" placeholder="Творог, картошка, гуляш…" onfocus="productSearch(this.value)" oninput="clearSelectedProductMeta();productSearch(this.value)"><div class="product-suggestions" id="productSuggestions"></div></div>'+
       '<div class="quick-food-row">'+
         '<button type="button" onclick="quickFood(\'base-cottage-5\')">Творог</button>'+
         '<button type="button" onclick="quickFood(\'base-egg\')">Яйцо</button>'+
@@ -741,6 +741,32 @@
     return String(v||'').toLowerCase().replace(/ё/g,'е').replace(/[^a-zа-я0-9]+/gi,' ').trim();
   }
 
+  function entryCaffeineMg(x){
+    return Math.max(0,+((x&&x.caffeineMg)||0));
+  }
+
+  function adjustDayCaffeine(delta,k){
+    const dayKey=k||key();
+    const next=Math.max(0,(+(S.caf&&S.caf[dayKey]||0))+(+delta||0));
+    if(!S.caf)S.caf={};
+    S.caf[dayKey]=round1(next);
+  }
+
+  function selectedProductCaffeine100(){
+    const calc=document.getElementById('calorieCalculator');
+    return calc?(+calc.dataset.caffeine100||0):0;
+  }
+
+  function clearSelectedProductMeta(){
+    const calc=document.getElementById('calorieCalculator');
+    if(calc){
+      calc.dataset.caffeine100='';
+      calc.dataset.productId='';
+    }
+  }
+
+  window.clearSelectedProductMeta=clearSelectedProductMeta;
+
   function applyProductToCalculator(p){
     if(!p)return;
     const values={calcName:p.name,calcKcal100:p.kcal100,calcP100:p.p100,calcF100:p.f100,calcC100:p.c100};
@@ -748,6 +774,11 @@
       const el=document.getElementById(k);
       if(el)el.value=values[k]==null?'':values[k];
     });
+    const calc=document.getElementById('calorieCalculator');
+    if(calc){
+      calc.dataset.caffeine100=p.caffeine100?String(p.caffeine100):'';
+      calc.dataset.productId=p.id||'';
+    }
     hideProductSuggestions();
     const meal=document.getElementById('calcMeal');
     if(meal&&p.mealDefault)meal.value=p.mealDefault;
@@ -845,6 +876,7 @@
     p.p100=num('calcP100');
     p.f100=num('calcF100');
     p.c100=num('calcC100');
+    p.caffeine100=selectedProductCaffeine100()||0;
     p.lastUsed=Date.now();
     if(library.length>100){
       const removable=library.filter(function(x){return !x.favorite}).sort(function(a,b){return (a.lastUsed||0)-(b.lastUsed||0)});
@@ -1125,7 +1157,7 @@
     const src=((S.food&&S.food[yesterdayKey()])||[]).filter(function(x){return x.meal===meal});
     if(!src.length)return;
     if(!S.food[key()])S.food[key()]=[];
-    src.forEach(function(x){S.food[key()].push(Object.assign({},x,{copiedFrom:yesterdayKey()}))});
+    src.forEach(function(x){S.food[key()].push(Object.assign({},x,{copiedFrom:yesterdayKey()}));if(entryCaffeineMg(x))adjustDayCaffeine(entryCaffeineMg(x),key())});
     if(typeof save==='function')save();
     renderFoodTools();
   }
@@ -1334,7 +1366,9 @@
       kcal100:x.kcal100!=null?+x.kcal100:((+x.cal||0)/(factor||1)),
       p100:x.p100!=null?+x.p100:((+x.p||0)/(factor||1)),
       f100:x.f100!=null?+x.f100:((+x.f||0)/(factor||1)),
-      c100:x.c100!=null?+x.c100:((+x.c||0)/(factor||1))
+      c100:x.c100!=null?+x.c100:((+x.c||0)/(factor||1)),
+      caffeine100:x.caffeine100!=null?+x.caffeine100:(entryCaffeineMg(x)/(factor||1)),
+      caffeineMg:entryCaffeineMg(x)
     };
   }
 
@@ -1345,14 +1379,15 @@
     const p100=+(gramsEl&&gramsEl.dataset.p100||0);
     const f100=+(gramsEl&&gramsEl.dataset.f100||0);
     const c100=+(gramsEl&&gramsEl.dataset.c100||0);
+    const caffeine100=+(gramsEl&&gramsEl.dataset.caffeine100||0);
     const k=grams/100;
-    return {grams:grams,kcal:round1(kcal100*k),p:round1(p100*k),f:round1(f100*k),c:round1(c100*k)};
+    return {grams:grams,kcal:round1(kcal100*k),p:round1(p100*k),f:round1(f100*k),c:round1(c100*k),caffeine:round1(caffeine100*k)};
   }
 
   function updateFoodEditorPreview(){
     const t=foodEditorTotals(),out=document.getElementById('foodEditPreview');
     if(!out)return;
-    out.innerHTML='<div><span>Порция</span><b>'+Math.round(t.grams)+' г</b></div><div><span>Калории</span><b>'+Math.round(t.kcal)+' ккал</b></div><div><span>Белок</span><b>'+round1(t.p)+' г</b></div><div><span>Жиры / углеводы</span><b>'+round1(t.f)+' / '+round1(t.c)+' г</b></div>';
+    out.innerHTML='<div><span>Порция</span><b>'+Math.round(t.grams)+' г</b></div><div><span>Калории</span><b>'+Math.round(t.kcal)+' ккал</b></div><div><span>Белок</span><b>'+round1(t.p)+' г</b></div><div><span>Жиры / углеводы</span><b>'+round1(t.f)+' / '+round1(t.c)+' г</b></div>'+(t.caffeine?'<div class="food-edit-caffeine"><span>Кофеин</span><b>'+Math.round(t.caffeine)+' мг</b></div>':'');
   }
 
   function openFoodEntryEditor(index){
@@ -1364,7 +1399,7 @@
       '<div class="food-edit-sheet">'+
         '<div class="food-edit-head"><div><div class="label">Дневник питания</div><h3>'+escapeHtml(e.baseName)+'</h3><p>Исправь порцию или перенеси запись в другой приём пищи.</p></div><div class="food-edit-mark">✎</div></div>'+
         '<label class="food-edit-field"><span>Приём пищи</span><select id="foodEditMeal">'+meals.map(function(m){return '<option '+(m===e.meal?'selected':'')+'>'+m+'</option>'}).join('')+'</select></label>'+
-        '<label class="food-edit-field"><span>Порция</span><div class="food-edit-grams"><input id="foodEditGrams" type="number" inputmode="decimal" min="1" step="1" value="'+round1(e.grams)+'" data-kcal100="'+round1(e.kcal100)+'" data-p100="'+round1(e.p100)+'" data-f100="'+round1(e.f100)+'" data-c100="'+round1(e.c100)+'" oninput="updateFoodEditorPreview()"><i>г</i></div></label>'+
+        '<label class="food-edit-field"><span>Порция</span><div class="food-edit-grams"><input id="foodEditGrams" type="number" inputmode="decimal" min="1" step="1" value="'+round1(e.grams)+'" data-kcal100="'+round1(e.kcal100)+'" data-p100="'+round1(e.p100)+'" data-f100="'+round1(e.f100)+'" data-c100="'+round1(e.c100)+'" data-caffeine100="'+round1(e.caffeine100||0)+'" oninput="updateFoodEditorPreview()"><i>г</i></div></label>'+
         '<div class="food-edit-preview" id="foodEditPreview"></div>'+
         '<div class="food-edit-actions"><button type="button" class="btn" onclick="saveFoodEntryEdit('+index+')">Сохранить</button><button type="button" class="btn soft" onclick="duplicateFoodEntry('+index+')">Добавить ещё такую же</button></div>'+
         '<button type="button" class="food-edit-delete" onclick="deleteFoodEntryFromEditor('+index+')">Удалить запись</button>'+
@@ -1382,9 +1417,13 @@
     x.meal=meal;
     x.baseName=e.baseName;
     x.grams=grams;
-    x.kcal100=e.kcal100;x.p100=e.p100;x.f100=e.f100;x.c100=e.c100;
+    const oldCaffeine=entryCaffeineMg(x);
+    x.kcal100=e.kcal100;x.p100=e.p100;x.f100=e.f100;x.c100=e.c100;x.caffeine100=e.caffeine100||0;
     x.name=e.baseName+' · '+Math.round(grams)+' г';
     x.cal=t.kcal;x.p=t.p;x.f=t.f;x.c=t.c;
+    const newCaffeine=t.caffeine||0;
+    x.caffeineMg=newCaffeine;
+    if(newCaffeine!==oldCaffeine)adjustDayCaffeine(newCaffeine-oldCaffeine,key());
     if(typeof save==='function')save();
     if(typeof closeM==='function')closeM();
   }
@@ -1398,11 +1437,12 @@
     if(!S.food[key()])S.food[key()]=[];
     S.food[key()].push({
       meal:meal,baseName:e.baseName,grams:grams,
-      kcal100:e.kcal100,p100:e.p100,f100:e.f100,c100:e.c100,
+      kcal100:e.kcal100,p100:e.p100,f100:e.f100,c100:e.c100,caffeine100:e.caffeine100||0,
       name:e.baseName+' · '+Math.round(grams)+' г',
-      cal:t.kcal,p:t.p,f:t.f,c:t.c,
+      cal:t.kcal,p:t.p,f:t.f,c:t.c,caffeineMg:t.caffeine||0,
       copiedEntry:true
     });
+    if(t.caffeine)adjustDayCaffeine(t.caffeine,key());
     if(typeof save==='function')save();
     if(typeof closeM==='function')closeM();
   }
@@ -1441,7 +1481,7 @@
           ? '<button class="meal-empty-add" type="button" onclick="openMealAdd(\''+meal+'\')"><span>＋</span><div><b>Добавить '+meal.toLowerCase()+'</b><small>Найти продукт или блюдо</small></div></button>'
           : '<div class="meal-items">'+items.map(function(e){
               const x=e.item;
-              return '<div class="meal-item"><button type="button" class="meal-item-edit" onclick="openFoodEntryEditor('+e.index+')"><div class="meal-item-main"><b>'+escapeHtml(x.name||'Еда')+'</b><small>'+Math.round(+x.cal||0)+' ккал · Б '+round1(+x.p||0)+' · Ж '+round1(+x.f||0)+' · У '+round1(+x.c||0)+'</small></div><span>Изм.</span></button><button type="button" class="meal-item-delete" aria-label="Удалить" onclick="deleteMealEntry('+e.index+')">×</button></div>';
+              return '<div class="meal-item"><button type="button" class="meal-item-edit" onclick="openFoodEntryEditor('+e.index+')"><div class="meal-item-main"><b>'+escapeHtml(x.name||'Еда')+'</b><small>'+Math.round(+x.cal||0)+' ккал · Б '+round1(+x.p||0)+' · Ж '+round1(+x.f||0)+' · У '+round1(+x.c||0)+(entryCaffeineMg(x)?' · ⚡ '+Math.round(entryCaffeineMg(x))+' мг кофеина':'')+'</small></div><span>Изм.</span></button><button type="button" class="meal-item-delete" aria-label="Удалить" onclick="deleteMealEntry('+e.index+')">×</button></div>';
             }).join('')+'</div><button class="meal-add-more" type="button" onclick="openMealAdd(\''+meal+'\')">+ Добавить ещё</button>')+
       '</div>';
     }).join('');
@@ -1554,6 +1594,8 @@
     const name=(nameEl&&nameEl.value.trim())||'Продукт';
     const meal=(mealEl&&mealEl.value)||'Другое';
     rememberCurrentProduct(name);
+    const caffeine100=selectedProductCaffeine100();
+    const caffeineMg=round1(caffeine100*t.grams/100);
     if(!S.food[key()])S.food[key()]=[];
     S.food[key()].push({
       meal:meal,
@@ -1564,15 +1606,19 @@
       p100:num('calcP100'),
       f100:num('calcF100'),
       c100:num('calcC100'),
+      caffeine100:caffeine100||0,
+      caffeineMg:caffeineMg||0,
       cal:t.kcal,
       p:t.p,
       f:t.f,
       c:t.c
     });
+    if(caffeineMg)adjustDayCaffeine(caffeineMg,key());
     if(typeof save==='function')save();
     ['calcName','calcGrams','calcKcal100','calcP100','calcF100','calcC100'].forEach(function(id){
       const el=document.getElementById(id); if(el)el.value='';
     });
+    clearSelectedProductMeta();
     calorieCalc();
     updateCalorieDaily();
     renderProductLibrary();
@@ -2730,7 +2776,7 @@
     const src=(S.food&&S.food[k])||[];
     if(!src.length)return;
     if(!S.food[key()])S.food[key()]=[];
-    src.forEach(function(x){S.food[key()].push(Object.assign({},x,{copiedFrom:k}))});
+    src.forEach(function(x){S.food[key()].push(Object.assign({},x,{copiedFrom:k}));if(entryCaffeineMg(x))adjustDayCaffeine(entryCaffeineMg(x),key())});
     if(typeof save==='function')save();
     if(typeof closeM==='function')closeM();
   }
