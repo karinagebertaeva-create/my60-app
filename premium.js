@@ -1966,12 +1966,13 @@
 
   function weekPlanSettings(w){
     const data=[
-      {steps:7000,strength:2,note:'Входим в ритм спокойно'},
-      {steps:8000,strength:2,note:'Закрепляем привычки'},
-      {steps:8750,strength:2,note:'Добавляем немного движения'},
-      {steps:9500,strength:2,note:'Смотрим на восстановление'}
+      {strength:2,note:'Входим в ритм спокойно'},
+      {strength:2,note:'Закрепляем привычки'},
+      {strength:2,note:'Сохраняем удобный ритм'},
+      {strength:2,note:'Смотрим на восстановление'}
     ];
-    return data[Math.max(0,Math.min(3,w-1))];
+    const base=data[Math.max(0,Math.min(3,w-1))];
+    return {steps:Math.round(appGoals().steps),strength:base.strength,note:base.note};
   }
 
   function dayPlanForDate(d){
@@ -3029,7 +3030,7 @@
         '<div><span>Вода</span><b id="goalSettingWater">—</b><small>мл / день</small></div>'+
         '<div><span>Кофеин</span><b id="goalSettingCaffeine">—</b><small>мг / день</small></div>'+
       '</div>'+
-      '<div class="goals-note">Меняй цели осознанно. MY 60 не будет автоматически снижать калории из-за нескольких дней без изменения веса.</div>'+
+      '<div class="goals-note">Эти значения действуют во всём MY 60. Шаги больше не повышаются автоматически — цель меняется только когда меняешь её ты.</div>'+
     '</div>';
   }
 
