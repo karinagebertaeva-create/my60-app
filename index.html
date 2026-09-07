@@ -237,7 +237,7 @@ summary{cursor:pointer;font-weight:820}
 </section>
 
 <section id="plan" class="section">
-<div class="card"><div class="label">Первые 4 недели</div><div class="big">Мой план</div><div class="item"><b>Неделя 1</b><div class="muted">1500 ккал • 100–110 г белка • 7000 шагов • 2 силовые</div></div><div class="item"><b>Неделя 2</b><div class="muted">1500 ккал • 8000 шагов • 2 силовые</div></div><div class="item"><b>Неделя 3</b><div class="muted">1500 ккал • 8500–9000 шагов • 2 силовые</div></div><div class="item"><b>Неделя 4</b><div class="muted">1500 ккал • 9000–10000 шагов • 2–3 силовые при хорошем восстановлении</div></div></div>
+<div class="card"><div class="label">Первые 4 недели</div><div class="big">Мой план</div><div class="item"><b>Неделя 1</b><div class="muted">Калории, белок и шаги — из «Мои цели» • 2 силовые</div></div><div class="item"><b>Неделя 2</b><div class="muted">Те же личные цели • 2 силовые</div></div><div class="item"><b>Неделя 3</b><div class="muted">Личные цели не повышаются автоматически • 2 силовые</div></div><div class="item"><b>Неделя 4</b><div class="muted">Твои цели сохраняются • 2–3 силовые только при хорошем восстановлении</div></div></div>
 <div class="card" style="margin-top:11px"><div class="label">Меню на 7 дней</div><div id="menu"></div></div>
 <div class="card work" style="margin-top:11px"><div class="label">Силовая A</div><div id="workA"></div><button class="btn soft" onclick="doneWorkout('A')">Завершить A</button></div>
 <div class="card work" style="margin-top:11px"><div class="label">Силовая B</div><div id="workB"></div><button class="btn soft" onclick="doneWorkout('B')">Завершить B</button></div>
@@ -294,7 +294,7 @@ function key(d){d=d||new Date();return d.getFullYear()+"-"+String(d.getMonth()+1
 function fmt(n,d){return Number(n||0).toLocaleString("ru-RU",{minimumFractionDigits:d||0,maximumFractionDigits:d||0})}
 function save(){persist();render()}
 function lastWeight(){var k=Object.keys(S.weights).sort();return k.length?+S.weights[k[k.length-1]]:START}
-function target(){var k=Object.keys(S.weights).sort()[0],base=S.profile.steps||7000;if(!k)return base;var days=Math.floor((new Date()-new Date(k+"T00:00"))/86400000);return days<7?base:days<14?base+1000:days<21?base+1750:base+2500}
+function target(){return Math.max(1000,+((S.profile&&S.profile.steps)||7000))}
 function tab(id,b){document.querySelectorAll(".section").forEach(function(x){x.classList.remove("active")});document.getElementById(id).classList.add("active");document.querySelectorAll(".nav button").forEach(function(x){x.classList.remove("active")});b.classList.add("active");if(id==="progress")setTimeout(draw,40)}
 function closeM(){modal.classList.remove("open");entryDateKey=null}
 function quick(){var a=[['⚖️','Вес','weight'],['🍽','Еда','food'],['💧','Вода','water'],['👟','Шаги','steps'],['😴','Самочувствие','wellness'],['📏','Замеры','measure'],['📷','Фото','photo'],['⚡','Кофеин','caffeine']];sheet.innerHTML='<h3>Добавить</h3><div class="qgrid">'+a.map(function(x){return '<button data-t="'+x[2]+'" onclick="openEntryForm(this.dataset.t)"><span style="font-size:22px">'+x[0]+'</span><b>'+x[1]+'</b></button>'}).join('')+'</div>';modal.classList.add("open")}
