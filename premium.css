@@ -4537,3 +4537,58 @@ canvas{margin-top:14px;height:220px;border:0;border-radius:20px;background:linea
 @media (max-width:520px){
   #food .product-category-row{margin-left:-2px;margin-right:-2px;padding-left:2px;padding-right:2px}
 }
+
+
+/* Workout studio expanded v21 */
+.workout-focus-tabs{
+  display:flex;gap:6px;overflow-x:auto;margin-top:13px;padding:1px 1px 4px;
+  scrollbar-width:none;-webkit-overflow-scrolling:touch
+}
+.workout-focus-tabs::-webkit-scrollbar{display:none}
+.workout-focus-tabs button{
+  flex:0 0 auto;border:1px solid #e4e7e2;background:#f6f6f2;color:#737a75;border-radius:999px;
+  padding:8px 10px;font-size:8px;font-weight:850;white-space:nowrap
+}
+.workout-focus-tabs button.active{
+  background:#1a211d;color:white;border-color:#1a211d;box-shadow:0 6px 15px rgba(18,25,21,.12)
+}
+.workout-picker{
+  max-height:430px;overflow-y:auto;padding-right:1px;align-items:stretch
+}
+.workout-choice{min-height:126px}
+.workout-choice .choice-letter{font-size:9px}
+.workout-timer{
+  display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:10px;padding:11px 12px;
+  border-radius:16px;background:#f5f4ef;border:1px solid #e8e9e4
+}
+.workout-timer>div:first-child span{
+  display:block;font-size:7px;text-transform:uppercase;letter-spacing:.09em;font-weight:850;color:#929894
+}
+.workout-timer>div:first-child b{
+  display:block;margin-top:2px;font-size:18px;letter-spacing:-.035em;font-variant-numeric:tabular-nums
+}
+.workout-timer-actions{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.workout-timer-actions button{
+  min-height:31px;border:1px solid #e1e4de;background:#fff;color:#626a65;border-radius:10px;
+  padding:0 8px;font-size:7px;font-weight:850
+}
+.workout-timer-actions .timer-stop{background:#eeeae6;color:#866d70}
+.workout-timer.running{
+  background:linear-gradient(145deg,#f4ecea,#f0f4ef);border-color:rgba(189,110,120,.15)
+}
+.workout-timer.running>div:first-child b{color:#a35f68}
+.workout-timer.done{background:#eaf1eb;border-color:#dce8de}
+.workout-timer.done>div:first-child b{color:#607b67}
+@media(max-width:420px){
+  .workout-picker{grid-template-columns:1fr 1fr;max-height:400px}
+  .workout-choice{min-height:118px;padding:10px}
+  .workout-choice b{font-size:12px}
+  .workout-choice>small{font-size:8px}
+  .workout-choice>i{font-size:6.5px}
+  .workout-timer{display:block}
+  .workout-timer-actions{justify-content:flex-start;margin-top:8px}
+}
+@media(max-width:350px){
+  .workout-picker{grid-template-columns:1fr}
+  .workout-choice{min-height:0}
+}
