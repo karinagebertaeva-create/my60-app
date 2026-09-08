@@ -2116,8 +2116,71 @@
       {name:'Жим бутылок вверх',dose:'3 × 10',focus:'Плечи · руки',tip:'Держи корпус собранным. Выжимай бутылки вверх без резкого прогиба в пояснице, опускай до комфортного уровня.'},
       {name:'Румынская тяга',dose:'3 × 10',focus:'Задняя поверхность бедра',tip:'Движение начинается тазом назад. Вес близко к ногам, шея продолжает линию спины.'},
       {name:'Bird dog',dose:'2 × 8 / сторона',focus:'Кор · спина',tip:'На четвереньках вытягивай противоположные руку и ногу. Таз не разворачивай, движение делай медленно.'}
+    ],
+    GLUTES:[
+      {name:'Ягодичный мост с паузой',dose:'3 × 15',focus:'Ягодицы',tip:'В верхней точке задержись на 1–2 секунды, сохраняя рёбра спокойно опущенными и не перегибая поясницу.'},
+      {name:'Присед к стулу',dose:'3 × 12',focus:'Ягодицы · бёдра',tip:'Садись тазом назад, слегка касайся стула и поднимайся через всю стопу. Колени направлены по линии носков.'},
+      {name:'Отведение ноги назад',dose:'3 × 12 / ногу',focus:'Ягодицы',tip:'Держись за опору. Отводи прямую или чуть согнутую ногу назад без раскачки корпуса и без прогиба в пояснице.'},
+      {name:'Отведение ноги лёжа на боку',dose:'3 × 12 / сторону',focus:'Средняя ягодичная',tip:'Таз не заваливай назад. Поднимай верхнюю ногу до комфортной высоты и опускай медленно.'},
+      {name:'Румынская тяга с бутылками',dose:'3 × 10',focus:'Ягодицы · задняя поверхность бедра',tip:'Таз уходит назад, спина остаётся длинной. Бутылки скользят близко к ногам.'},
+      {name:'Frog pumps',dose:'2 × 20',focus:'Ягодицы',tip:'Соедини стопы, колени разведи комфортно. Поднимай таз коротким контролируемым движением, работая ягодицами.'}
+    ],
+    LEGS:[
+      {name:'Присед к стулу',dose:'3 × 12',focus:'Бёдра · ягодицы',tip:'Контролируй опускание и поднимайся через всю стопу. Не позволяй коленям резко уходить внутрь.'},
+      {name:'Выпад назад с опорой',dose:'3 × 8 / ногу',focus:'Ноги · ягодицы',tip:'Можно держаться за стул. Сделай шаг назад и опускайся только на комфортную глубину.'},
+      {name:'Шаг на невысокую ступень',dose:'3 × 10 / ногу',focus:'Бёдра · ягодицы',tip:'Используй устойчивую невысокую ступень. Поднимайся за счёт рабочей ноги, без толчка второй ногой.'},
+      {name:'Подъёмы на носки',dose:'3 × 15',focus:'Икры',tip:'Держись за опору, поднимай пятки плавно и так же медленно опускай.'},
+      {name:'Статический присед у стены',dose:'3 × 30 сек',focus:'Бёдра',tip:'Спина опирается на стену. Выбери такую глубину, где можешь спокойно дышать и удерживать колени без дискомфорта.'},
+      {name:'Боковые шаги в полуприседе',dose:'2 × 12 / сторону',focus:'Ягодицы · бёдра',tip:'Делай небольшие шаги, держи колени мягкими и корпус устойчивым.'}
+    ],
+    CORE:[
+      {name:'Dead bug',dose:'3 × 8 / сторону',focus:'Глубокий кор',tip:'Поясница остаётся спокойно прижатой к полу. Уменьши амплитуду, если начинает тянуть поясницу.'},
+      {name:'Bird dog',dose:'3 × 8 / сторону',focus:'Кор · спина',tip:'Тянись рукой и противоположной ногой в разные стороны, не разворачивая таз.'},
+      {name:'Касание пяток лёжа',dose:'3 × 12 / сторону',focus:'Косые мышцы живота',tip:'Лопатки слегка приподняты, двигайся коротко в сторону пятки без рывков шеей.'},
+      {name:'Марш в ягодичном мосту',dose:'3 × 8 / ногу',focus:'Кор · ягодицы',tip:'Удерживай таз примерно на одном уровне и поочерёдно слегка отрывай стопу от пола.'},
+      {name:'Боковая планка с колен',dose:'2 × 20 сек / сторону',focus:'Кор · боковая линия',tip:'Опора на предплечье и колени. Корпус держи в одной линии, плечо не проваливай.'},
+      {name:'Стоя колено к противоположному локтю',dose:'2 × 12 / сторону',focus:'Кор · координация',tip:'Работай без рывков, слегка подкручивая корпус. Это не упражнение на скорость.'}
+    ],
+    UPPER:[
+      {name:'Отжимания от стола',dose:'3 × 8–12',focus:'Грудь · трицепс',tip:'Чем выше опора, тем легче. Держи тело одной линией и опускайся контролируемо.'},
+      {name:'Тяга бутылок к поясу',dose:'3 × 12',focus:'Спина · бицепс',tip:'Отведи таз назад, держи спину нейтральной и тяни локти к поясу.'},
+      {name:'Жим бутылок вверх',dose:'3 × 10',focus:'Плечи',tip:'Не прогибайся в пояснице. Выжимай вес вверх плавно и опускай до комфортной высоты.'},
+      {name:'Разведение рук в стороны',dose:'2 × 12',focus:'Плечи',tip:'Используй лёгкие бутылки. Локти слегка согнуты, плечи не поднимай к ушам.'},
+      {name:'Сгибание рук с бутылками',dose:'3 × 12',focus:'Бицепс',tip:'Локти остаются близко к корпусу. Не раскачивайся и опускай вес медленно.'},
+      {name:'Разгибание рук из-за головы',dose:'2 × 10',focus:'Трицепс',tip:'Возьми одну лёгкую бутылку двумя руками. Локти направлены вперёд, движение только в локтях.'}
+    ],
+    BACK:[
+      {name:'Тяга к поясу',dose:'3 × 12',focus:'Широчайшие · руки',tip:'Тяни локти назад к тазу, не поднимая плечи к ушам.'},
+      {name:'Обратные разведения',dose:'3 × 10',focus:'Верх спины',tip:'С лёгкими бутылками слегка наклони корпус и разводи руки в стороны, сохраняя шею расслабленной.'},
+      {name:'Bird dog',dose:'3 × 8 / сторону',focus:'Спина · кор',tip:'Двигайся медленно и не разворачивай таз.'},
+      {name:'Y-подъёмы лёжа/в наклоне',dose:'2 × 10',focus:'Лопатки · верх спины',tip:'Руки образуют букву Y. Поднимай их небольшой амплитудой, чувствуя работу между лопатками.'},
+      {name:'Скольжение руками по стене',dose:'2 × 12',focus:'Осанка · плечевой пояс',tip:'Спина у стены, руки плавно скользят вверх и вниз без боли в плечах.'},
+      {name:'Наклоны-таз назад без веса',dose:'3 × 12',focus:'Задняя цепь · поясничная стабилизация',tip:'Учись двигаться тазом назад с длинной спиной, не округляя поясницу.'}
+    ],
+    CARDIO:[
+      {name:'Марш на месте',dose:'3 × 45 сек',focus:'Кардио · всё тело',tip:'Поддерживай темп, при котором дыхание учащается, но движение остаётся контролируемым.'},
+      {name:'Шаг в сторону + касание',dose:'3 × 40 сек',focus:'Кардио · ноги',tip:'Шагай вправо-влево без прыжков. Добавь движения руками, если хочется больше интенсивности.'},
+      {name:'Подъём колен поочерёдно',dose:'3 × 40 сек',focus:'Кардио · кор',tip:'Поднимай колени до комфортной высоты, не сутулясь и не задерживая дыхание.'},
+      {name:'Присед + подъём рук',dose:'3 × 12',focus:'Ноги · пульс',tip:'Неглубокий присед и плавный подъём рук вверх. Темп умеренный, без прыжков.'},
+      {name:'Шаг конькобежца без прыжка',dose:'3 × 40 сек',focus:'Кардио · ягодицы',tip:'Переноси вес с ноги на ногу широким шагом, оставляя движение мягким и без прыжка.'},
+      {name:'Бокс стоя',dose:'3 × 45 сек',focus:'Кардио · руки',tip:'Чередуй прямые удары перед собой, корпус слегка собран. Не выпрямляй локоть резко до конца.'}
     ]
   };
+
+  const workoutMeta={
+    A:{icon:'A',title:'Всё тело · база',sub:'Основная силовая',detail:'ноги · ягодицы · спина · кор',duration:'30–35 мин',group:'full',strength:true},
+    B:{icon:'B',title:'Всё тело · вариация',sub:'Основная силовая',detail:'ноги · плечи · спина · кор',duration:'30–35 мин',group:'full',strength:true},
+    GLUTES:{icon:'Я',title:'Ягодицы',sub:'Акцент на тонус низа тела',detail:'ягодицы · задняя поверхность бедра',duration:'25–30 мин',group:'lower',strength:true},
+    LEGS:{icon:'Н',title:'Ноги',sub:'Бёдра и устойчивость',detail:'бёдра · ягодицы · икры',duration:'25–30 мин',group:'lower',strength:true},
+    CORE:{icon:'К',title:'Кор и талия',sub:'Стабильность корпуса',detail:'пресс · боковая линия · спина',duration:'20–25 мин',group:'core',strength:true},
+    UPPER:{icon:'В',title:'Руки и плечи',sub:'Верх тела',detail:'плечи · руки · грудь',duration:'25–30 мин',group:'upper',strength:true},
+    BACK:{icon:'С',title:'Спина и осанка',sub:'Сильная спина',detail:'лопатки · спина · задняя цепь',duration:'20–25 мин',group:'upper',strength:true},
+    CARDIO:{icon:'♥',title:'Кардио без прыжков',sub:'Разогнать пульс мягко',detail:'всё тело · низкая ударная нагрузка',duration:'18–25 мин',group:'cardio',strength:false}
+  };
+
+  function isStrengthWorkout(type){
+    return !!(workoutMeta[type]&&workoutMeta[type].strength);
+  }
 
   function ensurePlanState(){
     if(!window.S)return;
@@ -2251,10 +2314,19 @@
       '<div class="week-route" id="weekRoute"></div>'+
       '<div class="today-plan-card" id="todayPlanCard"></div>'+
       '<div class="workout-studio" id="workoutStudio">'+
-        '<div class="studio-head"><div><div class="label">Силовые тренировки</div><h3>Выбери тренировку</h3><p>MY 60 подскажет, какая следующая. Во время тренировки отмечай каждый подход отдельно.</p></div><div class="studio-week-badge" id="studioWeekBadge">0 / 2</div></div>'+
+        '<div class="studio-head"><div><div class="label">Интерактивные тренировки</div><h3>Выбери зону тела</h3><p>Две основные силовые остаются базой недели. Дополнительную тренировку выбирай по самочувствию и не обязательно делай каждый день.</p></div><div class="studio-week-badge" id="studioWeekBadge">0 / 2</div></div>'+
+        '<div class="workout-focus-tabs" id="workoutFocusTabs">'+
+          '<button class="active" onclick="setWorkoutGroup(\'all\',this)">Все</button>'+
+          '<button onclick="setWorkoutGroup(\'full\',this)">Всё тело</button>'+
+          '<button onclick="setWorkoutGroup(\'lower\',this)">Низ тела</button>'+
+          '<button onclick="setWorkoutGroup(\'upper\',this)">Верх тела</button>'+
+          '<button onclick="setWorkoutGroup(\'core\',this)">Кор</button>'+
+          '<button onclick="setWorkoutGroup(\'cardio\',this)">Кардио</button>'+
+        '</div>'+
         '<div class="workout-picker" id="workoutPicker"></div>'+
         '<div class="active-workout-head"><div><span id="activeWorkoutBadge">Тренировка A</span><h4 id="activeWorkoutTitle">Всё тело · база</h4><small id="activeWorkoutMeta">6 упражнений · 30–35 мин</small></div><button class="workout-reset" onclick="resetCurrentWorkout()">Сбросить</button></div>'+
         '<div class="workout-progress"><div><span id="workoutProgressText">0 подходов</span><b id="workoutProgressPct">0%</b></div><div class="workout-progress-bar"><span id="workoutProgressBar"></span></div></div>'+
+        '<div class="workout-timer" id="workoutTimer"><div><span>Таймер отдыха</span><b id="workoutTimerValue">01:00</b></div><div class="workout-timer-actions"><button onclick="startWorkoutTimer(45)">45 сек</button><button onclick="startWorkoutTimer(60)">60 сек</button><button onclick="startWorkoutTimer(90)">90 сек</button><button class="timer-stop" onclick="stopWorkoutTimer()">Стоп</button></div></div>'+
         '<div class="next-exercise" id="nextExercise"></div>'+
         '<div id="interactiveWorkoutList"></div>'+
         '<button class="btn workout-finish" id="workoutFinishBtn" onclick="completePremiumWorkout()">Завершить тренировку</button>'+
@@ -2264,6 +2336,52 @@
   }
 
   let activePlanWorkout='A';
+  let activeWorkoutGroup='all';
+  let workoutTimerHandle=null;
+  let workoutTimerLeft=60;
+
+  function setWorkoutGroup(group,button){
+    activeWorkoutGroup=group||'all';
+    const tabs=document.getElementById('workoutFocusTabs');
+    if(tabs)Array.from(tabs.querySelectorAll('button')).forEach(function(b){b.classList.toggle('active',b===button)});
+    renderWorkoutPicker();
+  }
+
+  function formatWorkoutTimer(seconds){
+    const m=Math.floor(seconds/60),s=seconds%60;
+    return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  }
+
+  function updateWorkoutTimer(){
+    const el=document.getElementById('workoutTimerValue');
+    if(el)el.textContent=formatWorkoutTimer(workoutTimerLeft);
+  }
+
+  function stopWorkoutTimer(){
+    if(workoutTimerHandle){clearInterval(workoutTimerHandle);workoutTimerHandle=null}
+    workoutTimerLeft=60;
+    updateWorkoutTimer();
+    const box=document.getElementById('workoutTimer');if(box)box.classList.remove('running','done');
+  }
+
+  function startWorkoutTimer(seconds){
+    if(workoutTimerHandle)clearInterval(workoutTimerHandle);
+    workoutTimerLeft=Math.max(1,+seconds||60);
+    const box=document.getElementById('workoutTimer');if(box){box.classList.add('running');box.classList.remove('done')}
+    updateWorkoutTimer();
+    workoutTimerHandle=setInterval(function(){
+      workoutTimerLeft-=1;
+      updateWorkoutTimer();
+      if(workoutTimerLeft<=0){
+        clearInterval(workoutTimerHandle);workoutTimerHandle=null;
+        if(box){box.classList.remove('running');box.classList.add('done')}
+      }
+    },1000);
+  }
+
+  window.setWorkoutGroup=setWorkoutGroup;
+  window.startWorkoutTimer=startWorkoutTimer;
+  window.stopWorkoutTimer=stopWorkoutTimer;
 
   function weekDates(){
     const now=new Date(),day=(now.getDay()+6)%7,monday=new Date(now);
@@ -2329,27 +2447,27 @@
   function renderWorkoutPicker(){
     const picker=document.getElementById('workoutPicker');if(!picker)return;
     const recommended=suggestedWorkout();
-    const data={
-      A:{title:'Силовая A',sub:'База всего тела',detail:'ноги · ягодицы · спина · кор'},
-      B:{title:'Силовая B',sub:'Вариация всего тела',detail:'ноги · плечи · спина · кор'}
-    };
-    picker.innerHTML=['A','B'].map(function(type){
-      const d=data[type],done=weekWorkoutDone(type),active=activePlanWorkout===type;
+    const order=['A','B','GLUTES','LEGS','CORE','UPPER','BACK','CARDIO'];
+    const visible=order.filter(function(type){return activeWorkoutGroup==='all'||workoutMeta[type].group===activeWorkoutGroup});
+    picker.innerHTML=visible.map(function(type){
+      const d=workoutMeta[type],done=weekWorkoutDone(type),active=activePlanWorkout===type;
+      const state=done?'Выполнена ✓':recommended===type?'По плану':(d.strength?'На выбор':'Лёгкая');
       return '<button type="button" class="workout-choice '+(active?'active ':'')+(done?'done ':'')+'" onclick="selectPlanWorkout(\''+type+'\')">'+
-        '<div class="choice-top"><span class="choice-letter">'+type+'</span><span class="choice-state">'+(done?'Выполнена ✓':recommended===type?'Следующая':'На неделе')+'</span></div>'+
-        '<b>'+d.title+'</b><small>'+d.sub+'</small><i>'+d.detail+'</i>'+
+        '<div class="choice-top"><span class="choice-letter">'+escapeHtml(d.icon)+'</span><span class="choice-state">'+state+'</span></div>'+
+        '<b>'+escapeHtml(d.title)+'</b><small>'+escapeHtml(d.sub)+'</small><i>'+escapeHtml(d.detail)+' · '+escapeHtml(d.duration)+'</i>'+
       '</button>';
     }).join('');
     const badge=document.getElementById('studioWeekBadge');
     if(badge){
-      const count=(weekWorkoutDone('A')?1:0)+(weekWorkoutDone('B')?1:0);
-      badge.textContent=count+' / 2';
+      const count=weekDates().reduce(function(n,d){return n+(S.workouts[key(d)]||[]).filter(isStrengthWorkout).length},0);
+      badge.textContent=Math.min(count,2)+' / 2';
       badge.classList.toggle('done',count>=2);
     }
   }
 
   function selectPlanWorkout(type){
-    activePlanWorkout=type==='B'?'B':'A';
+    if(!planExerciseInfo[type])type='A';
+    activePlanWorkout=type;
     const studio=document.getElementById('workoutStudio');if(studio)studio.dataset.userPicked='1';
     renderWorkoutPicker();
     renderInteractiveWorkout();
@@ -2363,6 +2481,10 @@
   function exerciseReps(ex){
     const parts=String(ex.dose||'').split('×');
     return parts.length>1?parts.slice(1).join('×').trim():ex.dose;
+  }
+
+  function exerciseDoseLabel(ex){
+    return /сек/i.test(String(ex.dose||''))?'время':'повторы';
   }
 
   function getExerciseSetState(type,i){
@@ -2437,7 +2559,7 @@
         '<div class="exercise-card-top">'+
           '<button class="exercise-number" onclick="togglePlanExercise(\''+type+'\','+i+')">'+(done?'✓':(i+1))+'</button>'+
           '<button class="exercise-main" onclick="showExerciseInfo(\''+type+'\','+i+')"><b>'+escapeHtml(ex.name)+'</b><small>'+escapeHtml(ex.focus)+'</small></button>'+
-          '<div class="exercise-reps"><b>'+escapeHtml(exerciseReps(ex))+'</b><small>повторы</small></div>'+
+          '<div class="exercise-reps"><b>'+escapeHtml(exerciseReps(ex))+'</b><small>'+exerciseDoseLabel(ex)+'</small></div>'+
         '</div>'+
         '<div class="set-row">'+setButtons+'<button class="how-btn" onclick="showExerciseInfo(\''+type+'\','+i+')">Как делать</button></div>'+
       '</div>';
@@ -2449,11 +2571,11 @@
     if(pct)pct.textContent=n+'%';
     if(bar)bar.style.width=n+'%';
 
-    const meta={A:{title:'Всё тело · база'},B:{title:'Всё тело · вариация'}};
+    const m=workoutMeta[type]||workoutMeta.A;
     const badge=document.getElementById('activeWorkoutBadge'),title=document.getElementById('activeWorkoutTitle'),metaEl=document.getElementById('activeWorkoutMeta');
-    if(badge)badge.textContent='Тренировка '+type;
-    if(title)title.textContent=meta[type].title;
-    if(metaEl)metaEl.textContent=items.length+' упражнений · '+totalSets+' подходов · 30–35 мин';
+    if(badge)badge.textContent=m.strength?'Силовая':'Кардио';
+    if(title)title.textContent=m.title;
+    if(metaEl)metaEl.textContent=items.length+' упражнений · '+totalSets+' подходов · '+m.duration;
 
     const next=document.getElementById('nextExercise');
     if(next){
@@ -2468,7 +2590,7 @@
     const finish=document.getElementById('workoutFinishBtn');
     const already=(S.workouts[key()]||[]).indexOf(type)>=0;
     if(finish){
-      finish.textContent=already?'Тренировка '+type+' выполнена ✓':(doneSets===totalSets?'Завершить тренировку '+type:'Выполни все подходы · '+doneSets+'/'+totalSets);
+      finish.textContent=already?(workoutMeta[type]?.title||'Тренировка')+' выполнена ✓':(doneSets===totalSets?'Завершить: '+(workoutMeta[type]?.title||'тренировка'):'Выполни все подходы · '+doneSets+'/'+totalSets);
       finish.disabled=already||doneSets<totalSets;
       finish.classList.toggle('complete',already);
     }
@@ -2493,7 +2615,7 @@
   function updatePlanInsight(){
     const el=document.getElementById('planInsight');if(!el)return;
     const dates=weekDates(),settings=weekPlanSettings(planWeekNumber());
-    const completed=dates.reduce(function(n,d){return n+(S.workouts[key(d)]||[]).filter(function(x){return x==='A'||x==='B'}).length},0);
+    const completed=dates.reduce(function(n,d){return n+(S.workouts[key(d)]||[]).filter(isStrengthWorkout).length},0);
     const stepVals=dates.map(function(d){return +(S.steps[key(d)]||0)}).filter(function(v){return v>0});
     const avg=stepVals.length?Math.round(stepVals.reduce(function(a,b){return a+b},0)/stepVals.length):0;
     let title,copy;
@@ -2505,7 +2627,7 @@
       copy='Неделя уже движется. Вторую силовую удобнее поставить с перерывом хотя бы в один день от первой.';
     }else{
       title='Начни с одной понятной тренировки';
-      copy='Не нужно выполнять весь план сразу. Открой A, двигайся по упражнениям сверху вниз и отмечай выполненное.';
+      copy='Не нужно выполнять всё сразу. Начни с основной тренировки A или B, а акцентную выбирай только если есть силы и желание.';
     }
     el.innerHTML='<div class="insight-mark">✦</div><div><span>Фокус недели</span><b>'+title+'</b><p>'+copy+'</p><div class="insight-stats"><i>'+completed+' / '+settings.strength+' силовых</i><i>'+(avg?avg.toLocaleString('ru-RU'):'—')+' ср. шагов</i></div></div>';
   }
@@ -2521,7 +2643,7 @@
     const sub=document.getElementById('planHeroSub');if(sub)sub.textContent=settings.note+' · ориентир '+settings.steps.toLocaleString('ru-RU')+' шагов в день';
     updatePlanStart();
     const dates=weekDates();
-    const workoutsDone=dates.reduce(function(n,d){return n+(S.workouts[key(d)]||[]).filter(function(x){return x==='A'||x==='B'}).length},0);
+    const workoutsDone=dates.reduce(function(n,d){return n+(S.workouts[key(d)]||[]).filter(isStrengthWorkout).length},0);
     const stepDays=dates.filter(function(d){return +(S.steps[key(d)]||0)>=settings.steps}).length;
     const score=planDayNumber()<=0?0:Math.min(100,Math.round((Math.min(workoutsDone/settings.strength,1)*55)+(stepDays/7*45)));
     const ring=document.getElementById('planRing'),pct=document.getElementById('planRingPct');
@@ -2530,6 +2652,14 @@
     updateWeekRoute();renderTodayPlan();renderWorkoutPicker();renderInteractiveWorkout();updatePlanInsight();
   }
 
+
+  window.selectPlanWorkout=selectPlanWorkout;
+  window.togglePlanSet=togglePlanSet;
+  window.togglePlanExercise=togglePlanExercise;
+  window.resetCurrentWorkout=resetCurrentWorkout;
+  window.showExerciseInfo=showExerciseInfo;
+  window.startTodayWorkout=startTodayWorkout;
+  window.completePremiumWorkout=completePremiumWorkout;
 
   let progressPeriod=30;
 
@@ -2546,10 +2676,10 @@
     const waistLost=firstWaist&&minWaist?Math.max(0,firstWaist-minWaist):0;
 
     const workoutDays=Object.keys(S.workouts||{}).filter(function(k){
-      return (S.workouts[k]||[]).some(function(x){return x==='A'||x==='B'});
+      return (S.workouts[k]||[]).some(isStrengthWorkout);
     });
     const totalStrength=workoutDays.reduce(function(n,k){
-      return n+(S.workouts[k]||[]).filter(function(x){return x==='A'||x==='B'}).length;
+      return n+(S.workouts[k]||[]).filter(isStrengthWorkout).length;
     },0);
 
     const weekBuckets={};
@@ -2557,7 +2687,7 @@
       const d=new Date(k+'T00:00:00'),day=(d.getDay()+6)%7,monday=new Date(d);
       monday.setDate(d.getDate()-day);
       const wk=key(monday);
-      weekBuckets[wk]=(weekBuckets[wk]||0)+(S.workouts[k]||[]).filter(function(x){return x==='A'||x==='B'}).length;
+      weekBuckets[wk]=(weekBuckets[wk]||0)+(S.workouts[k]||[]).filter(isStrengthWorkout).length;
     });
     const bestStrengthWeek=Object.keys(weekBuckets).length?Math.max.apply(null,Object.values(weekBuckets)):0;
 
