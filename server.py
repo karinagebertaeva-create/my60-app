@@ -113,10 +113,14 @@ def health():
 def home():
     with open("index.html", "r", encoding="utf-8") as source:
         html = source.read()
-    html = html.replace('sw.js?v=50', 'sw.js?v=51')
-    script = '<script src="/workout-ux.js?v=1"></script>'
-    if script not in html:
-        html = html.replace("</body>", script + "</body>")
+    html = html.replace('sw.js?v=50', 'sw.js?v=52')
+    workout_script = '<script src="/workout-ux.js?v=1"></script>'
+    motion_script = '<script src="/workout-motion.js?v=2"></script>'
+    scripts = workout_script + motion_script
+    if workout_script not in html:
+        html = html.replace("</body>", scripts + "</body>")
+    elif motion_script not in html:
+        html = html.replace(workout_script, scripts)
     response = Response(html, mimetype="text/html")
     response.headers["Cache-Control"] = "no-cache"
     return response
