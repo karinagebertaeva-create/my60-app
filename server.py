@@ -113,7 +113,7 @@ def health():
 def home():
     with open("index.html", "r", encoding="utf-8") as source:
         html = source.read()
-    html = html.replace('sw.js?v=50', 'sw.js?v=58')
+    html = html.replace('sw.js?v=50', 'sw.js?v=59')
     scripts = [
         '<script src="/workout-ux.js?v=1"></script>',
         '<script src="/workout-motion.js?v=2"></script>',
@@ -123,6 +123,7 @@ def home():
         '<script src="/workout-exercise-swap.js?v=1"></script>',
         '<script src="/workout-flow.js?v=1"></script>',
         '<script src="/workout-progress.js?v=1"></script>',
+        '<script src="/workout-goals.js?v=1"></script>',
     ]
     for script in scripts:
         if script not in html:
