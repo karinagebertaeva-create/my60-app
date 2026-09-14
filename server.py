@@ -113,21 +113,51 @@ def health():
 def home():
     with open("index.html", "r", encoding="utf-8") as source:
         html = source.read()
-    html = html.replace('sw.js?v=50', 'sw.js?v=60')
-    scripts = [
-        '<script src="/workout-ux.js?v=1"></script>',
-        '<script src="/workout-motion.js?v=2"></script>',
-        '<script src="/workout-library.js?v=1"></script>',
-        '<script src="/workout-plan.js?v=1"></script>',
-        '<script src="/workout-extra.js?v=1"></script>',
-        '<script src="/workout-exercise-swap.js?v=1"></script>',
-        '<script src="/workout-flow.js?v=1"></script>',
-    ]
-    for script in scripts:
-        if script not in html:
-            html = html.replace("</body>", script + "</body>")
+    html = html.replace('sw.js?v=50', 'sw.js?v=61')
+
+    auth_rescue = '''<style id="auth-rescue-v61">
+#authGate:not([hidden]){
+  position:fixed!important;
+  inset:0!important;
+  z-index:2147483647!important;
+  pointer-events:auto!important;
+  overflow:auto!important;
+  isolation:isolate!important;
+  touch-action:auto!important;
+}
+#authGate:not([hidden]) .authCard,
+#authGate:not([hidden]) .pin-wrap,
+#authGate:not([hidden]) .pin-input-row,
+#authGate:not([hidden]) input,
+#authGate:not([hidden]) button{
+  pointer-events:auto!important;
+  touch-action:auto!important;
+}
+#authGate:not([hidden]) input{
+  position:relative!important;
+  z-index:2!important;
+  -webkit-user-select:text!important;
+  user-select:text!important;
+}
+#authGate:not([hidden]) button{
+  position:relative;
+  z-index:3;
+}
+#authGate:not([hidden]) ~ .app,
+#authGate:not([hidden]) ~ .nav,
+#authGate:not([hidden]) ~ .fab,
+#authGate:not([hidden]) ~ .modal{
+  pointer-events:none!important;
+}
+</style>'''
+    if 'auth-rescue-v61' not in html:
+        html = html.replace("</head>", auth_rescue + "</head>")
+
+    # Emergency safe mode: workout enhancements stay off until login is stable.
     response = Response(html, mimetype="text/html")
-    response.headers["Cache-Control"] = "no-cache"
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
     return response
 
 
