@@ -4225,7 +4225,7 @@
     if(menuCard){
       const label=menuCard.querySelector('.label');if(label)label.textContent='Меню на неделю';
     }
-    let weekly={}; // питание не выводится в тренировках
+    let weekly={disabled:true}; // питание не выводится в тренировках
     if(!weekly){
       const studio=document.getElementById('workoutStudio');
       if(studio)studio.insertAdjacentHTML('afterend',weeklyMenuMarkup());
