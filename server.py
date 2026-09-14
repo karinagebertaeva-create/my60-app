@@ -111,7 +111,12 @@ def health():
 
 @app.get("/")
 def home():
-    response = send_from_directory(".", "index.html")
+    with open("index.html", "r", encoding="utf-8") as source:
+        html = source.read()
+    script = '<script src="/workout-ux.js?v=1"></script>'
+    if script not in html:
+        html = html.replace("</body>", script + "</body>")
+    response = Response(html, mimetype="text/html")
     response.headers["Cache-Control"] = "no-cache"
     return response
 
