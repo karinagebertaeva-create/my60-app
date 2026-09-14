@@ -2179,7 +2179,7 @@
   };
 
   function isStrengthWorkout(type){
-    return !!(workoutMeta[type]&&workoutMeta[type].strength);
+    return type==='CUSTOM'||!!(workoutMeta[type]&&workoutMeta[type].strength);
   }
 
   function ensurePlanState(){
@@ -2315,6 +2315,25 @@
       '<div class="today-plan-card" id="todayPlanCard"></div>'+
       '<div class="workout-studio" id="workoutStudio">'+
         '<div class="studio-head"><div><div class="label">Интерактивные тренировки</div><h3>Выбери зону тела</h3><p>Две основные силовые остаются базой недели. Дополнительную тренировку выбирай по самочувствию и не обязательно делай каждый день.</p></div><div class="studio-week-badge" id="studioWeekBadge">0 / 2</div></div>'+
+        '<div class="fitify-builder" id="fitifyBuilder">'+
+          '<div class="fitify-builder-title"><span>Собрать свою тренировку</span><b>Какие зоны тренируем?</b><small>Можно выбрать несколько</small></div>'+
+          '<div class="body-selector">'+
+            '<div class="body-column"><span>Спереди</span><div class="body-figure front"><i class="body-head"></i><i class="body-torso"></i><i class="body-arm left"></i><i class="body-arm right"></i><i class="body-leg left"></i><i class="body-leg right"></i></div></div>'+
+            '<div class="body-column"><span>Сзади</span><div class="body-figure back"><i class="body-head"></i><i class="body-torso"></i><i class="body-arm left"></i><i class="body-arm right"></i><i class="body-leg left"></i><i class="body-leg right"></i></div></div>'+
+            '<div class="body-zone-buttons">'+
+              '<button data-zone="core" onclick="toggleBodyZone(\'core\',this)">Пресс</button>'+
+              '<button data-zone="arms" onclick="toggleBodyZone(\'arms\',this)">Руки</button>'+
+              '<button data-zone="chest" onclick="toggleBodyZone(\'chest\',this)">Грудь</button>'+
+              '<button data-zone="back" onclick="toggleBodyZone(\'back\',this)">Спина</button>'+
+              '<button data-zone="shoulders" onclick="toggleBodyZone(\'shoulders\',this)">Плечи</button>'+
+              '<button data-zone="glutes" onclick="toggleBodyZone(\'glutes\',this)">Ягодицы</button>'+
+              '<button data-zone="thighs" onclick="toggleBodyZone(\'thighs\',this)">Бёдра</button>'+
+              '<button data-zone="calves" onclick="toggleBodyZone(\'calves\',this)">Икры</button>'+
+            '</div>'+
+          '</div>'+
+          '<div class="fitify-duration"><span>Длительность</span><div><button onclick="setCustomWorkoutMinutes(10,this)">10 мин</button><button class="active" onclick="setCustomWorkoutMinutes(15,this)">15 мин</button><button onclick="setCustomWorkoutMinutes(20,this)">20 мин</button><button onclick="setCustomWorkoutMinutes(25,this)">25 мин</button></div></div>'+
+          '<button class="fitify-start" id="fitifyStartBtn" onclick="startCustomWorkout()">Выбери зоны тела</button>'+
+        '</div>'+
         '<div class="workout-focus-tabs" id="workoutFocusTabs">'+
           '<button class="active" onclick="setWorkoutGroup(\'all\',this)">Все</button>'+
           '<button onclick="setWorkoutGroup(\'full\',this)">Всё тело</button>'+
@@ -2339,6 +2358,162 @@
   let activeWorkoutGroup='all';
   let workoutTimerHandle=null;
   let workoutTimerLeft=60;
+
+  let customWorkoutZones=[];
+  let customWorkoutMinutes=15;
+  let customWorkoutSession=null;
+  let customWorkoutTick=null;
+
+  const customZoneMap={
+    core:['CORE'],arms:['UPPER'],chest:['A','UPPER'],back:['BACK'],
+    shoulders:['UPPER','BACK'],glutes:['GLUTES'],thighs:['LEGS','GLUTES'],calves:['LEGS']
+  };
+
+  function updateCustomWorkoutButton(){
+    const btn=document.getElementById('fitifyStartBtn');
+    if(!btn)return;
+    btn.disabled=!customWorkoutZones.length;
+    btn.textContent=customWorkoutZones.length
+      ? 'Начать · '+customWorkoutMinutes+' мин · '+customWorkoutZones.length+' '+(customWorkoutZones.length===1?'зона':'зоны')
+      : 'Выбери зоны тела';
+    const builder=document.getElementById('fitifyBuilder');
+    if(builder)builder.dataset.zones=customWorkoutZones.join(',');
+  }
+
+  function toggleBodyZone(zone,button){
+    const i=customWorkoutZones.indexOf(zone);
+    if(i>=0)customWorkoutZones.splice(i,1);else customWorkoutZones.push(zone);
+    if(button)button.classList.toggle('active',customWorkoutZones.indexOf(zone)>=0);
+    updateCustomWorkoutButton();
+  }
+
+  function setCustomWorkoutMinutes(minutes,button){
+    customWorkoutMinutes=Math.max(10,Math.min(25,+minutes||15));
+    const root=document.querySelector('.fitify-duration');
+    if(root)Array.from(root.querySelectorAll('button')).forEach(function(b){b.classList.toggle('active',b===button)});
+    updateCustomWorkoutButton();
+  }
+
+  function buildCustomWorkout(){
+    const seen={},pool=[];
+    customWorkoutZones.forEach(function(zone){
+      (customZoneMap[zone]||[]).forEach(function(type){
+        (planExerciseInfo[type]||[]).forEach(function(ex){
+          const id=ex.name.toLowerCase();
+          if(!seen[id]){seen[id]=true;pool.push({name:ex.name,focus:ex.focus,tip:ex.tip,dose:ex.dose})}
+        });
+      });
+    });
+    const wanted=customWorkoutMinutes<=10?4:customWorkoutMinutes<=15?5:customWorkoutMinutes<=20?6:8;
+    return pool.slice(0,wanted);
+  }
+
+  function customWorkoutOverlay(){
+    let root=document.getElementById('customWorkoutPlayer');
+    if(root)return root;
+    root=document.createElement('div');
+    root.id='customWorkoutPlayer';
+    root.className='custom-workout-player';
+    document.body.appendChild(root);
+    return root;
+  }
+
+  function startCustomWorkout(){
+    const exercises=buildCustomWorkout();
+    if(!exercises.length)return;
+    customWorkoutSession={exercises:exercises,index:0,phase:'work',left:40,running:true,completed:0};
+    renderCustomWorkoutPlayer();
+    startCustomWorkoutClock();
+  }
+
+  function startCustomWorkoutClock(){
+    if(customWorkoutTick)clearInterval(customWorkoutTick);
+    customWorkoutTick=setInterval(function(){
+      if(!customWorkoutSession||!customWorkoutSession.running)return;
+      customWorkoutSession.left--;
+      if(customWorkoutSession.left<=0)advanceCustomWorkout();
+      else updateCustomWorkoutClock();
+    },1000);
+  }
+
+  function updateCustomWorkoutClock(){
+    const s=customWorkoutSession,el=document.getElementById('customWorkoutClock');
+    if(el&&s)el.textContent='00:'+String(Math.max(0,s.left)).padStart(2,'0');
+    const ring=document.querySelector('.custom-timer-ring');
+    if(ring&&s)ring.style.setProperty('--session-p',Math.max(0,Math.min(100,(s.left/(s.phase==='work'?40:20))*100))+'%');
+  }
+
+  function toggleCustomWorkoutPause(){
+    if(!customWorkoutSession)return;
+    customWorkoutSession.running=!customWorkoutSession.running;
+    renderCustomWorkoutPlayer();
+  }
+
+  function advanceCustomWorkout(){
+    const s=customWorkoutSession;if(!s)return;
+    if(s.phase==='work'){
+      s.completed=Math.max(s.completed,s.index+1);
+      if(s.index>=s.exercises.length-1)return finishCustomWorkout();
+      s.phase='rest';s.left=20;
+    }else{
+      s.index++;s.phase='work';s.left=40;
+    }
+    renderCustomWorkoutPlayer();
+  }
+
+  function previousCustomWorkout(){
+    const s=customWorkoutSession;if(!s)return;
+    if(s.phase==='rest'){s.phase='work';s.left=40}
+    else if(s.index>0){s.index--;s.left=40}
+    renderCustomWorkoutPlayer();
+  }
+
+  function skipCustomWorkout(){
+    const s=customWorkoutSession;if(!s)return;
+    if(s.phase==='rest'){s.index++;s.phase='work';s.left=40}
+    else advanceCustomWorkout();
+    renderCustomWorkoutPlayer();
+  }
+
+  function closeCustomWorkout(){
+    if(customWorkoutTick){clearInterval(customWorkoutTick);customWorkoutTick=null}
+    customWorkoutSession=null;
+    const root=document.getElementById('customWorkoutPlayer');
+    if(root)root.classList.remove('open');
+  }
+
+  function finishCustomWorkout(){
+    if(customWorkoutTick){clearInterval(customWorkoutTick);customWorkoutTick=null}
+    if(!S.workouts[key()])S.workouts[key()]=[];
+    if(S.workouts[key()].indexOf('CUSTOM')<0)S.workouts[key()].push('CUSTOM');
+    if(typeof save==='function')save();
+    const root=customWorkoutOverlay();
+    root.classList.add('open','finished');
+    root.innerHTML='<div class="custom-finish"><div class="custom-finish-mark">✓</div><span>Тренировка завершена</span><h3>'+customWorkoutMinutes+' минут для тела</h3><p>Готово. Тренировка сохранена в прогрессе за сегодня.</p><button onclick="closeCustomWorkout();updatePlanExperience()">Вернуться к плану</button></div>';
+  }
+
+  function renderCustomWorkoutPlayer(){
+    const s=customWorkoutSession;if(!s)return;
+    const root=customWorkoutOverlay(),ex=s.exercises[s.index],rest=s.phase==='rest';
+    const next=s.exercises[Math.min(s.index+1,s.exercises.length-1)];
+    root.className='custom-workout-player open';
+    root.innerHTML=
+      '<div class="custom-player-top"><button onclick="closeCustomWorkout()">×</button><div><span>'+(rest?'Отдых':'Тренировка')+'</span><b>'+(s.index+1)+' / '+s.exercises.length+'</b></div><i></i></div>'+
+      '<div class="custom-session-progress"><span style="width:'+((s.completed/s.exercises.length)*100)+'%"></span></div>'+
+      '<div class="custom-exercise-visual '+(rest?'rest':'')+'"><div class="motion-figure"><i></i><b></b><em></em></div></div>'+
+      '<div class="custom-exercise-copy"><span>'+(rest?'Следующее упражнение':escapeHtml(ex.focus))+'</span><h2>'+(rest?'Приготовься: '+escapeHtml(next.name):escapeHtml(ex.name))+'</h2><p>'+(rest?'Встряхни руки и восстанови дыхание.':escapeHtml(ex.tip))+'</p></div>'+
+      '<div class="custom-timer-ring"><div><b id="customWorkoutClock">00:'+String(s.left).padStart(2,'0')+'</b><small>'+(rest?'отдых':'работа')+'</small></div></div>'+
+      '<div class="custom-player-controls"><button onclick="previousCustomWorkout()">‹<small>назад</small></button><button class="pause" onclick="toggleCustomWorkoutPause()">'+(s.running?'Ⅱ':'▶')+'<small>'+(s.running?'пауза':'продолжить')+'</small></button><button onclick="skipCustomWorkout()">›<small>дальше</small></button></div>';
+    updateCustomWorkoutClock();
+  }
+
+  window.toggleBodyZone=toggleBodyZone;
+  window.setCustomWorkoutMinutes=setCustomWorkoutMinutes;
+  window.startCustomWorkout=startCustomWorkout;
+  window.toggleCustomWorkoutPause=toggleCustomWorkoutPause;
+  window.previousCustomWorkout=previousCustomWorkout;
+  window.skipCustomWorkout=skipCustomWorkout;
+  window.closeCustomWorkout=closeCustomWorkout;
 
   function setWorkoutGroup(group,button){
     activeWorkoutGroup=group||'all';
