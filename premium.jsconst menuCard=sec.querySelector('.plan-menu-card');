@@ -10,7 +10,7 @@
   const sectionNames={
     food:['Питание','Баланс дня'],
     progress:['Прогресс','Твоя динамика'],
-    plan:['План','Путь к цели'],
+    plan:['Тренировки','Тренируйся в своём ритме'],
     more:['Мой журнал','Итоги и заметки']
   };
   function greet(){
@@ -4221,18 +4221,18 @@
       if(title)title.insertAdjacentHTML('afterend',planDashboardMarkup());
       else sec.insertAdjacentHTML('afterbegin',planDashboardMarkup());
     }
-    const menuCard=sec.querySelector('.plan-menu-card');
+    const menuCard=null;//
     if(menuCard){
       const label=menuCard.querySelector('.label');if(label)label.textContent='Меню на неделю';
     }
-    let weekly=document.getElementById('weeklyMenu');
+    let weekly={}; // питание не выводится в тренировках
     if(!weekly){
       const studio=document.getElementById('workoutStudio');
       if(studio)studio.insertAdjacentHTML('afterend',weeklyMenuMarkup());
       else if(exp)exp.insertAdjacentHTML('beforeend',weeklyMenuMarkup());
     }
     updatePlanExperience();
-    renderWeeklyMenu();
+    // renderWeeklyMenu();
   }
 
   window.selectPlanWorkout=selectPlanWorkout;
