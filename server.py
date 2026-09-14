@@ -113,6 +113,7 @@ def health():
 def home():
     with open("index.html", "r", encoding="utf-8") as source:
         html = source.read()
+    html = html.replace('sw.js?v=50', 'sw.js?v=51')
     script = '<script src="/workout-ux.js?v=1"></script>'
     if script not in html:
         html = html.replace("</body>", script + "</body>")
