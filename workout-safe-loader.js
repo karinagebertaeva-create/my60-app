@@ -2,9 +2,10 @@
 'use strict';
 
 const SOURCES=[
-  '/workout-library.js?v=66',
-  '/workout-variety.js?v=66',
-  '/workout-challenges.js?v=66'
+  '/workout-library.js?v=67',
+  '/workout-variety.js?v=67',
+  '/workout-smart.js?v=67',
+  '/workout-challenges.js?v=67'
 ];
 let started=false;
 let ready=false;
