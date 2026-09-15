@@ -113,7 +113,7 @@ def health():
 def home():
     with open("index.html", "r", encoding="utf-8") as source:
         html = source.read()
-    html = html.replace('sw.js?v=50', 'sw.js?v=61')
+    html = html.replace('sw.js?v=50', 'sw.js?v=62')
 
     auth_rescue = '''<style id="auth-rescue-v61">
 #authGate:not([hidden]){
@@ -153,7 +153,11 @@ def home():
     if 'auth-rescue-v61' not in html:
         html = html.replace("</head>", auth_rescue + "</head>")
 
-    # Emergency safe mode: workout enhancements stay off until login is stable.
+    # Workout modules are loaded only after successful unlock and only when Plan is opened.
+    loader = '<script src="/workout-safe-loader.js?v=62"></script>'
+    if loader not in html:
+        html = html.replace("</body>", loader + "</body>")
+
     response = Response(html, mimetype="text/html")
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Pragma"] = "no-cache"
