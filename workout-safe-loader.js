@@ -2,10 +2,8 @@
 'use strict';
 
 const SOURCES=[
-  '/workout-ux.js?v=64',
-  '/workout-motion.js?v=64',
-  '/workout-library.js?v=64',
-  '/workout-challenges.js?v=64'
+  '/workout-library.js?v=65',
+  '/workout-challenges.js?v=65'
 ];
 let started=false;
 let ready=false;
@@ -53,7 +51,7 @@ function addGuardStyle(){
 function protectLogin(){
   if(!authVisible())return;
   document.body.classList.remove('my60-workout-open','my60-challenge-open');
-  document.querySelectorAll('#my60QuickBanner,#my60ChallengeSheet').forEach(el=>el.hidden=true);
+  document.querySelectorAll('#my60ChallengeSheet,#my60WorkoutPreview,#my60WorkoutPlayer').forEach(el=>el.hidden=true);
 }
 function showError(){
   const host=document.getElementById('workoutStudio');
