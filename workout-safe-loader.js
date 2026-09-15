@@ -2,11 +2,10 @@
 'use strict';
 
 const SOURCES=[
-  '/workout-ux.js?v=63',
-  '/workout-motion.js?v=63',
-  '/workout-library.js?v=63',
-  '/workout-extra.js?v=63',
-  '/workout-challenges.js?v=63'
+  '/workout-ux.js?v=64',
+  '/workout-motion.js?v=64',
+  '/workout-library.js?v=64',
+  '/workout-challenges.js?v=64'
 ];
 let started=false;
 let ready=false;
@@ -26,7 +25,8 @@ function planOpen(){
 }
 function loadScript(src){
   return new Promise((resolve,reject)=>{
-    const exists=[...document.scripts].find(s=>s.src && s.src.includes(src.split('?')[0]));
+    const path=src.split('?')[0];
+    const exists=[...document.scripts].find(s=>s.src && s.src.includes(path));
     if(exists){resolve();return;}
     const s=document.createElement('script');
     s.src=src;
