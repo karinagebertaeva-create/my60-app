@@ -113,7 +113,7 @@ def health():
 def home():
     with open("index.html", "r", encoding="utf-8") as source:
         html = source.read()
-    html = html.replace('sw.js?v=50', 'sw.js?v=65')
+    html = html.replace('sw.js?v=50', 'sw.js?v=66')
 
     auth_rescue = '''<style id="auth-rescue-v61">
 #authGate:not([hidden]){
@@ -154,7 +154,7 @@ def home():
         html = html.replace("</head>", auth_rescue + "</head>")
 
     # Workout modules are loaded only after successful unlock and only when Plan is opened.
-    loader = '<script src="/workout-safe-loader.js?v=65"></script>'
+    loader = '<script src="/workout-safe-loader.js?v=66"></script>'
     if loader not in html:
         html = html.replace("</body>", loader + "</body>")
 
