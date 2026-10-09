@@ -113,51 +113,6 @@ def health():
 def home():
     with open("index.html", "r", encoding="utf-8") as source:
         html = source.read()
-    html = html.replace('sw.js?v=50', 'sw.js?v=67')
-
-    auth_rescue = '''<style id="auth-rescue-v61">
-#authGate:not([hidden]){
-  position:fixed!important;
-  inset:0!important;
-  z-index:2147483647!important;
-  pointer-events:auto!important;
-  overflow:auto!important;
-  isolation:isolate!important;
-  touch-action:auto!important;
-}
-#authGate:not([hidden]) .authCard,
-#authGate:not([hidden]) .pin-wrap,
-#authGate:not([hidden]) .pin-input-row,
-#authGate:not([hidden]) input,
-#authGate:not([hidden]) button{
-  pointer-events:auto!important;
-  touch-action:auto!important;
-}
-#authGate:not([hidden]) input{
-  position:relative!important;
-  z-index:2!important;
-  -webkit-user-select:text!important;
-  user-select:text!important;
-}
-#authGate:not([hidden]) button{
-  position:relative;
-  z-index:3;
-}
-#authGate:not([hidden]) ~ .app,
-#authGate:not([hidden]) ~ .nav,
-#authGate:not([hidden]) ~ .fab,
-#authGate:not([hidden]) ~ .modal{
-  pointer-events:none!important;
-}
-</style>'''
-    if 'auth-rescue-v61' not in html:
-        html = html.replace("</head>", auth_rescue + "</head>")
-
-    # Workout modules are loaded only after successful unlock and only when Plan is opened.
-    loader = '<script src="/workout-safe-loader.js?v=67"></script>'
-    if loader not in html:
-        html = html.replace("</body>", loader + "</body>")
-
     response = Response(html, mimetype="text/html")
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Pragma"] = "no-cache"
