@@ -1,0 +1,2 @@
+.journal-actions{display:flex;flex-direction:column;align-items:flex-end;gap:1px;align-self:center}.journal-actions button{border:0;background:transparent;padding:3px 0;font-size:12px;text-decoration:underline;text-underline-offset:2px;cursor:pointer;color:var(--green)}.journal-actions .remove-food{color:#a55448}
+@media(max-width:380px){.journal-group>div{flex-wrap:wrap}.journal-actions{margin-left:auto}}
