@@ -1,0 +1,1 @@
+.sugar-line{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;padding:9px 11px;border-radius:13px;background:#fff7eb;color:#805b36;font-size:12px}.sugar-line b{font-size:16px;line-height:1;color:#704d2b}.sugar-line span:before{content:'◈';margin-right:6px;color:#c48248}@media(max-width:380px){.sugar-line{padding:8px 10px}}
