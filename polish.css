@@ -1,0 +1,2 @@
+main{padding-top:max(64px,calc(24px + env(safe-area-inset-top)))}
+.food-journal summary,.food-journal summary *{text-decoration:none!important}
