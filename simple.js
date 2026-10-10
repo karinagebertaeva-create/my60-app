@@ -36,7 +36,7 @@ const products=[
   ['Куриное филе',165,31,3.6,0],['Индейка',135,29,1.5,0],['Говядина постная',190,26,9,0],['Хек',86,16.6,2.2,0],['Яйцо',157,12.7,11.5,0.7],['Творог 2%',103,18,2,3],['Йогурт натуральный',60,4.3,2,5],['Кефир 1%',40,3,1,4],['Молоко 1,5%',44,3,1.5,4.8],
   ['Овсянка сухая',366,12,6,60],['Гречка варёная',110,4,1,21],['Рис варёный',130,2.7,0.3,28],['Макароны варёные',131,5,1.1,25],['Картофель варёный',82,2,0.4,17],['Хлеб',250,8,3,49],['Овощи',30,1.5,0.2,5],['Банан',89,1.1,0.3,23],['Яблоко',52,0.3,0.2,14],['Ягоды',45,1,0.3,10],['Суп с курицей',55,4,2,5],['Плов',180,7,7,23],
   ['Пельмени варёные',275,11,12,31,200],['Манты',220,10,10,25,200],['Пицца',250,11,10,30,180],['Шаурма',220,11,11,22,300],['Лапша быстрого приготовления',450,9,19,62,90],['Бургер',260,13,13,25,180],['Хот-дог',290,11,17,24,160],['Картофель фри',310,3.5,15,42,150],['Чипсы',530,6,35,50,50],['Шоколад молочный',540,7,31,57,40],['Печенье',450,6,18,68,50],
-  ['Coca-Cola',42,0,0,10.6,500],['Coca-Cola Zero',0.3,0,0,0,500],['Red Bull',46,0,0,11,250],['Red Bull Sugarfree',3,0,0,0,250],['Adrenaline Rush',50,0,0,12.5,449],['Adrenaline Rush Zero',20,0,0,5,449]
+  ['Coca-Cola (Кола)',42,0,0,10.6,500],['Coca-Cola Zero (Кола зеро)',0.3,0,0,0,500],['Red Bull (Ред Булл)',46,0,0,11,250],['Red Bull Sugarfree (Ред Булл без сахара)',3,0,0,0,250],['Adrenaline Rush (Адреналин Раш)',50,0,0,12.5,449],['Adrenaline Rush Zero (Адреналин Раш зеро)',20,0,0,5,449]
 ].map(([name,cal,p,f,c,portion])=>({name,cal,p,f,c,portion}));
 function daily(k){return S.simpleDays[k]||(S.simpleDays[k]={meals:{},move:false})}
 function intro(kicker,title,sub){return `<div class="intro"><div class="eyebrow">${kicker}</div><h1>${title}</h1><p class="muted">${sub}</p></div>`}
@@ -153,5 +153,5 @@ document.getElementById('backupFile').addEventListener('change',async e=>{const 
 function refreshDay(){const k=dateKey();if(k!==today){today=k;dates=weekKeys();selected=dates.indexOf(today);render()}}
 window.addEventListener('pageshow',refreshDay);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshDay()});
 window.addEventListener('storage',e=>{if(e.key===STORE&&e.newValue){try{S=JSON.parse(e.newValue);normalize();render()}catch(err){notice('Не удалось обновить записи из другой вкладки.')}}});
-render();if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js?v=74').catch(()=>{});
+render();if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js?v=75').catch(()=>{});
 })();
