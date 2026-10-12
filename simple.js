@@ -165,5 +165,5 @@ document.getElementById('backupFile').addEventListener('change',async e=>{const 
 function refreshDay(){const k=dateKey();if(k!==today){today=k;dates=weekKeys();selected=dates.indexOf(today);render()}}
 window.addEventListener('pageshow',refreshDay);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshDay()});
 window.addEventListener('storage',e=>{if(e.key===STORE&&e.newValue){try{S=JSON.parse(e.newValue);normalize();render()}catch(err){notice('Не удалось обновить записи из другой вкладки.')}}});
-render();if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js?v=92').catch(()=>{});
+render();if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js?v=93').catch(()=>{});
 })();
